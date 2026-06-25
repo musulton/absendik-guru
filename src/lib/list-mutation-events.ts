@@ -1,4 +1,6 @@
 import type { GuruAssignment, GuruClass, GuruStudent } from "@/lib/types";
+import { getCachedStudentSort } from "@/lib/student-sort-cache";
+import { sortStudentsByMode } from "@/lib/student-sort";
 
 export type ListMutationEvent =
   | { type: "class-created"; workspaceId: string; guruClass: GuruClass }
@@ -56,10 +58,11 @@ export function emitListMutation(event: ListMutationEvent): void {
   }
 }
 
-function sortStudents(students: GuruStudent[]): GuruStudent[] {
-  return [...students].sort((a, b) =>
-    a.fullName.localeCompare(b.fullName, "id"),
-  );
+function sortStudents(
+  students: GuruStudent[],
+  workspaceId: string,
+): GuruStudent[] {
+  return sortStudentsByMode(students, getCachedStudentSort(workspaceId));
 }
 
 function sortClasses(classes: GuruClass[]): GuruClass[] {
@@ -69,9 +72,10 @@ function sortClasses(classes: GuruClass[]): GuruClass[] {
 export function appendStudentToList(
   students: GuruStudent[],
   student: GuruStudent,
+  workspaceId: string,
 ): GuruStudent[] {
   if (students.some((row) => row.id === student.id)) return students;
-  return sortStudents([...students, student]);
+  return sortStudents([...students, student], workspaceId);
 }
 
 export function appendClassToList(

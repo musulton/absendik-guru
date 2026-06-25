@@ -6,7 +6,8 @@ import { useTheme } from "@/context/AppPreferencesContext";
 import { withHaptic } from "@/lib/haptics";
 import { elevation, radius, space } from "@/lib/theme";
 
-type Props = {
+type ActionProps = {
+  variant?: "actions";
   fullName: string;
   studentNumber?: string | null;
   onAttendance: () => void;
@@ -19,6 +20,16 @@ type Props = {
   showGrades?: boolean;
 };
 
+type NavigateProps = {
+  variant: "navigate";
+  fullName: string;
+  studentNumber?: string | null;
+  actionHint: string;
+  onPress: () => void;
+};
+
+type Props = ActionProps | NavigateProps;
+
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   if (parts.length === 0) return "?";
@@ -26,26 +37,73 @@ function initials(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function StudentListCardInner({
-  fullName,
-  studentNumber,
-  onAttendance,
-  onGrades,
-  onManage,
-  attendanceLabel,
-  gradesLabel,
-  manageLabel,
-  showAttendance = true,
-  showGrades = true,
-}: Props) {
+function StudentListCardInner(props: Props) {
   const { colors, font, scale } = useTheme();
   const textStyles = useMemo(
     () => ({
       avatarText: { fontSize: scale(12), fontWeight: "800" as const },
-      name: { fontWeight: "600" as const },
+      name: { fontWeight: "700" as const },
     }),
     [scale],
   );
+
+  if (props.variant === "navigate") {
+    const { fullName, studentNumber, actionHint, onPress } = props;
+    const palette = resolveLabelColor(null, fullName);
+
+    return (
+      <Pressable
+        onPress={withHaptic(onPress)}
+        style={({ pressed }) => [
+          styles.cardNavigate,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+          elevation(colors.cardShadow, "sm"),
+          pressed && styles.pressed,
+        ]}
+        accessibilityRole="button"
+      >
+        <View style={styles.top}>
+          <View style={styles.identityNavigate}>
+            <View style={[styles.avatar, { backgroundColor: palette.bg }]}>
+              <Text style={[textStyles.avatarText, { color: palette.text }]}>
+                {initials(fullName)}
+              </Text>
+            </View>
+            <View style={styles.nameWrap}>
+              <Text style={[font.body, textStyles.name, { color: colors.text }]}>
+                {fullName}
+              </Text>
+              {studentNumber ? (
+                <Text style={[font.caption, { color: colors.textMuted }]}>
+                  NIS {studentNumber}
+                </Text>
+              ) : null}
+            </View>
+          </View>
+          <Icon name="chevronRight" size={20} color={colors.textMuted} />
+        </View>
+        <Text
+          style={[font.caption, { color: colors.primary, fontWeight: "600" }]}
+          numberOfLines={1}
+        >
+          {actionHint}
+        </Text>
+      </Pressable>
+    );
+  }
+
+  const {
+    fullName,
+    studentNumber,
+    onAttendance,
+    onGrades,
+    onManage,
+    attendanceLabel,
+    gradesLabel,
+    manageLabel,
+    showAttendance = true,
+    showGrades = true,
+  } = props;
   const palette = resolveLabelColor(null, fullName);
 
   return (
@@ -63,7 +121,7 @@ function StudentListCardInner({
           </Text>
         </View>
         <View style={styles.nameWrap}>
-          <Text style={[font.body, textStyles.name]} numberOfLines={1}>
+          <Text style={[font.body, textStyles.name]} numberOfLines={2}>
             {fullName}
           </Text>
           {studentNumber ? (
@@ -131,6 +189,27 @@ function StudentListCardInner({
 export const StudentListCard = memo(StudentListCardInner);
 
 const styles = StyleSheet.create({
+  cardNavigate: {
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    paddingHorizontal: space.md,
+    paddingVertical: 14,
+    marginBottom: space.sm,
+    gap: 8,
+  },
+  top: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: space.sm,
+  },
+  identityNavigate: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+  },
   card: {
     flexDirection: "row",
     alignItems: "center",

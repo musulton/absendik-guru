@@ -4,8 +4,12 @@ import {
   activateCloudSubscription,
   setAutoCloudSyncEnabled,
   setCloudSubscriptionActive,
+  isCloudSubscriptionActive,
 } from "@/lib/storage-mode";
 import { GURU_IAP_DEV_UNLOCK } from "@/lib/iap/config";
+import { Platform } from "react-native";
+import { isAndroidIapSupported } from "@/lib/iap/native-module";
+import { restoreAndroidProPurchases } from "@/lib/iap/android-pro";
 
 export async function applyProSubscriptionActive(active: boolean): Promise<void> {
   await setCloudSubscriptionActive(active);
@@ -39,4 +43,18 @@ export async function devUnlockProSubscription(): Promise<void> {
     throw new Error("Dev unlock tidak aktif.");
   }
   await activateCloudSubscription();
+}
+
+/** Coba pulihkan langganan Play saat login di perangkat baru. */
+export async function tryRestoreProSubscriptionOnBootstrap(): Promise<void> {
+  if (Platform.OS !== "android" || !isAndroidIapSupported()) return;
+  if (await isCloudSubscriptionActive()) return;
+
+  const synced = await syncProSubscriptionFromServer();
+  if (synced.active) return;
+
+  const restored = await restoreAndroidProPurchases();
+  if (restored.ok) {
+    await applyProSubscriptionActive(true);
+  }
 }

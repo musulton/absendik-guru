@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { Alert, FlatList, RefreshControl, StyleSheet, View } from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AdFooterStack } from "@/components/ads/AdFooterStack";
@@ -22,7 +22,7 @@ import {
   shouldShowFetchLoading,
 } from "@/hooks/useBlockingScreenLoad";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
-import { apiDeleteStudent, apiListStudents } from "@/lib/guru-repository";
+import { apiListStudents } from "@/lib/guru-repository";
 import { useListStyles } from "@/lib/use-themed-styles";
 import { useTranslatedScreenTitle } from "@/hooks/useTranslatedScreenTitle";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -109,7 +109,7 @@ export function ClassStudentsScreen({
     switch (event.type) {
       case "student-created":
         if (event.classId !== classId) return;
-        setStudents((prev) => appendStudentToList(prev, event.student));
+        setStudents((prev) => appendStudentToList(prev, event.student, workspaceId));
         break;
       case "student-updated":
         if (event.classId !== classId) return;
@@ -135,18 +135,11 @@ export function ClassStudentsScreen({
   }, { staleMs: 0 });
 
   useLayoutEffect(() => {
-    const popToClasses = () => navigation.popToTop();
-
     navigation.setOptions({
       headerRight: () => (
         <HeaderActions
-          actions={[
-            {
-              icon: "classes",
-              onPress: popToClasses,
-              accessibilityLabel: t("nav.allClasses"),
-            },
-            ...(isMutationLocked
+          actions={
+            isMutationLocked
               ? []
               : [
                   {
@@ -154,94 +147,53 @@ export function ClassStudentsScreen({
                     onPress: onAddStudent,
                     accessibilityLabel: t("subjects.addStudent"),
                   },
-                ]),
-          ]}
+                ]
+          }
         />
       ),
     });
   }, [navigation, onAddStudent, isMutationLocked, isDark, t]);
 
-  const handleDeleteStudent = useCallback(
-    async (student: GuruStudent) => {
-      const result = await apiDeleteStudent(workspaceId, classId, student.id);
-      if (!result.ok) {
-        Alert.alert(t("student.deleteTitle"), result.error.message);
-      }
-    },
-    [workspaceId, classId, t],
-  );
-
-  const confirmDeleteStudent = useCallback(
-    (student: GuruStudent) => {
-      Alert.alert(t("student.deleteTitle"), t("student.deleteBody"), [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("student.deleteAction"),
-          style: "destructive",
-          onPress: () => void handleDeleteStudent(student),
-        },
-      ]);
-    },
-    [t, handleDeleteStudent],
-  );
-
-  const showStudentMenu = useCallback(
-    (student: GuruStudent) => {
-      Alert.alert(student.fullName, undefined, [
-        {
-          text: t("nav.editStudent"),
-          onPress: () => onEditStudent(student),
-        },
-        {
-          text: t("student.deleteAction"),
-          style: "destructive" as const,
-          onPress: () => confirmDeleteStudent(student),
-        },
-        { text: t("common.cancel"), style: "cancel" as const },
-      ]);
-    },
-    [t, onEditStudent, confirmDeleteStudent],
-  );
-
   const renderItem = useCallback(
-    ({ item }: { item: GuruStudent }) => (
-      <StudentListCard
-        fullName={item.fullName}
-        studentNumber={item.studentNumber}
-        attendanceLabel={t("studentDetail.title")}
-        gradesLabel={t("studentGradeDetail.title")}
-        showAttendance={!isManage && modules.attendance}
-        showGrades={!isManage && modules.grades}
-        onAttendance={() =>
-          onStudentDetail
-            ? onStudentDetail(item)
-            : onEditStudent(item)
-        }
-        onGrades={() =>
-          onStudentGradeDetail
-            ? onStudentGradeDetail(item)
-            : onEditStudent(item)
-        }
-        manageLabel={
-          isSchoolWorkspace || isLocalArchiveWorkspace
-            ? undefined
-            : t("nav.editStudent")
-        }
-        onManage={
-          isSchoolWorkspace || isLocalArchiveWorkspace
-            ? undefined
-            : () => showStudentMenu(item)
-        }
-      />
-    ),
+    ({ item }: { item: GuruStudent }) => {
+      if (isManage) {
+        return (
+          <StudentListCard
+            variant="navigate"
+            fullName={item.fullName}
+            studentNumber={item.studentNumber}
+            actionHint={t("students.tapToEdit")}
+            onPress={() => onEditStudent(item)}
+          />
+        );
+      }
+
+      return (
+        <StudentListCard
+          fullName={item.fullName}
+          studentNumber={item.studentNumber}
+          attendanceLabel={t("studentDetail.title")}
+          gradesLabel={t("studentGradeDetail.title")}
+          showAttendance={modules.attendance}
+          showGrades={modules.grades}
+          onAttendance={() =>
+            onStudentDetail
+              ? onStudentDetail(item)
+              : onEditStudent(item)
+          }
+          onGrades={() =>
+            onStudentGradeDetail
+              ? onStudentGradeDetail(item)
+              : onEditStudent(item)
+          }
+        />
+      );
+    },
     [
       t,
       onStudentDetail,
       onStudentGradeDetail,
       onEditStudent,
-      showStudentMenu,
-      isSchoolWorkspace,
-      isLocalArchiveWorkspace,
       modules.attendance,
       modules.grades,
       isManage,

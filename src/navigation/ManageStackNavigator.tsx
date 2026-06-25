@@ -17,6 +17,8 @@ import { EditSubjectScreen } from "@/screens/EditSubjectScreen";
 import { ClassStudentsScreen } from "@/screens/ClassStudentsScreen";
 import { CreateStudentScreen } from "@/screens/CreateStudentScreen";
 import { EditStudentScreen } from "@/screens/EditStudentScreen";
+import { GradePredikatSettingsScreen } from "@/screens/GradePredikatSettingsScreen";
+import { StudentSortSettingsScreen } from "@/screens/StudentSortSettingsScreen";
 
 const Stack = createNativeStackNavigator<ManageStackParamList>();
 
@@ -40,10 +42,7 @@ export function ManageStackNavigator() {
         )
       }
     >
-      <Stack.Screen
-        name="ManageHub"
-        options={{ title: t("nav.tabManage") }}
-      >
+      <Stack.Screen name="ManageHub" options={{ title: t("nav.tabManage") }}>
         {({ navigation }) => (
           <ManageHubScreen
             onManageClasses={() => navigation.navigate("ClassesManageList")}
@@ -53,6 +52,13 @@ export function ManageStackNavigator() {
             onManageStudents={() =>
               navigation.navigate("ClassPicker", { mode: "students" })
             }
+            onGradePredikatSettings={() =>
+              navigation.navigate("GradePredikatSettings")
+            }
+            onStudentSortSettings={() =>
+              navigation.navigate("StudentSortSettings")
+            }
+            onUpgrade={() => goToSettingsTab(navigation)}
           />
         )}
       </Stack.Screen>
@@ -114,6 +120,7 @@ export function ManageStackNavigator() {
         {({ navigation, route }) => (
           <ClassPickerScreen
             mode={route.params.mode}
+            onUpgrade={() => goToSettingsTab(navigation)}
             onPickClass={(guruClass) => {
               if (route.params.mode === "subjects") {
                 navigation.navigate("SubjectManageList", {
@@ -162,7 +169,10 @@ export function ManageStackNavigator() {
         )}
       </Stack.Screen>
 
-      <Stack.Screen name="CreateSubject" options={{ title: t("nav.addSubject") }}>
+      <Stack.Screen
+        name="CreateSubject"
+        options={{ title: t("nav.addSubject") }}
+      >
         {({ navigation, route }) => (
           <CreateSubjectScreen
             workspaceId={workspace.id}
@@ -174,7 +184,10 @@ export function ManageStackNavigator() {
         )}
       </Stack.Screen>
 
-      <Stack.Screen name="EditSubject" options={{ title: t("nav.editSubject") }}>
+      <Stack.Screen
+        name="EditSubject"
+        options={{ title: t("nav.editSubject") }}
+      >
         {({ navigation, route }) => (
           <EditSubjectScreen
             workspaceId={workspace.id}
@@ -236,7 +249,10 @@ export function ManageStackNavigator() {
         )}
       </Stack.Screen>
 
-      <Stack.Screen name="EditStudent" options={{ title: t("nav.editStudent") }}>
+      <Stack.Screen
+        name="EditStudent"
+        options={{ title: t("nav.editStudent") }}
+      >
         {({ navigation, route }) => (
           <EditStudentScreen
             workspaceId={workspace.id}
@@ -249,6 +265,20 @@ export function ManageStackNavigator() {
             onCancel={() => navigation.goBack()}
           />
         )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="GradePredikatSettings"
+        options={{ title: t("gradePredikat.title") }}
+      >
+        {() => <GradePredikatSettingsScreen />}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="StudentSortSettings"
+        options={{ title: t("studentSort.title") }}
+      >
+        {() => <StudentSortSettingsScreen />}
       </Stack.Screen>
     </Stack.Navigator>
   );

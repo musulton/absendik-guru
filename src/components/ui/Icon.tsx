@@ -39,6 +39,7 @@ const ICONS = {
   refresh: "refresh-cw",
   export: "download",
   search: "search",
+  sort: "list",
   logout: "log-out",
   bell: "bell",
   cloud: "cloud",

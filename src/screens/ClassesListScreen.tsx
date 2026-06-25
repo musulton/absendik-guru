@@ -285,12 +285,10 @@ export function ClassesListScreen(props: Props) {
   return (
     <StickyScreen
       footer={
-        isManage ? undefined : (
-          <AdFooterStack
-            placement="classes_list"
-            onUpgrade={() => goToSettingsTab(navigation)}
-          />
-        )
+        <AdFooterStack
+          placement={isManage ? "manage_hub" : "classes_list"}
+          onUpgrade={() => goToSettingsTab(navigation)}
+        />
       }
     >
       <View style={styles.homeLayout}>

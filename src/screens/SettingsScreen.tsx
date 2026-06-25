@@ -67,7 +67,6 @@ type Props = {
   account: GuruAccount;
   userId: string;
   onAbout: () => void;
-  onGradePredikatSettings?: () => void;
   onReplayOnboarding: () => void;
   onSwitchSchool: () => void;
   onSubscriptionChanged: () => void;
@@ -407,7 +406,6 @@ export function SettingsScreen({
   account,
   userId,
   onAbout,
-  onGradePredikatSettings,
   onReplayOnboarding,
   onSwitchSchool,
   onSubscriptionChanged,
@@ -566,23 +564,36 @@ export function SettingsScreen({
   }
 
   async function handleRestorePurchase() {
-    if (Platform.OS !== "android" || !isAndroidIapSupported()) {
-      Alert.alert(t("settings.upgradePro"), t("settings.iapUnavailable"));
-      return;
-    }
     setRestoringPurchase(true);
     setMessage("");
     try {
-      const result = await restoreAndroidProPurchases();
-      if (!result.ok) {
+      const synced = await syncProSubscriptionFromServer();
+      if (synced.active) {
+        setSubscribed(true);
+        setProDeviceConflict(
+          synced.proDevice && !synced.proDevice.ok ? synced.proDevice : null,
+        );
+        onSubscriptionChanged();
+        void ads?.refreshAdsState();
+        setMessage(t("settings.proActive"));
+        return;
+      }
+
+      if (Platform.OS === "android" && isAndroidIapSupported()) {
+        const result = await restoreAndroidProPurchases();
+        if (result.ok) {
+          await applyProSubscriptionActive(true);
+          setSubscribed(true);
+          onSubscriptionChanged();
+          void ads?.refreshAdsState();
+          setMessage(t("settings.proActive"));
+          return;
+        }
         setMessage(result.message);
         return;
       }
-      await applyProSubscriptionActive(true);
-      setSubscribed(true);
-      onSubscriptionChanged();
-      void ads?.refreshAdsState();
-      setMessage(t("settings.proActive"));
+
+      setMessage(t("settings.restoreNotFound"));
     } finally {
       setRestoringPurchase(false);
     }
@@ -792,21 +803,6 @@ export function SettingsScreen({
         </>
       ) : null}
 
-      {showModuleSettings && !isSchoolWorkspace && modulesCtx.modules.grades ? (
-        <>
-          <SectionLabel title={t("settings.gradePredikatSection")} dense />
-          <SettingsCard colors={colors}>
-            <SettingsNavRow
-              title={t("settings.gradePredikat")}
-              subtitle={t("settings.gradePredikatSub")}
-              icon="gradeRecap"
-              onPress={onGradePredikatSettings}
-              colors={colors}
-            />
-          </SettingsCard>
-        </>
-      ) : null}
-
       <SectionLabel title={t("settings.package")} dense />
       <SettingsCard colors={colors} accent={subscribed ? "success" : "primary"}>
         <View style={styles.planTop}>
@@ -872,24 +868,26 @@ export function SettingsScreen({
                   ? t("settings.iapIosSoon")
                   : t("settings.proUpgradeHint")}
             </Text>
+            <Text style={[font.caption, { color: colors.textMuted, marginBottom: space.sm }]}>
+              {t("settings.restorePurchaseHint")}
+            </Text>
             <PrimaryButton
               title={t("settings.upgradePro")}
               size="compact"
               loading={loading}
               onPress={() => void handleSubscribe()}
             />
-            {Platform.OS === "android" && isAndroidIapSupported() ? (
-              <Pressable
-                onPress={withHaptic(() => void handleRestorePurchase())}
-                style={styles.restorePurchaseLink}
-              >
-                <Text style={[font.caption, { color: colors.primary }]}>
-                  {restoringPurchase ? "…" : t("settings.restorePurchase")}
-                </Text>
-              </Pressable>
-            ) : null}
           </>
         )}
+        <View style={styles.restorePurchaseBtn}>
+          <PrimaryButton
+            title={t("settings.restorePurchase")}
+            variant="secondary"
+            size="compact"
+            loading={restoringPurchase}
+            onPress={() => void handleRestorePurchase()}
+          />
+        </View>
       </SettingsCard>
 
       <SectionLabel title={t("settings.cloud")} dense />
@@ -1236,9 +1234,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  restorePurchaseLink: {
-    alignSelf: "center",
+  restorePurchaseBtn: {
     marginTop: space.sm,
-    paddingVertical: space.xs,
   },
 });

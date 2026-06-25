@@ -1,8 +1,11 @@
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import { AdFooterStack } from "@/components/ads/AdFooterStack";
 import { ScreenScroll } from "@/components/ScreenScroll";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { ScreenHint } from "@/components/ui/ScreenHint";
+import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useTheme } from "@/context/AppPreferencesContext";
+import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useTranslatedScreenTitle } from "@/hooks/useTranslatedScreenTitle";
 import { withHaptic } from "@/lib/haptics";
@@ -10,11 +13,18 @@ import { elevation, radius, space } from "@/lib/theme";
 
 type HubItem = {
   icon: IconName;
-  titleKey: "manage.hubClasses" | "manage.hubSubjects" | "manage.hubStudents";
+  titleKey:
+    | "manage.hubClasses"
+    | "manage.hubSubjects"
+    | "manage.hubStudents"
+    | "manage.hubGradePredikat"
+    | "manage.hubStudentSort";
   subtitleKey:
     | "manage.hubClassesSub"
     | "manage.hubSubjectsSub"
-    | "manage.hubStudentsSub";
+    | "manage.hubStudentsSub"
+    | "manage.hubGradePredikatSub"
+    | "manage.hubStudentSortSub";
   onPress: () => void;
 };
 
@@ -22,15 +32,22 @@ type Props = {
   onManageClasses: () => void;
   onManageSubjects: () => void;
   onManageStudents: () => void;
+  onGradePredikatSettings: () => void;
+  onStudentSortSettings: () => void;
+  onUpgrade?: () => void;
 };
 
 export function ManageHubScreen({
   onManageClasses,
   onManageSubjects,
   onManageStudents,
+  onGradePredikatSettings,
+  onStudentSortSettings,
+  onUpgrade,
 }: Props) {
   const { colors, t, scale } = useTheme();
   const { workspace } = useWorkspace();
+  const { modules } = useWorkspaceModules();
   const isSubjectMode = workspace.attendanceMode === "subject";
 
   useTranslatedScreenTitle(t("nav.tabManage"));
@@ -58,54 +75,74 @@ export function ManageHubScreen({
       subtitleKey: "manage.hubStudentsSub",
       onPress: onManageStudents,
     },
+    ...(modules.grades
+      ? [
+          {
+            icon: "gradeRecap" as const,
+            titleKey: "manage.hubGradePredikat" as const,
+            subtitleKey: "manage.hubGradePredikatSub" as const,
+            onPress: onGradePredikatSettings,
+          },
+        ]
+      : []),
+    {
+      icon: "sort",
+      titleKey: "manage.hubStudentSort",
+      subtitleKey: "manage.hubStudentSortSub",
+      onPress: onStudentSortSettings,
+    },
   ];
 
   return (
-    <ScreenScroll>
-      <ScreenHint>{t("manage.hubHint")}</ScreenHint>
-      <View style={styles.list}>
-        {items.map((item) => (
-          <Pressable
-            key={item.titleKey}
-            onPress={withHaptic(item.onPress)}
-            style={({ pressed }) => [
-              styles.card,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-              },
-              elevation(colors.cardShadow, "sm"),
-              pressed && styles.pressed,
-            ]}
-          >
-            <View
-              style={[styles.iconWrap, { backgroundColor: colors.primaryMuted }]}
+    <StickyScreen
+      footer={<AdFooterStack placement="manage_hub" onUpgrade={onUpgrade} />}
+    >
+      <ScreenScroll>
+        <ScreenHint>{t("manage.hubHint")}</ScreenHint>
+        <View style={styles.list}>
+          {items.map((item) => (
+            <Pressable
+              key={item.titleKey}
+              onPress={withHaptic(item.onPress)}
+              style={({ pressed }) => [
+                styles.card,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                },
+                elevation(colors.cardShadow, "sm"),
+                pressed && styles.pressed,
+              ]}
             >
-              <Icon name={item.icon} size={20} color={colors.primary} />
-            </View>
-            <View style={styles.textWrap}>
-              <Text
-                style={[
-                  styles.title,
-                  { color: colors.text, fontSize: scale(15) },
-                ]}
+              <View
+                style={[styles.iconWrap, { backgroundColor: colors.primaryMuted }]}
               >
-                {t(item.titleKey)}
-              </Text>
-              <Text
-                style={[
-                  styles.subtitle,
-                  { color: colors.textMuted, fontSize: scale(12) },
-                ]}
-              >
-                {t(item.subtitleKey)}
-              </Text>
-            </View>
-            <Icon name="chevronRight" size={20} color={colors.textMuted} />
-          </Pressable>
-        ))}
-      </View>
-    </ScreenScroll>
+                <Icon name={item.icon} size={20} color={colors.primary} />
+              </View>
+              <View style={styles.textWrap}>
+                <Text
+                  style={[
+                    styles.title,
+                    { color: colors.text, fontSize: scale(15) },
+                  ]}
+                >
+                  {t(item.titleKey)}
+                </Text>
+                <Text
+                  style={[
+                    styles.subtitle,
+                    { color: colors.textMuted, fontSize: scale(12) },
+                  ]}
+                >
+                  {t(item.subtitleKey)}
+                </Text>
+              </View>
+              <Icon name="chevronRight" size={20} color={colors.textMuted} />
+            </Pressable>
+          ))}
+        </View>
+      </ScreenScroll>
+    </StickyScreen>
   );
 }
 

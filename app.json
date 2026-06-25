@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "Absendik Guru",
+    "name": "Rekap Guru",
     "slug": "absendik-guru",
     "version": "0.1.0",
     "orientation": "portrait",
@@ -50,7 +50,7 @@
           "androidAppId": "ca-app-pub-3940256099942544~3347511713",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
           "delayAppMeasurementInit": true,
-          "userTrackingUsageDescription": "Iklan yang lebih relevan membantu Absendik Guru tetap gratis. Anda bisa menolak tanpa kehilangan fitur."
+          "userTrackingUsageDescription": "Iklan yang lebih relevan membantu Rekap Guru tetap gratis. Anda bisa menolak tanpa kehilangan fitur."
         }
       ],
       "@react-native-community/datetimepicker",

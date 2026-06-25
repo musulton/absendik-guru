@@ -17,6 +17,7 @@ import { ScreenHint } from "@/components/ui/ScreenHint";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useTheme } from "@/context/AppPreferencesContext";
+import { useActionMenu } from "@/context/ActionMenuContext";
 import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
@@ -34,6 +35,7 @@ import { space } from "@/lib/theme";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { GuruAssignment } from "@/lib/types";
 import { goToSettingsTab } from "@/navigation/navHelpers";
+import { showSubjectListModuleMenu } from "@/navigation/classDetailMenu";
 import type { HomeModule, HomeStackParamList } from "@/navigation/types";
 
 type Nav = NativeStackNavigationProp<HomeStackParamList, "SubjectList">;
@@ -74,6 +76,7 @@ export function SubjectListScreen(props: Props) {
   const { workspace, isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
   const isMutationLocked = isSchoolWorkspace || isLocalArchiveWorkspace;
   const { colors, t, isDark } = useTheme();
+  const { showActionMenu } = useActionMenu();
   const listStyles = useListStyles();
   const [loading, setLoading] = useFetchLoadingState();
   const [refreshing, setRefreshing] = useState(false);
@@ -140,30 +143,20 @@ export function SubjectListScreen(props: Props) {
 
   const showClassMenu = useCallback(() => {
     if (props.purpose !== "home") return;
-    const items: { text: string; onPress?: () => void; style?: "cancel" }[] = [];
-    if (props.module === "attendance") {
-      items.push({
-        text: t("nav.recap"),
-        onPress: () => props.onRecap(assignments),
-      });
-    }
-    if (props.module === "grades") {
-      items.push({
-        text: t("nav.gradeRecap"),
-        onPress: () => props.onGradeRecap(assignments),
-      });
-    }
-    if (!isMutationLocked) {
-      items.push({ text: t("nav.manageClass"), onPress: props.onEditClass });
-    }
-    items.push({ text: t("common.cancel"), style: "cancel" });
-    Alert.alert(className, undefined, items);
+    showSubjectListModuleMenu(showActionMenu, t, {
+      title: className,
+      module: props.module,
+      onRecap: () => props.onRecap(assignments),
+      onGradeRecap: () => props.onGradeRecap(assignments),
+      onEditClass: isMutationLocked ? undefined : props.onEditClass,
+    });
   }, [
     className,
     t,
     assignments,
     isMutationLocked,
     props,
+    showActionMenu,
   ]);
 
   useLayoutEffect(() => {
@@ -350,12 +343,10 @@ export function SubjectListScreen(props: Props) {
   return (
     <StickyScreen
       footer={
-        isManage ? undefined : (
-          <AdFooterStack
-            placement="subject_list"
-            onUpgrade={() => goToSettingsTab(navigation)}
-          />
-        )
+        <AdFooterStack
+          placement={isManage ? "manage_hub" : "subject_list"}
+          onUpgrade={() => goToSettingsTab(navigation)}
+        />
       }
     >
       <FlatList

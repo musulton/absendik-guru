@@ -1,4 +1,3 @@
-import { isSchoolWorkspaceId, getSchoolLinkSnapshot } from "@/lib/school-link";
 import {
   getAutoCloudSyncEnabled,
   hasCloudSubscription,
@@ -24,19 +23,11 @@ export function shouldSyncLocalToCloud(backend: DataBackend): boolean {
 
 /**
  * Tentukan backend data untuk workspace.
- * - `school:*` + terhubung Absendik Sekolah → cloud API
- * - lokal → SQLite; Pro + sync otomatis → juga cadangkan ke cloud
+ * Lokal → SQLite; Pro + sync otomatis → juga cadangkan ke cloud.
  */
 export async function resolveDataBackend(
-  workspaceId: string,
+  _workspaceId: string,
 ): Promise<DataBackend> {
-  if (isSchoolWorkspaceId(workspaceId)) {
-    const link = getSchoolLinkSnapshot();
-    if (link.linked) {
-      return "school-cloud";
-    }
-  }
-
   if ((await hasCloudSubscription()) && (await getAutoCloudSyncEnabled())) {
     return "local-sqlite-cloud-sync";
   }
@@ -52,7 +43,6 @@ export async function shouldUseSchoolCloud(
 }
 
 /** Apakah workspace ID menunjuk ke sekolah Absendik (prefix + link aktif)? */
-export function isSchoolLinkedWorkspace(workspaceId: string): boolean {
-  if (!isSchoolWorkspaceId(workspaceId)) return false;
-  return getSchoolLinkSnapshot().linked;
+export function isSchoolLinkedWorkspace(_workspaceId: string): boolean {
+  return false;
 }

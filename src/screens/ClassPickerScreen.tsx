@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { FlatList, RefreshControl, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { AdFooterStack } from "@/components/ads/AdFooterStack";
 import { ClassListCard } from "@/components/ui/ClassListCard";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { ScreenHint } from "@/components/ui/ScreenHint";
@@ -19,13 +21,16 @@ import { apiListClasses } from "@/lib/guru-repository";
 import { useListStyles } from "@/lib/use-themed-styles";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { GuruClass } from "@/lib/types";
+import { goToSettingsTab } from "@/navigation/navHelpers";
 
 type Props = {
   mode: "subjects" | "students";
   onPickClass: (guruClass: GuruClass) => void;
+  onUpgrade?: () => void;
 };
 
-export function ClassPickerScreen({ mode, onPickClass }: Props) {
+export function ClassPickerScreen({ mode, onPickClass, onUpgrade }: Props) {
+  const navigation = useNavigation();
   const hintKey =
     mode === "subjects" ? "classPicker.subjects" : "classPicker.students";
   const listStyles = useListStyles();
@@ -85,7 +90,14 @@ export function ClassPickerScreen({ mode, onPickClass }: Props) {
   }
 
   return (
-    <StickyScreen>
+    <StickyScreen
+      footer={
+        <AdFooterStack
+          placement="class_picker"
+          onUpgrade={onUpgrade ?? (() => goToSettingsTab(navigation))}
+        />
+      }
+    >
       <FlatList
         style={[listStyles.list, { backgroundColor: colors.bg }]}
         contentContainerStyle={listStyles.listContent}

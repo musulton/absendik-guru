@@ -285,6 +285,7 @@ export type TranslationKey =
   | "settings.subscribeAlertBody"
   | "settings.subscribeAlertBodyAndroid"
   | "settings.restorePurchase"
+  | "settings.restoreNotFound"
   | "settings.iapUnavailable"
   | "settings.iapIosSoon"
   | "settings.proPrice"
@@ -401,6 +402,19 @@ export type TranslationKey =
   | "manage.hubSubjectsSub"
   | "manage.hubStudents"
   | "manage.hubStudentsSub"
+  | "manage.hubGradePredikat"
+  | "manage.hubGradePredikatSub"
+  | "manage.hubStudentSort"
+  | "manage.hubStudentSortSub"
+  | "studentSort.title"
+  | "studentSort.desc"
+  | "studentSort.section"
+  | "studentSort.byName"
+  | "studentSort.byNis"
+  | "studentSort.hint"
+  | "studentSort.saved"
+  | "students.tapToEdit"
+  | "settings.restorePurchaseHint"
   | "home.hubHint"
   | "home.hubAttendanceSub"
   | "home.hubGradesSub"
@@ -577,7 +591,7 @@ export type TranslationKey =
   | "iap.restoreFailed";
 
 const id: Record<TranslationKey, string> = {
-  "app.name": "Absendik Guru",
+  "app.name": "Rekap Guru",
   "app.tagline": "Absensi & nilai per kelas atau mapel — dari genggaman guru",
   "common.save": "Simpan",
   "common.cancel": "Batal",
@@ -626,7 +640,7 @@ const id: Record<TranslationKey, string> = {
   "login.email": "Email",
   "login.password": "Kata sandi",
   "login.emailSubmit": "Masuk",
-  "login.emailHint": "Gunakan email yang terhubung dengan Absendik Sekolah.",
+  "login.emailHint": "Gunakan email akun yang sudah terdaftar.",
   "login.schoolLinkHint":
     "Absendik Guru hadir untuk membantu absensi dan nilai — per rombel atau per mata pelajaran. Waktu Anda lebih berharga untuk mendidik daripada administrasi.",
   "classes.hintTitle": "Mulai dari kelas",
@@ -849,7 +863,7 @@ const id: Record<TranslationKey, string> = {
     "Perbandingan paket Gratis dan Pro ada di Pengaturan → Paket dan langganan.",
   "about.schoolHint":
     "Sekolah pakai Absendik Sekolah? Admin kelola data terpusat; guru bergabung lewat tautan undangan.",
-  "about.footer": "Absendik Guru",
+  "about.footer": "Rekap Guru",
   "settings.title": "Pengaturan",
   "settings.appearance": "Tampilan",
   "settings.language": "Bahasa",
@@ -903,7 +917,9 @@ const id: Record<TranslationKey, string> = {
     "Data harian tetap di HP Anda. Pro menambah:\n\n• Sekolah mandiri tanpa batas (selain Absendik Sekolah)\n• Kelas tanpa batas per sekolah · mapel tanpa batas\n• Siswa tanpa batas\n• Rekap semester\n• Cadangan online dan sinkron otomatis\n• Pulihkan data saat ganti HP (pindah perangkat di Pengaturan)\n• Tanpa iklan\n\nLanjut ke Google Play?",
   "settings.subscribeAlertBodyAndroid":
     "Data harian tetap di HP Anda. Pro menambah sekolah mandiri tanpa batas, kelas tanpa batas per sekolah, siswa tanpa batas, rekap semester, cadangan online, dan tanpa iklan.\n\n{price}\n\nLanjut ke Google Play?",
-  "settings.restorePurchase": "Pulihkan pembelian",
+  "settings.restorePurchase": "Pulihkan langganan",
+  "settings.restoreNotFound":
+    "Langganan tidak ditemukan untuk akun ini. Pastikan Anda login dengan akun yang sama saat berlangganan.",
   "settings.iapUnavailable":
     "Langganan Pro hanya tersedia di aplikasi resmi dari Google Play.",
   "settings.iapIosSoon": "Langganan Pro via App Store menyusul.",
@@ -1040,6 +1056,22 @@ const id: Record<TranslationKey, string> = {
   "manage.hubSubjectsSub": "Kelola mapel per kelas",
   "manage.hubStudents": "Siswa",
   "manage.hubStudentsSub": "Kelola daftar siswa per kelas",
+  "manage.hubGradePredikat": "Predikat nilai",
+  "manage.hubGradePredikatSub": "Label dan ambang batas predikat rekap",
+  "manage.hubStudentSort": "Urutan siswa",
+  "manage.hubStudentSortSub": "Urutkan daftar siswa berdasarkan nama atau NIS",
+  "studentSort.title": "Urutan siswa",
+  "studentSort.desc":
+    "Pengaturan ini memengaruhi urutan siswa di absensi, penilaian, daftar siswa, dan rekap.",
+  "studentSort.section": "Urutkan berdasarkan",
+  "studentSort.byName": "Nama",
+  "studentSort.byNis": "NIS",
+  "studentSort.hint":
+    "Siswa tanpa NIS tetap ditampilkan di akhir saat urutan NIS dipilih.",
+  "studentSort.saved": "Urutan siswa tersimpan.",
+  "students.tapToEdit": "Ketuk untuk ubah data siswa",
+  "settings.restorePurchaseHint":
+    "Sudah berlangganan di perangkat lain? Pulihkan pembelian setelah login.",
   "home.hubHint": "Pilih modul yang ingin Anda gunakan.",
   "home.hubAttendanceSub": "Isi absensi harian per kelas atau mata pelajaran",
   "home.hubGradesSub": "Input nilai tugas dan lihat rekap penilaian",
@@ -1284,7 +1316,7 @@ const id: Record<TranslationKey, string> = {
 };
 
 const en: Record<TranslationKey, string> = {
-  "app.name": "Absendik Guru",
+  "app.name": "Rekap Guru",
   "app.tagline": "Attendance & grades per class or subject — in your pocket",
   "common.save": "Save",
   "common.cancel": "Cancel",
@@ -1550,7 +1582,7 @@ const en: Record<TranslationKey, string> = {
     "Free vs Pro plan details are in Settings → Plan & subscription.",
   "about.schoolHint":
     "School on Absendik Sekolah? Admins manage centrally; teachers join via invitation link.",
-  "about.footer": "Absendik Guru",
+  "about.footer": "Rekap Guru",
   "settings.title": "Settings",
   "settings.appearance": "Appearance",
   "settings.language": "Language",
@@ -1603,7 +1635,9 @@ const en: Record<TranslationKey, string> = {
     "Daily data stays on your phone. Pro adds:\n\n• Unlimited independent schools (excluding Absendik Sekolah)\n• Unlimited classes per school · unlimited subjects\n• Unlimited students\n• Semester reports\n• Online backup & automatic sync\n• Restore data when you change phones (transfer device in Settings)\n• No ads\n\nContinue to Google Play?",
   "settings.subscribeAlertBodyAndroid":
     "Daily data stays on your phone. Pro adds unlimited schools, unlimited classes per school, unlimited students, semester reports, online backup, and no ads.\n\n{price}\n\nContinue to Google Play?",
-  "settings.restorePurchase": "Restore purchase",
+  "settings.restorePurchase": "Restore subscription",
+  "settings.restoreNotFound":
+    "No subscription found for this account. Make sure you are signed in with the same account used to subscribe.",
   "settings.iapUnavailable":
     "Pro subscription is only available in the official app from Google Play.",
   "settings.iapIosSoon": "Pro subscription via the App Store is coming soon.",
@@ -1739,6 +1773,22 @@ const en: Record<TranslationKey, string> = {
   "manage.hubSubjectsSub": "Manage subjects per class",
   "manage.hubStudents": "Students",
   "manage.hubStudentsSub": "Manage student lists per class",
+  "manage.hubGradePredikat": "Grade bands",
+  "manage.hubGradePredikatSub": "Labels and score thresholds for grade recap",
+  "manage.hubStudentSort": "Student order",
+  "manage.hubStudentSortSub": "Sort student lists by name or student ID",
+  "studentSort.title": "Student order",
+  "studentSort.desc":
+    "This affects student order in attendance, grades, student lists, and recaps.",
+  "studentSort.section": "Sort by",
+  "studentSort.byName": "Name",
+  "studentSort.byNis": "Student ID",
+  "studentSort.hint":
+    "Students without an ID appear at the end when sorting by ID.",
+  "studentSort.saved": "Student order saved.",
+  "students.tapToEdit": "Tap to edit student",
+  "settings.restorePurchaseHint":
+    "Already subscribed on another device? Restore your purchase after signing in.",
   "home.hubHint": "Choose a module to get started.",
   "home.hubAttendanceSub": "Take daily attendance by class or subject",
   "home.hubGradesSub": "Enter task grades and view grade reports",

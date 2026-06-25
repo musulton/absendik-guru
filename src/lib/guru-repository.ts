@@ -189,17 +189,11 @@ async function fetchMeUncached(
   bootstrap = false,
 ) {
   if (bootstrap) {
-    await Promise.all([
-      syncProSubscriptionFromServer().catch(() => null),
-      refreshSchoolLink().catch(() => ({ linked: false as const })),
-    ]);
+    await syncProSubscriptionFromServer().catch(() => null);
   }
 
   const server = await api.apiMe("cloud", accessToken);
   if (server.ok) {
-    if (server.data.schoolLink?.linked) {
-      setCachedSchoolLink(server.data.schoolLink);
-    }
     await applyProSubscriptionActive(Boolean(server.data.cloudSubscriptionActive));
     const subscribed = server.data.cloudSubscriptionActive;
     const limits = getGuruLimitsForMode(subscribed ? "cloud" : "local");
@@ -246,35 +240,7 @@ export async function apiListLocalWorkspaces() {
 }
 
 export async function apiListWorkspaces() {
-  const link = await ensureSchoolLinkLoaded();
-  const localResult = await local.localListWorkspaces();
-  if (!link.linked) return localResult;
-
-  const schoolWorkspace = schoolApi.buildSchoolWorkspace({
-    workspaceId: link.workspaceId,
-    schoolId: link.schoolId,
-    schoolName: link.schoolName,
-    attendanceMode: link.attendanceMode,
-    classCount: link.stats?.classCount ?? link.classes?.length,
-    subjectCount: link.stats?.subjectCount,
-    activeStudentCount: link.stats?.activeStudentCount,
-  });
-
-  if (!localResult.ok) {
-    return {
-      ok: true as const,
-      data: { workspaces: [schoolWorkspace] },
-    };
-  }
-
-  const others = localResult.data.workspaces.filter(
-    (workspace) => workspace.id !== schoolWorkspace.id,
-  );
-  const merged = [schoolWorkspace, ...others];
-  return {
-    ok: true as const,
-    data: { workspaces: sortWorkspacesForDisplay(merged, link) },
-  };
+  return local.localListWorkspaces();
 }
 
 export async function apiCreateWorkspace(

@@ -17,6 +17,8 @@ import {
 } from "@/lib/period-range";
 import { getGuruWeekRange } from "@/lib/week-range";
 import { getAppLocale, translate } from "@/lib/i18n/translations";
+import { localGetWorkspaceStudentSort } from "@/lib/local-store-student-sort";
+import { sqlStudentOrderBy } from "@/lib/student-sort";
 import { getSchoolLinkSnapshot } from "@/lib/school-link";
 import {
   applyLocalStudentQuotaUsage,
@@ -118,6 +120,11 @@ async function requireUserId(): Promise<string> {
   const id = data.session?.user.id;
   if (!id) throw new Error("UNAUTHORIZED");
   return id;
+}
+
+async function studentOrderClause(workspaceId: string): Promise<string> {
+  const mode = await localGetWorkspaceStudentSort(workspaceId);
+  return sqlStudentOrderBy(mode);
 }
 
 function resolveSubject(subjectName?: string | null): string | null {
@@ -651,6 +658,7 @@ export async function localDeleteClass(workspaceId: string, classId: string) {
 export async function localListStudents(workspaceId: string, classId: string) {
   const userId = await requireUserId();
   const db = await getLocalDb(userId);
+  const orderBy = await studentOrderClause(workspaceId);
   const rows = await db.getAllAsync<{
     id: string;
     class_id: string;
@@ -662,7 +670,7 @@ export async function localListStudents(workspaceId: string, classId: string) {
     `SELECT id, class_id, full_name, student_number, is_active, created_at
      FROM students
      WHERE workspace_id = ? AND class_id = ? AND is_active = 1
-     ORDER BY full_name ASC`,
+     ${orderBy}`,
     workspaceId,
     classId,
   );
@@ -1024,6 +1032,7 @@ export async function localGetAttendance(
 ) {
   const userId = await requireUserId();
   const db = await getLocalDb(userId);
+  const orderBy = await studentOrderClause(workspaceId);
   const students = await db.getAllAsync<{
     id: string;
     full_name: string;
@@ -1031,7 +1040,7 @@ export async function localGetAttendance(
   }>(
     `SELECT id, full_name, student_number FROM students
      WHERE workspace_id = ? AND class_id = ? AND is_active = 1
-     ORDER BY full_name ASC`,
+     ${orderBy}`,
     workspaceId,
     classId,
   );
@@ -1240,6 +1249,7 @@ export async function localGetGradeDay(
   const db = await getLocalDb(userId);
   const subject = resolveSubject(subjectName);
 
+  const orderBy = await studentOrderClause(workspaceId);
   const students = await db.getAllAsync<{
     id: string;
     full_name: string;
@@ -1247,7 +1257,7 @@ export async function localGetGradeDay(
   }>(
     `SELECT id, full_name, student_number FROM students
      WHERE workspace_id = ? AND class_id = ? AND is_active = 1
-     ORDER BY full_name ASC`,
+     ${orderBy}`,
     workspaceId,
     classId,
   );
@@ -1484,6 +1494,7 @@ async function buildGradePeriodRecap(
     workspaceId,
   );
 
+  const orderBy = await studentOrderClause(workspaceId);
   const students = await db.getAllAsync<{
     id: string;
     full_name: string;
@@ -1491,7 +1502,7 @@ async function buildGradePeriodRecap(
   }>(
     `SELECT id, full_name, student_number FROM students
      WHERE workspace_id = ? AND class_id = ? AND is_active = 1
-     ORDER BY full_name ASC`,
+     ${orderBy}`,
     workspaceId,
     classId,
   );

@@ -124,4 +124,16 @@ export async function migrateLocalDbSchema(
       `INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '7')`,
     );
   }
+
+  if (version < 8) {
+    await addColumnIfMissing(
+      db,
+      "workspaces",
+      "student_sort_mode",
+      "TEXT NOT NULL DEFAULT 'name'",
+    );
+    await db.runAsync(
+      `INSERT OR REPLACE INTO meta (key, value) VALUES ('schema_version', '8')`,
+    );
+  }
 }

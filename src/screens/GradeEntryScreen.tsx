@@ -20,6 +20,7 @@ import { StickyActionBar } from "@/components/ui/StickyActionBar";
 import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useTheme } from "@/context/AppPreferencesContext";
 import { useAdsOptional } from "@/context/AdContext";
+import { useActionMenu } from "@/context/ActionMenuContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useListStyles } from "@/lib/use-themed-styles";
 import { useTranslatedScreenTitle } from "@/hooks/useTranslatedScreenTitle";
@@ -96,6 +97,7 @@ export function GradeEntryScreen({
 }: Props) {
   const navigation = useNavigation();
   const listStyles = useListStyles();
+  const { showActionMenu } = useActionMenu();
   const { colors, font, scale, t, locale, isDark } = useTheme();
   const { isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
   const isMutationLocked = isSchoolWorkspace || isLocalArchiveWorkspace;
@@ -265,7 +267,7 @@ export function GradeEntryScreen({
               onPress: () => {
                 void apiListAssignments(workspaceId, classId).then((res) => {
                   const assignments = res.ok ? res.data.assignments : [];
-                  showGradesModuleMenu(t, {
+                  showGradesModuleMenu(showActionMenu, t, {
                     title: className,
                     onManageStudents: onStudents,
                     onGradeRecap: () => onGradeRecap(assignments),
@@ -289,6 +291,7 @@ export function GradeEntryScreen({
     isMutationLocked,
     t,
     isDark,
+    showActionMenu,
   ]);
 
   const shiftDate = useCallback(

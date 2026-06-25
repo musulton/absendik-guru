@@ -27,6 +27,7 @@ import { StickyActionBar } from "@/components/ui/StickyActionBar";
 import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useTheme } from "@/context/AppPreferencesContext";
 import { useAdsOptional } from "@/context/AdContext";
+import { useActionMenu } from "@/context/ActionMenuContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useListStyles } from "@/lib/use-themed-styles";
 import { useTranslatedScreenTitle } from "@/hooks/useTranslatedScreenTitle";
@@ -123,6 +124,7 @@ export function AttendanceScreen({
   const { isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
   const isMutationLocked = isSchoolWorkspace || isLocalArchiveWorkspace;
   const listStyles = useListStyles();
+  const { showActionMenu } = useActionMenu();
   const { colors, font, scale, t, locale, isDark } = useTheme();
   const hintStyle = useMemo(
     () => ({ fontSize: scale(11), lineHeight: scale(15), marginBottom: 2 }),
@@ -253,7 +255,7 @@ export function AttendanceScreen({
               onPress: () => {
                 void apiListAssignments(workspaceId, classId).then((res) => {
                   const assignments = res.ok ? res.data.assignments : [];
-                  showAttendanceModuleMenu(t, {
+                  showAttendanceModuleMenu(showActionMenu, t, {
                     title: className,
                     onManageStudents: onStudents,
                     onRecap: () => onRecap(assignments),
@@ -277,6 +279,7 @@ export function AttendanceScreen({
     isMutationLocked,
     t,
     isDark,
+    showActionMenu,
   ]);
 
   const setAllPresent = useCallback(() => {

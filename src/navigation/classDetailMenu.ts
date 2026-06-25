@@ -1,26 +1,13 @@
-import { Alert } from "react-native";
+import type { ActionMenuItem } from "@/components/ui/ActionMenuSheet";
+import type { ShowActionMenuParams } from "@/context/ActionMenuContext";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import type { HomeModule } from "@/navigation/types";
 
-type MenuButton = {
-  text: string;
-  onPress?: () => void;
-  style?: "cancel";
-};
-
-function showMenu(
-  t: (key: TranslationKey) => string,
-  title: string,
-  items: MenuButton[],
-) {
-  Alert.alert(title, undefined, [
-    ...items,
-    { text: t("common.cancel"), style: "cancel" },
-  ]);
-}
+type ShowMenu = (params: ShowActionMenuParams) => void;
 
 /** Menu ⋮ layar absensi — hanya aksi terkait absensi. */
 export function showAttendanceModuleMenu(
+  showMenu: ShowMenu,
   t: (key: TranslationKey) => string,
   opts: {
     title: string;
@@ -29,18 +16,34 @@ export function showAttendanceModuleMenu(
     onEditClass?: () => void;
   },
 ) {
-  const items: MenuButton[] = [
-    { text: t("nav.students"), onPress: opts.onManageStudents },
-    { text: t("nav.recap"), onPress: opts.onRecap },
+  const items: ActionMenuItem[] = [
+    {
+      id: "students",
+      label: t("nav.students"),
+      icon: "students",
+      onPress: opts.onManageStudents,
+    },
+    {
+      id: "recap",
+      label: t("nav.recap"),
+      icon: "recap",
+      onPress: opts.onRecap,
+    },
   ];
   if (opts.onEditClass) {
-    items.push({ text: t("nav.manageClass"), onPress: opts.onEditClass });
+    items.push({
+      id: "manage-class",
+      label: t("nav.manageClass"),
+      icon: "classes",
+      onPress: opts.onEditClass,
+    });
   }
-  showMenu(t, opts.title, items);
+  showMenu({ title: opts.title, items });
 }
 
 /** Menu ⋮ layar penilaian — hanya aksi terkait nilai. */
 export function showGradesModuleMenu(
+  showMenu: ShowMenu,
   t: (key: TranslationKey) => string,
   opts: {
     title: string;
@@ -49,18 +52,34 @@ export function showGradesModuleMenu(
     onEditClass?: () => void;
   },
 ) {
-  const items: MenuButton[] = [
-    { text: t("nav.students"), onPress: opts.onManageStudents },
-    { text: t("nav.gradeRecap"), onPress: opts.onGradeRecap },
+  const items: ActionMenuItem[] = [
+    {
+      id: "students",
+      label: t("nav.students"),
+      icon: "students",
+      onPress: opts.onManageStudents,
+    },
+    {
+      id: "grade-recap",
+      label: t("nav.gradeRecap"),
+      icon: "gradeRecap",
+      onPress: opts.onGradeRecap,
+    },
   ];
   if (opts.onEditClass) {
-    items.push({ text: t("nav.manageClass"), onPress: opts.onEditClass });
+    items.push({
+      id: "manage-class",
+      label: t("nav.manageClass"),
+      icon: "classes",
+      onPress: opts.onEditClass,
+    });
   }
-  showMenu(t, opts.title, items);
+  showMenu({ title: opts.title, items });
 }
 
 /** Menu ⋮ daftar mapel (mode home) — sesuai modul yang dipilih. */
 export function showSubjectListModuleMenu(
+  showMenu: ShowMenu,
   t: (key: TranslationKey) => string,
   opts: {
     title: string;
@@ -70,38 +89,29 @@ export function showSubjectListModuleMenu(
     onEditClass?: () => void;
   },
 ) {
-  const items: MenuButton[] = [];
+  const items: ActionMenuItem[] = [];
   if (opts.module === "attendance") {
-    items.push({ text: t("nav.recap"), onPress: opts.onRecap });
+    items.push({
+      id: "recap",
+      label: t("nav.recap"),
+      icon: "recap",
+      onPress: opts.onRecap,
+    });
   } else {
-    items.push({ text: t("nav.gradeRecap"), onPress: opts.onGradeRecap });
+    items.push({
+      id: "grade-recap",
+      label: t("nav.gradeRecap"),
+      icon: "gradeRecap",
+      onPress: opts.onGradeRecap,
+    });
   }
   if (opts.onEditClass) {
-    items.push({ text: t("nav.manageClass"), onPress: opts.onEditClass });
+    items.push({
+      id: "manage-class",
+      label: t("nav.manageClass"),
+      icon: "classes",
+      onPress: opts.onEditClass,
+    });
   }
-  showMenu(t, opts.title, items);
-}
-
-/** @deprecated gunakan showAttendanceModuleMenu / showGradesModuleMenu */
-export function showClassDetailMenu(
-  t: (key: TranslationKey) => string,
-  opts: {
-    studentCount: number;
-    onManageStudents: () => void;
-    onRecap: () => void;
-    onEditClass: () => void;
-  },
-) {
-  const buttons: MenuButton[] = [];
-
-  if (opts.studentCount > 0) {
-    buttons.push({ text: t("nav.students"), onPress: opts.onManageStudents });
-  }
-
-  buttons.push(
-    { text: t("classMenu.weeklyRecap"), onPress: opts.onRecap },
-    { text: t("classMenu.editOrDelete"), onPress: opts.onEditClass },
-  );
-
-  showMenu(t, t("common.class"), buttons);
+  showMenu({ title: opts.title, items });
 }

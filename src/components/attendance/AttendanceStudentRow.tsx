@@ -119,15 +119,39 @@ function AttendanceStudentRowInner({
                 {studentInitial(item.fullName)}
               </Text>
             </View>
-            <Text
-              style={[font.caption, textStyles.nameText, { color: colors.primary }]}
-              numberOfLines={1}
-            >
-              {item.fullName}
-            </Text>
+            <View style={styles.nameTextWrap}>
+              <Text
+                style={[font.caption, textStyles.nameText, { color: colors.primary }]}
+              >
+                {item.fullName}
+              </Text>
+              {item.studentNumber ? (
+                <Text style={[font.caption, { color: colors.textMuted }]}>
+                  NIS {item.studentNumber}
+                </Text>
+              ) : null}
+            </View>
           </Pressable>
-          <View style={[styles.statusRow, readOnly && styles.statusRowReadOnly]}>
-            {ATTENDANCE_STATUS_ORDER.map((status) => {
+          {!readOnly ? (
+            <Pressable
+              style={[
+                styles.noteBtn,
+                {
+                  backgroundColor: noteOpen ? colors.primaryMuted : noteBtnColors.bg,
+                  borderColor: noteOpen ? colors.primaryBorder : noteBtnColors.border,
+                },
+              ]}
+              onPress={withHaptic(() => onToggleNote(item.studentId))}
+              accessibilityRole="button"
+              accessibilityLabel={noteOpen ? noteHideLabel : noteToggleLabel}
+              accessibilityState={{ expanded: noteOpen }}
+            >
+              <Icon name="note" size={15} color={noteOpen ? colors.primary : noteBtnColors.icon} />
+            </Pressable>
+          ) : null}
+        </View>
+        <View style={[styles.statusRow, readOnly && styles.statusRowReadOnly]}>
+          {ATTENDANCE_STATUS_ORDER.map((status) => {
               const active = item.status === status;
               const palette = statusPalette(status);
               const chipStyle = [
@@ -176,24 +200,6 @@ function AttendanceStudentRowInner({
                 </Pressable>
               );
             })}
-          </View>
-          {!readOnly ? (
-            <Pressable
-              style={[
-                styles.noteBtn,
-                {
-                  backgroundColor: noteOpen ? colors.primaryMuted : noteBtnColors.bg,
-                  borderColor: noteOpen ? colors.primaryBorder : noteBtnColors.border,
-                },
-              ]}
-              onPress={withHaptic(() => onToggleNote(item.studentId))}
-              accessibilityRole="button"
-              accessibilityLabel={noteOpen ? noteHideLabel : noteToggleLabel}
-              accessibilityState={{ expanded: noteOpen }}
-            >
-              <Icon name="note" size={15} color={noteOpen ? colors.primary : noteBtnColors.icon} />
-            </Pressable>
-          ) : null}
         </View>
         {readOnly && hasNote ? (
           <View
@@ -270,16 +276,17 @@ const styles = StyleSheet.create({
   },
   mainRow: {
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: space.sm,
   },
   nameWrap: {
     flex: 1,
     minWidth: 0,
     flexDirection: "row",
-    alignItems: "center",
+    alignItems: "flex-start",
     gap: space.sm,
   },
+  nameTextWrap: { flex: 1, minWidth: 0, gap: 2 },
   avatar: {
     width: 36,
     height: 36,
@@ -289,7 +296,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     flexShrink: 0,
   },
-  statusRow: { flexDirection: "row", gap: 4, flexShrink: 0 },
+  statusRow: { flexDirection: "row", gap: 4, flexWrap: "wrap" },
   statusRowReadOnly: { opacity: 0.92 },
   statusChip: {
     width: 32,

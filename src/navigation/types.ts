@@ -81,6 +81,8 @@ export type ManageStackParamList = {
     fullName: string;
     studentNumber: string;
   };
+  GradePredikatSettings: undefined;
+  StudentSortSettings: undefined;
 };
 
 /** Pengaturan aplikasi. */
@@ -88,7 +90,6 @@ export type SettingsStackParamList = {
   Settings: undefined;
   About: undefined;
   OnboardingReplay: undefined;
-  GradePredikatSettings: undefined;
 };
 
 /** @deprecated bottom tab dihapus — gunakan HomeStackParamList */

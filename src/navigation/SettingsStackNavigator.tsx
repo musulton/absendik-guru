@@ -6,7 +6,6 @@ import { getStackScreenOptions } from "@/navigation/stackOptions";
 import { stackScreenOptionsWithBack } from "@/navigation/headerOptions";
 import type { SettingsStackParamList } from "@/navigation/types";
 import { SettingsScreen } from "@/screens/SettingsScreen";
-import { GradePredikatSettingsScreen } from "@/screens/GradePredikatSettingsScreen";
 import { AboutScreen } from "@/screens/AboutScreen";
 import { OnboardingScreen } from "@/screens/OnboardingScreen";
 
@@ -39,9 +38,6 @@ export function SettingsStackNavigator() {
             account={account}
             userId={userId}
             onAbout={() => navigation.navigate("About")}
-            onGradePredikatSettings={() =>
-              navigation.navigate("GradePredikatSettings")
-            }
             onReplayOnboarding={() => navigation.navigate("OnboardingReplay")}
             onSwitchSchool={onSwitchWorkspace}
             onSubscriptionChanged={refreshApp}
@@ -49,13 +45,6 @@ export function SettingsStackNavigator() {
             onLocalDataWiped={onSwitchWorkspace}
           />
         )}
-      </Stack.Screen>
-
-      <Stack.Screen
-        name="GradePredikatSettings"
-        options={{ title: t("gradePredikat.title") }}
-      >
-        {() => <GradePredikatSettingsScreen />}
       </Stack.Screen>
 
       <Stack.Screen name="About" options={{ title: t("about.title") }}>

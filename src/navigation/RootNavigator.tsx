@@ -17,6 +17,7 @@ import {
   isSchoolWorkspaceId,
 } from "@/lib/school-link";
 import { bootstrapGuruSession } from "@/lib/session-bootstrap";
+import { tryRestoreProSubscriptionOnBootstrap } from "@/lib/subscription-sync";
 import { isLocalArchiveWorkspace } from "@/lib/workspace-kind";
 import { scaleFontSize } from "@/lib/theme";
 import {
@@ -41,6 +42,8 @@ import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import { HomeStackNavigator } from "@/navigation/HomeStackNavigator";
 import { WorkspaceModulesProvider } from "@/context/WorkspaceModulesContext";
 import { WorkspaceGradePredikatProvider } from "@/context/WorkspaceGradePredikatContext";
+import { WorkspaceStudentSortProvider } from "@/context/WorkspaceStudentSortContext";
+import { ActionMenuProvider } from "@/context/ActionMenuContext";
 import { AccountSettingsRoute } from "@/navigation/AccountSettingsRoute";
 import type { RootStackParamList } from "@/navigation/types";
 
@@ -107,6 +110,8 @@ export function RootNavigator() {
 
     const boot = await bootstrapGuruSession(next.access_token);
     if (generation !== hydrateGeneration.current) return;
+
+    void tryRestoreProSubscriptionOnBootstrap();
 
     const me = boot.me;
     if (!me.ok) {
@@ -307,6 +312,7 @@ export function RootNavigator() {
       key={session?.user.id ?? "guest"}
     >
       <AdProvider onUpgradePress={navigateToSettings}>
+        <ActionMenuProvider>
         {bootstrapError && !account ? (
           <ScrollView
             style={[formStyles.flex, { backgroundColor: colors.bg }]}
@@ -436,11 +442,15 @@ export function RootNavigator() {
                     <WorkspaceModulesProvider
                       workspaceId={workspaceContextValue.workspace.id}
                     >
-                      <WorkspaceGradePredikatProvider
+                      <WorkspaceStudentSortProvider
                         workspaceId={workspaceContextValue.workspace.id}
                       >
-                        <HomeStackNavigator />
-                      </WorkspaceGradePredikatProvider>
+                        <WorkspaceGradePredikatProvider
+                          workspaceId={workspaceContextValue.workspace.id}
+                        >
+                          <HomeStackNavigator />
+                        </WorkspaceGradePredikatProvider>
+                      </WorkspaceStudentSortProvider>
                     </WorkspaceModulesProvider>
                   </WorkspaceProvider>
                 ) : null
@@ -448,6 +458,7 @@ export function RootNavigator() {
             </Stack.Screen>
           </Stack.Navigator>
         )}
+        </ActionMenuProvider>
       </AdProvider>
     </NavigationContainer>
   );

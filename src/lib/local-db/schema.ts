@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS workspaces (
   module_attendance_enabled INTEGER NOT NULL DEFAULT 1,
   module_grades_enabled INTEGER NOT NULL DEFAULT 1,
   grade_predikat_json TEXT,
+  student_sort_mode TEXT NOT NULL DEFAULT 'name',
   created_at TEXT NOT NULL
 );
 
