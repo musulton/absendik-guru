@@ -1,4 +1,4 @@
-# Iklan — Absendik for Guru (mode gratis)
+# Iklan — Catatan Guru (mode gratis)
 
 Tujuan: pendapatan iklan maksimal **tanpa mengganggu** alur kerja guru.
 Profil saat ini: **seimbang**.
@@ -9,7 +9,6 @@ Profil saat ini: **seimbang**.
 |-------|---------|--------|
 | **Banner** | Beranda kelas, list kelas pengelolaan, pilih sekolah, hub pengelolaan, hub kelas, pilih kelas (mapel/siswa), daftar siswa, daftar mapel, rekap | Footer layar, tidak ikut scroll konten |
 | **Interstitial** | Setelah simpan absensi/nilai lalu keluar; setelah ekspor Excel; setelah sinkron | Maks. 6×/hari; jeda global 4 menit; bucket simpan vs utilitas terpisah; 2 menit pertama sesi bebas iklan |
-| **App-open** | Saat kembali ke app setelah ditinggal ≥30 detik | Maks. 3×/hari, jarak min. 15 menit, hormati grace sesi |
 | **Tanpa iklan** | Input absensi/nilai, form siswa/mapel/kelas, login | Zona fokus kerja |
 
 - Interstitial **tidak pernah** muncul saat sedang input — hanya saat user
@@ -25,9 +24,8 @@ Profil saat ini: **seimbang**.
 - `policy.ts` — boleh tampil atau tidak (langganan + frekuensi).
 - `frequency.ts` — batas harian, jeda waktu, grace sesi (profil "seimbang").
 - `consent.ts` — UMP/GDPR: `gatherConsent`, opsi privasi, personalisasi iklan.
-- `admob.ts` — init SDK, banner, interstitial, app-open.
+- `admob.ts` — init SDK, banner, interstitial.
 - `context/AdContext.tsx` — runtime `off | native | preview`.
-- `hooks/useAppOpenAds.ts` — app-open saat kembali dari background.
 
 ### Mode runtime
 
@@ -69,7 +67,6 @@ Emulator Android otomatis di-whitelist. Reset state UMP: `AdsConsent.reset()` (d
 3. Set **ad unit id** di `.env` (lihat `.env.example`):
    - `EXPO_PUBLIC_ADMOB_BANNER_ANDROID` / `_IOS`
    - `EXPO_PUBLIC_ADMOB_INTERSTITIAL_ANDROID` / `_IOS`
-   - `EXPO_PUBLIC_ADMOB_APP_OPEN_ANDROID` / `_IOS`
 4. Build: `npx expo prebuild` lalu `eas build` (atau dev client).
 
 Saat dev (env kosong) otomatis memakai **TestIds** Google — aman, tidak

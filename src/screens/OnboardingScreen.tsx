@@ -1,19 +1,25 @@
 import { useMemo, useState } from "react";
 import {
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { PrimaryButton } from "@/components/PrimaryButton";
-import { AbsendikMark } from "@/components/brand/AbsendikMark";
+import { CatatanGuruMark } from "@/components/brand/CatatanGuruMark";
 import { IconBadge } from "@/components/ui/IconBadge";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { TextLink } from "@/components/ui/TextLink";
 import { useAdsOptional } from "@/context/AdContext";
 import { useTheme } from "@/context/AppPreferencesContext";
+import { OnboardingModulePicker } from "@/components/onboarding/OnboardingModulePicker";
 import { ONBOARDING_STEP_DEFS } from "@/lib/onboarding-steps";
+import {
+  DEFAULT_WORKSPACE_MODULES,
+  setOnboardingModulePrefs,
+} from "@/lib/onboarding-modules";
 import { formatGuruQuotaSummary, getGuruLocalLimitsFromEnv } from "@/lib/guru-limits";
 import {
   normalizeStorageProfile,
@@ -21,6 +27,7 @@ import {
   setStorageMode,
 } from "@/lib/storage-mode";
 import { radius, space } from "@/lib/theme";
+import type { WorkspaceModules } from "@/lib/workspace-modules-shared";
 
 type Props = {
   userId: string;
@@ -33,10 +40,12 @@ const STEP_ICONS: Record<string, IconName> = {
   welcome: "school",
   storage: "smartphone",
   school: "school",
-  schoolLink: "globe",
   class: "classes",
   attendance: "attendance",
   grades: "grades",
+  modules: "recap",
+  session: "journal",
+  attendance: "attendance",
   more: "recap",
   start: "check",
 };
@@ -57,17 +66,29 @@ export function OnboardingScreen({ userId, onDone, replay = false }: Props) {
   );
   const [stepIndex, setStepIndex] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [modules, setModules] = useState<WorkspaceModules>(
+    DEFAULT_WORKSPACE_MODULES,
+  );
+
+  const stepDefs = useMemo(
+    () =>
+      replay
+        ? ONBOARDING_STEP_DEFS.filter((def) => !def.skipOnReplay)
+        : ONBOARDING_STEP_DEFS,
+    [replay],
+  );
 
   const steps = useMemo(
     () =>
-      ONBOARDING_STEP_DEFS.map((def) => ({
+      stepDefs.map((def) => ({
         id: def.id,
         title: t(def.titleKey),
         body: t(def.bodyKey),
         bullets: def.bulletKeys?.map((key) => t(key)),
         showQuota: def.showQuota,
+        interactive: def.interactive,
       })),
-    [t],
+    [stepDefs, t],
   );
 
   const step = steps[stepIndex];
@@ -80,6 +101,7 @@ export function OnboardingScreen({ userId, onDone, replay = false }: Props) {
       if (!replay) {
         await normalizeStorageProfile();
         await setStorageMode("local");
+        await setOnboardingModulePrefs(userId, modules);
         await setOnboardingDone(userId);
         void ads?.refreshAdsState();
       }
@@ -112,10 +134,15 @@ export function OnboardingScreen({ userId, onDone, replay = false }: Props) {
         },
       ]}
     >
-      <View style={styles.slideContent}>
+      <ScrollView
+        style={styles.slideScroll}
+        contentContainerStyle={styles.slideContent}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={styles.stepMeta}>
           {step.id === "welcome" ? (
-            <AbsendikMark size={56} style={styles.iconBadge} />
+            <CatatanGuruMark size={56} style={styles.iconBadge} />
           ) : (
             <IconBadge
               icon={stepIcon}
@@ -152,7 +179,11 @@ export function OnboardingScreen({ userId, onDone, replay = false }: Props) {
             <Text style={[font.body, styles.bulletText, { color: colors.text }]}>{line}</Text>
           </View>
         ))}
-      </View>
+
+        {step.interactive === "modules" ? (
+          <OnboardingModulePicker modules={modules} onChange={setModules} />
+        ) : null}
+      </ScrollView>
 
       <View style={styles.dots}>
         {steps.map((s, i) => (
@@ -196,12 +227,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.lg,
     justifyContent: "space-between",
   },
+  slideScroll: { flexGrow: 1 },
   slideContent: {
     flexGrow: 1,
     justifyContent: "center",
     marginTop: space.sm,
     padding: space.lg,
-    minHeight: 320,
+    paddingBottom: space.md,
   },
   stepMeta: { marginBottom: space.lg, gap: space.md },
   iconBadge: {

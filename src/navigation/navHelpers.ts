@@ -51,6 +51,6 @@ export function goToManageTab<
 
 export function goToSettingsTab(navigation: NavigationProp<ParamListBase>) {
   getHomeStackNavigation(navigation).navigate("Settings", {
-    screen: "Settings",
+    screen: "SettingsHub",
   });
 }

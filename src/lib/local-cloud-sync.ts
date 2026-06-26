@@ -14,7 +14,24 @@ export type SyncSummary = {
   subjects: number;
   sessions: number;
   gradeTasks: number;
+  journalEntries: number;
+  studentNotes: number;
 };
+
+function buildSyncSummary(
+  snapshot: import("@/lib/local-store").LocalSyncSnapshot,
+): SyncSummary {
+  return {
+    workspaces: snapshot.workspaces.length,
+    classes: snapshot.classes.length,
+    students: snapshot.students.length,
+    subjects: snapshot.assignments.length,
+    sessions: snapshot.sessions.length,
+    gradeTasks: snapshot.gradeTasks?.length ?? 0,
+    journalEntries: snapshot.teachingJournalEntries?.length ?? 0,
+    studentNotes: snapshot.studentNotes?.length ?? 0,
+  };
+}
 
 /** Kirim snapshot SQLite ke cadangan cloud Supabase (Pro). */
 export async function syncAllLocalDataToCloud(): Promise<
@@ -49,14 +66,7 @@ export async function syncAllLocalDataToCloud(): Promise<
 
   return {
     ok: true,
-    summary: {
-      workspaces: uploaded.data.summary.workspaces,
-      classes: uploaded.data.summary.classes,
-      students: uploaded.data.summary.students,
-      subjects: uploaded.data.summary.subjects,
-      sessions: uploaded.data.summary.sessions,
-      gradeTasks: uploaded.data.summary.gradeTasks,
-    },
+    summary: buildSyncSummary(snapshot),
   };
 }
 
@@ -96,13 +106,6 @@ export async function restoreAllCloudDataToLocal(): Promise<
 
   return {
     ok: true,
-    summary: {
-      workspaces: snapshot.workspaces.length,
-      classes: snapshot.classes.length,
-      students: snapshot.students.length,
-      subjects: snapshot.assignments.length,
-      sessions: snapshot.sessions.length,
-      gradeTasks: snapshot.gradeTasks?.length ?? 0,
-    },
+    summary: buildSyncSummary(snapshot),
   };
 }

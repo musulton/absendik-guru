@@ -1,3 +1,5 @@
+import { getOnboardingModulePrefs, clearOnboardingModulePrefs } from "@/lib/onboarding-modules";
+import { DEFAULT_WORKSPACE_MODULES } from "@/lib/workspace-modules-shared";
 import { getLocalDb } from "@/lib/local-db/connection";
 import {
   getGuruLimitsForMode,
@@ -441,6 +443,8 @@ export async function localCreateWorkspace(input: {
   };
 
   const db = await getLocalDb(userId);
+  const modulePrefs = await getOnboardingModulePrefs(userId);
+  const mods = modulePrefs ?? DEFAULT_WORKSPACE_MODULES;
   try {
     await db.runAsync(
       `INSERT INTO workspaces (
@@ -448,8 +452,9 @@ export async function localCreateWorkspace(input: {
          contact_name, contact_phone, contact_email,
          identity_key, attendance_mode,
          module_attendance_enabled, module_grades_enabled,
+         module_teaching_journal_enabled, module_student_notes_enabled,
          created_at
-       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, 1, ?)`,
+       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       ws.id,
       ws.name,
       ws.city,
@@ -462,6 +467,10 @@ export async function localCreateWorkspace(input: {
       ws.contactEmail,
       ws.identityKey,
       ws.attendanceMode,
+      mods.attendance ? 1 : 0,
+      mods.grades ? 1 : 0,
+      mods.teachingJournal ? 1 : 0,
+      mods.studentNotes ? 1 : 0,
       ws.createdAt,
     );
   } catch {
@@ -470,6 +479,10 @@ export async function localCreateWorkspace(input: {
       "unknown",
       translate(locale, "bootstrap.sessionLoadFailed"),
     );
+  }
+
+  if (modulePrefs) {
+    await clearOnboardingModulePrefs(userId);
   }
 
   return { ok: true, data: { workspace: ws } };
@@ -2023,6 +2036,8 @@ export async function localGetStudentGradeDetail(
   };
 }
 
+export const LOCAL_SYNC_SCHEMA_VERSION = 2;
+
 export type LocalSyncStudent = {
   id: string;
   workspaceId: string;
@@ -2032,9 +2047,11 @@ export type LocalSyncStudent = {
 };
 
 export type LocalSyncAssignment = {
+  id?: string;
   workspaceId: string;
   classId: string;
   subjectName: string;
+  labelColor?: string | null;
 };
 
 export type LocalSyncSession = {
@@ -2043,10 +2060,12 @@ export type LocalSyncSession = {
   sessionDate: string;
   subjectName: string | null;
   submittedAt: string | null;
+  gradeLabel?: string | null;
   records: {
     studentId: string;
     status: GuruAttendanceStatus;
     note: string | null;
+    score?: string | null;
   }[];
 };
 
@@ -2066,15 +2085,70 @@ export type LocalSyncGradeScore = {
   score: string | null;
 };
 
+export type LocalSyncWorkspacePrefs = {
+  workspaceId: string;
+  moduleAttendanceEnabled: boolean;
+  moduleGradesEnabled: boolean;
+  moduleTeachingJournalEnabled: boolean;
+  moduleStudentNotesEnabled: boolean;
+  gradePredikatJson: string | null;
+  studentSortMode: string;
+};
+
+export type LocalSyncTeachingJournalEntry = {
+  id: string;
+  workspaceId: string;
+  classId: string;
+  sessionDate: string;
+  subjectName: string | null;
+  material: string | null;
+  method: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LocalSyncStudentNote = {
+  id: string;
+  workspaceId: string;
+  classId: string;
+  studentId: string;
+  category: string;
+  presetKey: string | null;
+  noteText: string;
+  noteDate: string;
+  createdAt: string;
+};
+
+export type LocalSyncTeachingSlot = {
+  id: string;
+  workspaceId: string;
+  classId: string;
+  subjectName: string | null;
+  dayOfWeek: number;
+  startTime: string;
+  endTime: string | null;
+  createdAt: string;
+};
+
 export type LocalSyncSnapshot = {
   schemaVersion?: number;
   workspaces: GuruWorkspace[];
-  classes: { workspaceId: string; id: string; name: string }[];
+  workspacePrefs?: LocalSyncWorkspacePrefs[];
+  classes: {
+    workspaceId: string;
+    id: string;
+    name: string;
+    labelColor?: string | null;
+  }[];
   students: LocalSyncStudent[];
   assignments: LocalSyncAssignment[];
   sessions: LocalSyncSession[];
   gradeTasks?: LocalSyncGradeTask[];
   gradeScores?: LocalSyncGradeScore[];
+  teachingJournalEntries?: LocalSyncTeachingJournalEntry[];
+  studentNotes?: LocalSyncStudentNote[];
+  teachingSlots?: LocalSyncTeachingSlot[];
 };
 
 /** Snapshot SQLite untuk sinkron ke Cloud. */
@@ -2082,18 +2156,35 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
   const userId = await requireUserId();
   const db = await getLocalDb(userId);
 
-  const wsRows = await db.getAllAsync<WorkspaceDbRow>(
-    `SELECT * FROM workspaces ORDER BY created_at ASC`,
-  );
+  const wsRows = await db.getAllAsync<
+    WorkspaceDbRow & {
+      module_attendance_enabled: number;
+      module_grades_enabled: number;
+      module_teaching_journal_enabled: number;
+      module_student_notes_enabled: number;
+      grade_predikat_json: string | null;
+      student_sort_mode: string;
+    }
+  >(`SELECT * FROM workspaces ORDER BY created_at ASC`);
 
   const workspaces: GuruWorkspace[] = wsRows.map(mapWorkspaceRow);
+  const workspacePrefs: LocalSyncWorkspacePrefs[] = wsRows.map((row) => ({
+    workspaceId: row.id,
+    moduleAttendanceEnabled: row.module_attendance_enabled !== 0,
+    moduleGradesEnabled: row.module_grades_enabled !== 0,
+    moduleTeachingJournalEnabled: row.module_teaching_journal_enabled !== 0,
+    moduleStudentNotesEnabled: row.module_student_notes_enabled !== 0,
+    gradePredikatJson: row.grade_predikat_json,
+    studentSortMode: row.student_sort_mode,
+  }));
 
   const classRows = await db.getAllAsync<{
     id: string;
     workspace_id: string;
     name: string;
+    label_color: string | null;
   }>(
-    `SELECT id, workspace_id, name FROM classes WHERE is_active = 1 ORDER BY name ASC`,
+    `SELECT id, workspace_id, name, label_color FROM classes WHERE is_active = 1 ORDER BY name ASC`,
   );
 
   const studentRows = await db.getAllAsync<{
@@ -2108,11 +2199,13 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
   );
 
   const assignRows = await db.getAllAsync<{
+    id: string;
     workspace_id: string;
     class_id: string;
     subject_name: string | null;
+    label_color: string | null;
   }>(
-    `SELECT workspace_id, class_id, subject_name FROM assignments
+    `SELECT id, workspace_id, class_id, subject_name, label_color FROM assignments
      WHERE subject_name IS NOT NULL`,
   );
 
@@ -2123,7 +2216,9 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
     session_date: string;
     subject_name: string | null;
     submitted_at: string | null;
-  }>(`SELECT * FROM attendance_sessions ORDER BY session_date ASC`);
+    grade_label: string | null;
+  }>(`SELECT id, workspace_id, class_id, session_date, subject_name, submitted_at, grade_label
+      FROM attendance_sessions ORDER BY session_date ASC`);
 
   const sessions: LocalSyncSession[] = [];
   for (const s of sessionRows) {
@@ -2131,8 +2226,9 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
       student_id: string;
       status: string;
       note: string | null;
+      score: string | null;
     }>(
-      `SELECT student_id, status, note FROM attendance_records WHERE session_id = ?`,
+      `SELECT student_id, status, note, score FROM attendance_records WHERE session_id = ?`,
       s.id,
     );
     if (recs.length === 0) continue;
@@ -2142,10 +2238,12 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
       sessionDate: s.session_date,
       subjectName: s.subject_name,
       submittedAt: s.submitted_at,
+      gradeLabel: s.grade_label,
       records: recs.map((r) => ({
         studentId: r.student_id,
         status: r.status as GuruAttendanceStatus,
         note: r.note,
+        score: r.score,
       })),
     });
   }
@@ -2167,13 +2265,54 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
     score: string | null;
   }>(`SELECT task_id, student_id, score FROM grade_scores`);
 
+  const journalRows = await db.getAllAsync<{
+    id: string;
+    workspace_id: string;
+    class_id: string;
+    session_date: string;
+    subject_name: string | null;
+    material: string | null;
+    method: string | null;
+    notes: string | null;
+    created_at: string;
+    updated_at: string;
+  }>(`SELECT id, workspace_id, class_id, session_date, subject_name, material, method, notes, created_at, updated_at
+      FROM teaching_journal_entries ORDER BY session_date ASC`);
+
+  const noteRows = await db.getAllAsync<{
+    id: string;
+    workspace_id: string;
+    class_id: string;
+    student_id: string;
+    category: string;
+    preset_key: string | null;
+    note_text: string;
+    note_date: string;
+    created_at: string;
+  }>(`SELECT id, workspace_id, class_id, student_id, category, preset_key, note_text, note_date, created_at
+      FROM student_notes ORDER BY note_date ASC, created_at ASC`);
+
+  const slotRows = await db.getAllAsync<{
+    id: string;
+    workspace_id: string;
+    class_id: string;
+    subject_name: string | null;
+    day_of_week: number;
+    start_time: string;
+    end_time: string | null;
+    created_at: string;
+  }>(`SELECT id, workspace_id, class_id, subject_name, day_of_week, start_time, end_time, created_at
+      FROM teaching_slots ORDER BY day_of_week ASC, start_time ASC`);
+
   return {
-    schemaVersion: 1,
+    schemaVersion: LOCAL_SYNC_SCHEMA_VERSION,
     workspaces,
+    workspacePrefs,
     classes: classRows.map((c) => ({
       workspaceId: c.workspace_id,
       id: c.id,
       name: c.name,
+      labelColor: c.label_color,
     })),
     students: studentRows.map((s) => ({
       id: s.id,
@@ -2183,9 +2322,11 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
       studentNumber: s.student_number,
     })),
     assignments: assignRows.map((a) => ({
+      id: a.id,
       workspaceId: a.workspace_id,
       classId: a.class_id,
       subjectName: a.subject_name!,
+      labelColor: a.label_color,
     })),
     sessions,
     gradeTasks: gradeTaskRows.map((t) => ({
@@ -2201,6 +2342,39 @@ export async function exportLocalSyncSnapshot(): Promise<LocalSyncSnapshot> {
       taskId: s.task_id,
       studentId: s.student_id,
       score: s.score,
+    })),
+    teachingJournalEntries: journalRows.map((row) => ({
+      id: row.id,
+      workspaceId: row.workspace_id,
+      classId: row.class_id,
+      sessionDate: row.session_date,
+      subjectName: row.subject_name,
+      material: row.material,
+      method: row.method,
+      notes: row.notes,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    })),
+    studentNotes: noteRows.map((row) => ({
+      id: row.id,
+      workspaceId: row.workspace_id,
+      classId: row.class_id,
+      studentId: row.student_id,
+      category: row.category,
+      presetKey: row.preset_key,
+      noteText: row.note_text,
+      noteDate: row.note_date,
+      createdAt: row.created_at,
+    })),
+    teachingSlots: slotRows.map((row) => ({
+      id: row.id,
+      workspaceId: row.workspace_id,
+      classId: row.class_id,
+      subjectName: row.subject_name,
+      dayOfWeek: row.day_of_week,
+      startTime: row.start_time,
+      endTime: row.end_time,
+      createdAt: row.created_at,
     })),
   };
 }
@@ -2218,18 +2392,29 @@ export async function importLocalSyncSnapshot(
       await db.runAsync(`DELETE FROM attendance_sessions`);
       await db.runAsync(`DELETE FROM grade_scores`);
       await db.runAsync(`DELETE FROM grade_tasks`);
+      await db.runAsync(`DELETE FROM student_notes`);
+      await db.runAsync(`DELETE FROM teaching_journal_entries`);
+      await db.runAsync(`DELETE FROM teaching_slots`);
       await db.runAsync(`DELETE FROM assignments`);
       await db.runAsync(`DELETE FROM students`);
       await db.runAsync(`DELETE FROM classes`);
       await db.runAsync(`DELETE FROM workspaces`);
 
+      const prefsByWs = new Map(
+        (snapshot.workspacePrefs ?? []).map((prefs) => [prefs.workspaceId, prefs]),
+      );
+
       for (const ws of snapshot.workspaces) {
+        const prefs = prefsByWs.get(ws.id);
         await db.runAsync(
           `INSERT INTO workspaces (
              id, name, city, npsn, province, address, school_level,
              contact_name, contact_phone, contact_email,
-             identity_key, attendance_mode, created_at
-           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+             identity_key, attendance_mode,
+             module_attendance_enabled, module_grades_enabled,
+             module_teaching_journal_enabled, module_student_notes_enabled,
+             grade_predikat_json, student_sort_mode, created_at
+           ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
           ws.id,
           ws.name,
           ws.city,
@@ -2242,6 +2427,12 @@ export async function importLocalSyncSnapshot(
           ws.contactEmail,
           ws.identityKey,
           ws.attendanceMode,
+          prefs?.moduleAttendanceEnabled === false ? 0 : 1,
+          prefs?.moduleGradesEnabled === false ? 0 : 1,
+          prefs?.moduleTeachingJournalEnabled === false ? 0 : 1,
+          prefs?.moduleStudentNotesEnabled === false ? 0 : 1,
+          prefs?.gradePredikatJson ?? null,
+          prefs?.studentSortMode ?? "name",
           ws.createdAt,
         );
       }
@@ -2253,10 +2444,11 @@ export async function importLocalSyncSnapshot(
       for (const c of snapshot.classes) {
         await db.runAsync(
           `INSERT INTO classes (id, workspace_id, name, label_color, is_active, created_at)
-           VALUES (?, ?, ?, NULL, 1, ?)`,
+           VALUES (?, ?, ?, ?, 1, ?)`,
           c.id,
           c.workspaceId,
           c.name,
+          c.labelColor ?? null,
           nowIso(),
         );
 
@@ -2297,39 +2489,58 @@ export async function importLocalSyncSnapshot(
       for (const a of snapshot.assignments) {
         await db.runAsync(
           `INSERT INTO assignments (id, workspace_id, class_id, user_id, subject_name, label_color, created_at)
-           VALUES (?, ?, ?, ?, ?, NULL, ?)`,
-          newId(),
+           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          a.id ?? newId(),
           a.workspaceId,
           a.classId,
           userId,
           a.subjectName || null,
+          a.labelColor ?? null,
           nowIso(),
+        );
+      }
+
+      for (const slot of snapshot.teachingSlots ?? []) {
+        await db.runAsync(
+          `INSERT INTO teaching_slots
+             (id, workspace_id, class_id, subject_name, day_of_week, start_time, end_time, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+          slot.id,
+          slot.workspaceId,
+          slot.classId,
+          slot.subjectName,
+          slot.dayOfWeek,
+          slot.startTime,
+          slot.endTime,
+          slot.createdAt || nowIso(),
         );
       }
 
       for (const session of snapshot.sessions) {
         const sessionId = newId();
         await db.runAsync(
-          `INSERT INTO attendance_sessions (id, workspace_id, class_id, session_date, subject_name, submitted_at, created_at)
-           VALUES (?, ?, ?, ?, ?, ?, ?)`,
+          `INSERT INTO attendance_sessions (id, workspace_id, class_id, session_date, subject_name, submitted_at, grade_label, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
           sessionId,
           session.workspaceId,
           session.classId,
           session.sessionDate,
           session.subjectName,
           session.submittedAt,
+          session.gradeLabel ?? null,
           nowIso(),
         );
 
         for (const r of session.records) {
           await db.runAsync(
-            `INSERT INTO attendance_records (id, session_id, student_id, status, note)
-             VALUES (?, ?, ?, ?, ?)`,
+            `INSERT INTO attendance_records (id, session_id, student_id, status, note, score)
+             VALUES (?, ?, ?, ?, ?, ?)`,
             newId(),
             sessionId,
             r.studentId,
             r.status,
             r.note,
+            r.score ?? null,
           );
         }
       }
@@ -2358,6 +2569,41 @@ export async function importLocalSyncSnapshot(
           score.taskId,
           score.studentId,
           score.score,
+        );
+      }
+
+      for (const entry of snapshot.teachingJournalEntries ?? []) {
+        await db.runAsync(
+          `INSERT INTO teaching_journal_entries
+             (id, workspace_id, class_id, session_date, subject_name, material, method, notes, created_at, updated_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          entry.id,
+          entry.workspaceId,
+          entry.classId,
+          entry.sessionDate,
+          entry.subjectName,
+          entry.material,
+          entry.method,
+          entry.notes,
+          entry.createdAt || nowIso(),
+          entry.updatedAt || entry.createdAt || nowIso(),
+        );
+      }
+
+      for (const note of snapshot.studentNotes ?? []) {
+        await db.runAsync(
+          `INSERT INTO student_notes
+             (id, workspace_id, class_id, student_id, category, preset_key, note_text, note_date, created_at)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          note.id,
+          note.workspaceId,
+          note.classId,
+          note.studentId,
+          note.category,
+          note.presetKey,
+          note.noteText,
+          note.noteDate,
+          note.createdAt || nowIso(),
         );
       }
     });

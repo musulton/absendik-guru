@@ -1,19 +1,17 @@
 import { useEffect, useMemo, useRef } from "react";
 import {
   Animated,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { useTheme } from "@/context/AppPreferencesContext";
 import { withHaptic } from "@/lib/haptics";
 import { elevation, radius, space } from "@/lib/theme";
-
-const BACKDROP_COLOR = "rgba(15, 23, 42, 0.42)";
 
 export type ActionMenuItem = {
   id: string;
@@ -21,6 +19,8 @@ export type ActionMenuItem = {
   icon?: IconName;
   onPress: () => void;
   destructive?: boolean;
+  iconAccent?: string;
+  iconTint?: string;
 };
 
 type Props = {
@@ -28,33 +28,39 @@ type Props = {
   title?: string;
   subtitle?: string;
   items: ActionMenuItem[];
+  dismissLabel?: string;
   onClose: () => void;
+  onDismiss: () => void;
   onItemPress: (item: ActionMenuItem) => void;
 };
+
+const SLIDE_OFFSET = 48;
 
 export function ActionMenuSheet({
   visible,
   title,
   subtitle,
   items,
+  dismissLabel,
   onClose,
+  onDismiss,
   onItemPress,
 }: Props) {
   const insets = useSafeAreaInsets();
   const { colors, scale, t } = useTheme();
-  const sheetY = useRef(new Animated.Value(320)).current;
+  const sheetY = useRef(new Animated.Value(SLIDE_OFFSET)).current;
 
   useEffect(() => {
     if (!visible) {
-      sheetY.setValue(320);
+      sheetY.setValue(SLIDE_OFFSET);
       return;
     }
 
-    sheetY.setValue(320);
+    sheetY.setValue(SLIDE_OFFSET);
     Animated.spring(sheetY, {
       toValue: 0,
       useNativeDriver: true,
-      damping: 24,
+      damping: 22,
       stiffness: 280,
     }).start();
   }, [visible, sheetY]);
@@ -62,14 +68,6 @@ export function ActionMenuSheet({
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        root: {
-          flex: 1,
-          justifyContent: "flex-end",
-        },
-        backdrop: {
-          ...StyleSheet.absoluteFillObject,
-          backgroundColor: BACKDROP_COLOR,
-        },
         sheet: {
           backgroundColor: colors.surface,
           borderTopLeftRadius: radius.xl,
@@ -135,84 +133,76 @@ export function ActionMenuSheet({
   );
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      statusBarTranslucent
-      onRequestClose={onClose}
-    >
-      <View style={styles.root}>
-        <Pressable
-          style={styles.backdrop}
-          onPress={onClose}
-          accessibilityRole="button"
-          accessibilityLabel={t("common.cancel")}
-        />
-        <Animated.View
-          style={[
-            styles.sheet,
-            elevation(colors.cardShadow, "lg"),
-            {
-              paddingBottom: Math.max(insets.bottom, space.md),
-              transform: [{ translateY: sheetY }],
-            },
-          ]}
-        >
-          <View style={styles.handle} />
-          {title ? (
-            <View style={styles.header}>
-              <Text style={styles.title} numberOfLines={2}>
-                {title}
+    <BottomSheetModal visible={visible} onClose={onClose} animationType="none">
+      <Animated.View
+        style={[
+          styles.sheet,
+          elevation(colors.cardShadow, "lg"),
+          {
+            paddingBottom: Math.max(insets.bottom, space.md),
+            transform: [{ translateY: sheetY }],
+          },
+        ]}
+      >
+        <View style={styles.handle} />
+        {title ? (
+          <View style={styles.header}>
+            <Text style={styles.title} numberOfLines={2}>
+              {title}
+            </Text>
+            {subtitle ? (
+              <Text style={styles.subtitle} numberOfLines={3}>
+                {subtitle}
               </Text>
-              {subtitle ? (
-                <Text style={styles.subtitle} numberOfLines={2}>
-                  {subtitle}
-                </Text>
-              ) : null}
-            </View>
-          ) : null}
-          <View style={styles.list}>
-            {items.map((item) => {
-              const tone = item.destructive ? colors.danger : colors.text;
-              const iconBg = item.destructive
+            ) : null}
+          </View>
+        ) : null}
+        <View style={styles.list}>
+          {items.map((item) => {
+            const tone = item.destructive ? colors.danger : colors.text;
+            const iconBg = item.iconTint
+              ? item.iconTint
+              : item.destructive
                 ? colors.dangerBg
                 : colors.primaryMuted;
-              const iconColor = item.destructive
+            const iconColor = item.iconAccent
+              ? item.iconAccent
+              : item.destructive
                 ? colors.danger
                 : colors.primary;
-              return (
-                <Pressable
-                  key={item.id}
-                  style={({ pressed }) => [
-                    styles.item,
-                    pressed && styles.itemPressed,
-                  ]}
-                  onPress={withHaptic(() => onItemPress(item))}
-                  accessibilityRole="button"
-                >
-                  {item.icon ? (
-                    <View style={[styles.itemIcon, { backgroundColor: iconBg }]}>
-                      <Icon name={item.icon} size={18} color={iconColor} />
-                    </View>
-                  ) : null}
-                  <Text style={[styles.itemLabel, { color: tone }]}>
-                    {item.label}
-                  </Text>
-                  <Icon name="chevronRight" size={18} color={colors.textMuted} />
-                </Pressable>
-              );
-            })}
-          </View>
-          <Pressable
-            style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}
-            onPress={withHaptic(onClose)}
-            accessibilityRole="button"
-          >
-            <Text style={styles.cancelText}>{t("common.cancel")}</Text>
-          </Pressable>
-        </Animated.View>
-      </View>
-    </Modal>
+            return (
+              <Pressable
+                key={item.id}
+                style={({ pressed }) => [
+                  styles.item,
+                  pressed && styles.itemPressed,
+                ]}
+                onPress={withHaptic(() => onItemPress(item))}
+                accessibilityRole="button"
+              >
+                {item.icon ? (
+                  <View style={[styles.itemIcon, { backgroundColor: iconBg }]}>
+                    <Icon name={item.icon} size={18} color={iconColor} />
+                  </View>
+                ) : null}
+                <Text style={[styles.itemLabel, { color: tone }]}>
+                  {item.label}
+                </Text>
+                <Icon name="chevronRight" size={18} color={colors.textMuted} />
+              </Pressable>
+            );
+          })}
+        </View>
+        <Pressable
+          style={({ pressed }) => [styles.cancel, pressed && styles.pressed]}
+          onPress={withHaptic(onDismiss)}
+          accessibilityRole="button"
+        >
+          <Text style={styles.cancelText}>
+            {dismissLabel ?? t("common.cancel")}
+          </Text>
+        </Pressable>
+      </Animated.View>
+    </BottomSheetModal>
   );
 }

@@ -23,6 +23,8 @@ export type AdInterstitialPlacement =
 export const AD_FREE_ZONES = [
   "attendance",
   "grade_entry",
+  "teaching_journal",
+  "student_notes",
   "create_student",
   "edit_student",
   "create_subject",

@@ -15,6 +15,7 @@ import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import {
   useFetchLoadingState,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useWorkspaceGradePredikat } from "@/context/WorkspaceGradePredikatContext";
@@ -140,7 +141,7 @@ export function StudentGradeDetailScreen({
     } catch (err) {
       setError(err instanceof Error ? err.message : t("error.generic"));
     } finally {
-      if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
+      finishScreenFetch({ isSchoolWorkspace, silent, setLoading });
     }
   }, [workspaceId, classId, studentId, subjectName, isSchoolWorkspace, setLoading, t]);
 

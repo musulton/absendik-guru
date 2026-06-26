@@ -1,6 +1,6 @@
-# Absendik Guru (mobile)
+# Catatan Guru (mobile)
 
-Aplikasi React Native (Expo) **khusus guru** — absensi dan nilai per kelas/mapel, rekap, export Excel. Cocok untuk wali kelas, pengampu mapel, bimbel, atau guru di beberapa sekolah.
+Aplikasi React Native (Expo) **khusus guru** — absensi, nilai, jurnal, catatan siswa, rekap, dan export Excel. Cocok untuk wali kelas, pengampu mapel, bimbel, atau guru di beberapa sekolah.
 
 ## Fitur
 
@@ -12,15 +12,15 @@ Aplikasi React Native (Expo) **khusus guru** — absensi dan nilai per kelas/map
 | **Absensi**                 | Hadir, sakit, izin, alpha — izin/sakit dengan catatan                         |
 | **Rekap**                   | Mingguan & bulanan (Gratis), semester (Pro)                                   |
 | **Export**                  | Excel (.xlsx) dari layar rekap                                                |
-| **Cloud (Pro)**             | Backup ke cloud, pulihkan saat ganti HP                                       |
+| **Supabase (Pro)**          | Backup ke Supabase, pulihkan saat ganti HP (termasuk jurnal & catatan)        |
 
 ## Paket
 
-Kuota dibaca dari **env backend** (`GURU_LOCAL_*`, `GURU_PRO_*`) dan disinkron ke app lewat `GET /api/guru/v1/quota-config`. Fallback offline: `EXPO_PUBLIC_GURU_*` di `mobile-guru/.env`. Nilai `unlimited`, `*`, atau `-1` = tidak dibatasi.
+Kuota dibaca dari **env backend** (`GURU_LOCAL_*`, `GURU_PRO_*`) dan disinkron ke app lewat `GET /api/guru/v1/quota-config`. Fallback offline: `EXPO_PUBLIC_GURU_*` di `.env`. Nilai `unlimited`, `*`, atau `-1` = tidak dibatasi.
 
 ### Gratis
 
-- 1 sekolah mandiri di HP
+- 1 sekolah di HP
 - 5 kelas per sekolah · mapel tanpa batas
 - 120 siswa
 - Rekap mingguan & bulanan
@@ -30,7 +30,7 @@ Kuota dibaca dari **env backend** (`GURU_LOCAL_*`, `GURU_PRO_*`) dan disinkron k
 
 ### Pro
 
-- Sekolah mandiri tanpa batas
+- Sekolah tanpa batas
 - Kelas tanpa batas per sekolah · mapel tanpa batas
 - Siswa tanpa batas
 - Rekap semester
@@ -41,28 +41,25 @@ Kuota dibaca dari **env backend** (`GURU_LOCAL_*`, `GURU_PRO_*`) dan disinkron k
 ## Prasyarat
 
 - Node.js 18+
-- Backend Next.js (`npm run dev:demo` di root → port **3001**) — untuk login & cloud sync
-- Skema Supabase (`supabase/install.sql`)
+- **Web Next.js** (`api/` → port **3001**) — API, callback Google OAuth, langganan Pro, cadangan cloud
+- Skema Supabase — lihat [`supabase/README.md`](supabase/README.md); jalankan `001_guru_core.sql` dan `002_guru_pro.sql`
 
 ## Setup
 
 ```bash
-cd mobile-guru
 npm install
 cp .env.example .env
-# Salin NEXT_PUBLIC_SUPABASE_URL & ANON_KEY dari .env root (harus project yang sama!)
-# isi EXPO_PUBLIC_API_BASE_URL
+# Isi EXPO_PUBLIC_GURU_SUPABASE_* dari project Supabase Catatan Guru
+# isi EXPO_PUBLIC_API_BASE_URL (mis. http://localhost:3001)
+
+# Terminal 1 — backend Next.js
+cd api && npm install && cp .env.example .env.local && npm run dev
+
+# Terminal 2 — app mobile
 npm start
 ```
 
-### Akun terhubung ke sekolah (Absendik Sekolah)
-
-1. Admin sekolah undang guru → guru buka link undangan (web) dan hubungkan akun
-2. Login di app dengan **akun yang sama**
-3. Pilih workspace sekolah (otomatis jika terhubung) — kelas & siswa muncul dari data admin sekolah
-4. Guru bisa **absensi & nilai**; tambah/edit kelas & siswa tetap lewat admin sekolah
-
-Pastikan `EXPO_PUBLIC_SUPABASE_*` **sama** dengan backend dan `npm run dev:demo` jalan.
+Pastikan `EXPO_PUBLIC_GURU_SUPABASE_*` **sama** project dengan `NEXT_PUBLIC_SUPABASE_*` di `api/.env.local`, dan `EXPO_PUBLIC_OAUTH_WEB_ORIGIN` mengarah ke origin Next.js yang sama (mis. `http://localhost:3001` hanya untuk API lokal — OAuth butuh HTTPS publik, lihat `api/README.md`).
 
 ### API base URL
 
@@ -80,12 +77,12 @@ Pastikan `EXPO_PUBLIC_SUPABASE_*` **sama** dengan backend dan `npm run dev:demo`
 | `npm run ios`       | Simulator iOS    |
 | `npm run android`   | Emulator Android |
 | `npm run typecheck` | TypeScript       |
+| `cd api && npm run dev` | Backend Next.js (port 3001) |
 
 ## Arsitektur data
 
 - **Operasi harian** → SQLite di HP (offline-first)
-- **Cloud** → cadangan JSON di Supabase (`guru_cloud_snapshots`, Pro). Siswa/kelas/mapel/absensi/nilai **tidak** masuk tenant sekolah.
-- **Absendik sekolah** → hanya metadata sekolah yang guru daftarkan (`guru_workspaces` + cluster stats).
+- **Supabase (Pro)** → cadangan JSON di project Guru (`guru_cloud_snapshots`). Mencakup absensi, nilai, jurnal, catatan siswa, jadwal, dan preferensi.
 
 ## Langganan Pro (Google Play — Android)
 
@@ -93,7 +90,7 @@ Butuh **dev build / EAS** (sama seperti iklan — tidak jalan di Expo Go).
 
 ### 1. Google Play Console
 
-1. Buat app `com.absendik.guru` (Absendik Guru)
+1. Buat app `com.catatanguru.app` (Catatan Guru)
 2. **Monetize → Subscriptions** → buat langganan dengan ID mis. `guru_pro_monthly`
 3. Tambahkan **license testers** untuk uji coba
 4. Upload minimal satu build ke **Internal testing**
@@ -106,27 +103,37 @@ Butuh **dev build / EAS** (sama seperti iklan — tidak jalan di Expo Go).
 
 ### 3. Env
 
-| Lingkungan         | Variabel                                                                                      |
-| ------------------ | --------------------------------------------------------------------------------------------- |
-| Backend `.env`     | `GOOGLE_PLAY_PACKAGE_NAME`, `GURU_IAP_ANDROID_PRODUCT_ID`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` |
-| `mobile-guru/.env` | `EXPO_PUBLIC_GURU_IAP_ANDROID_PRODUCT_ID` (sama dengan Play Console)                          |
+| Lingkungan | Variabel                                                                                      |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| Backend (`api/.env.local`) | `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `GOOGLE_PLAY_PACKAGE_NAME`, `GURU_IAP_ANDROID_PRODUCT_ID`, `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` |
+| `.env` | `EXPO_PUBLIC_GURU_IAP_ANDROID_PRODUCT_ID` (sama dengan Play Console)                          |
+
+Set `GOOGLE_PLAY_PACKAGE_NAME=com.catatanguru.app` di backend.
 
 ### 4. Database
 
-Jalankan `supabase/setup-patches.sql` di Supabase SQL Editor (setelah `install.sql`). Lihat [`supabase/README.md`](../supabase/README.md).
+Jalankan `supabase/migrations/001_guru_core.sql` dan `002_guru_pro.sql` di SQL Editor project Supabase. Lihat [`supabase/README.md`](supabase/README.md).
 
 ### 5. Dev tanpa Play
 
-Set `EXPO_PUBLIC_GURU_IAP_DEV_UNLOCK=true` di `mobile-guru/.env` (hanya `__DEV__`) untuk uji fitur Pro di Expo Go.
+Set `EXPO_PUBLIC_GURU_IAP_DEV_UNLOCK=true` di `.env` (hanya `__DEV__`) untuk uji fitur Pro di Expo Go.
+
+## OAuth redirect URLs
+
+Tambahkan di Supabase → Authentication → URL Configuration:
+
+- Expo Go: `https://YOUR-DOMAIN/auth/catatan-guru/mobile-callback**`
+- Dev/production build: `catatanguru://auth/callback`
 
 ## Struktur
 
 ```
-mobile-guru/
+├── api/              # Next.js — API + OAuth callback Google
 ├── App.tsx
 ├── src/
 │   ├── lib/          # SQLite, limits, sync, export Excel
 │   ├── navigation/
 │   ├── screens/
 │   └── components/
+├── supabase/         # Migrasi SQL
 ```

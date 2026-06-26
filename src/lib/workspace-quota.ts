@@ -3,7 +3,7 @@ import { canAddBillableWorkspace, getGuruLimitsForMode } from "@/lib/guru-limits
 import { isCloudSubscriptionActive } from "@/lib/storage-mode";
 import { getWorkspaceKind } from "@/lib/workspace-kind";
 
-/** Sekolah mandiri di HP — exclude Absendik Sekolah & arsip lokal. */
+/** Sekolah di HP — exclude workspace terhubung & arsip lokal. */
 export function countBillableWorkspaces(
   workspaces: GuruWorkspace[],
   link: GuruSchoolLinkResponse,

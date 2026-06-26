@@ -1,4 +1,5 @@
 import type { NativeStackNavigationOptions } from "@react-navigation/native-stack";
+import { Platform } from "react-native";
 import { scaleFontSize, type FontSizePreference } from "@/lib/theme";
 import { lightTheme, type ThemeColors } from "@/lib/theme-palettes";
 
@@ -22,7 +23,10 @@ export function getStackScreenOptions(
       backgroundColor: colors.headerBg,
     },
     contentStyle: { backgroundColor: colors.bg },
-    animation: "slide_from_right",
+    ...(Platform.OS === "android"
+      ? { animation: "simple_push" as const }
+      : { animation: "slide_from_right" as const, animationDuration: 100 }),
+    gestureEnabled: true,
   };
 }
 

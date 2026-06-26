@@ -7,7 +7,6 @@ export { AD_FREE_ZONES } from "@/lib/ads/placements";
 export { AD_CAPS } from "@/lib/ads/frequency";
 export {
   shouldShowAds,
-  shouldShowAppOpen,
   shouldShowInterstitial,
   isBannerPlacementAllowed,
 } from "@/lib/ads/policy";
@@ -29,6 +28,5 @@ export {
   isAdsSdkReady,
   prepareAds,
   reloadFullScreenAds,
-  showAppOpenIfReady,
   showInterstitialIfReady,
 } from "@/lib/ads/admob";

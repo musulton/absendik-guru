@@ -245,11 +245,55 @@ export type GuruAttendanceData = {
   students: GuruAttendanceStudent[];
 };
 
+export type GuruTeachingJournalEntry = {
+  id: string;
+  classId: string;
+  sessionDate: string;
+  subjectName: string | null;
+  material: string | null;
+  method: string | null;
+  notes: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type GuruTeachingJournalData = {
+  sessionDate: string;
+  entry: GuruTeachingJournalEntry | null;
+};
+
+export type GuruTeachingJournalRecap = {
+  periodLabel: string;
+  startDate: string;
+  endDate: string;
+  subjectName?: string | null;
+  totalSessions: number;
+  entries: GuruTeachingJournalEntry[];
+};
+
+export type GuruStudentNoteCategory =
+  | "positive"
+  | "academic"
+  | "attendance"
+  | "attitude"
+  | "other";
+
+export type GuruStudentNote = {
+  id: string;
+  classId: string;
+  studentId: string;
+  category: GuruStudentNoteCategory;
+  presetKey?: string | null;
+  noteText: string;
+  noteDate: string;
+  createdAt: string;
+};
+
 export type GuruAssignment = {
   id: string;
   classId: string;
   subjectName: string | null;
-  /** UUID mapel sekolah — hanya saat terhubung Absendik Sekolah. */
+  /** UUID mapel sekolah — legacy school-link. */
   subjectId?: string | null;
   label: string;
   labelColor: string | null;
@@ -321,4 +365,20 @@ export type GuruStudentGradeDetail = {
   scoredTasks: number;
   totalRecords: number;
   records: GuruStudentGradeRecord[];
+};
+
+export type GuruStudentNotesRecord = {
+  id: string;
+  noteDate: string;
+  category: GuruStudentNoteCategory;
+  presetKey?: string | null;
+  noteText: string;
+};
+
+export type GuruStudentNotesDetail = {
+  studentId: string;
+  fullName: string;
+  studentNumber: string | null;
+  totalRecords: number;
+  records: GuruStudentNotesRecord[];
 };

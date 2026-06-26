@@ -1,5 +1,5 @@
 /**
- * Generate app icon & splash PNGs from assets/brand/absendik-mark.svg
+ * Generate app icon & splash PNGs from assets/brand/catatan-guru-mark.svg
  * Run: node scripts/generate-brand-assets.mjs
  */
 import fs from "node:fs";
@@ -11,7 +11,7 @@ import sharp from "sharp";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.join(__dirname, "..");
 const assetsDir = path.join(root, "assets");
-const svgPath = path.join(assetsDir, "brand", "absendik-mark.svg");
+const svgPath = path.join(assetsDir, "brand", "catatan-guru-mark.svg");
 
 const BRAND_BG = "#047857";
 

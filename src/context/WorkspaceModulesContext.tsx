@@ -7,6 +7,8 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { applyOnboardingModulePrefsToWorkspace } from "@/lib/onboarding-modules";
+import { supabase } from "@/lib/supabase";
 import {
   DEFAULT_WORKSPACE_MODULES,
   getWorkspaceModules,
@@ -49,13 +51,21 @@ export function WorkspaceModulesProvider({
 
   useEffect(() => {
     let active = true;
-    void getWorkspaceModules(workspaceId)
-      .then((next) => {
-        if (active) setModulesState(next);
-      })
-      .catch(() => {
-        /* pertahankan default */
-      });
+
+    async function load() {
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user?.id;
+      if (userId) {
+        await applyOnboardingModulePrefsToWorkspace(workspaceId, userId);
+      }
+      const next = await getWorkspaceModules(workspaceId);
+      if (active) setModulesState(next);
+    }
+
+    void load().catch(() => {
+      /* pertahankan default */
+    });
+
     return () => {
       active = false;
     };

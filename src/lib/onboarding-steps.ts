@@ -6,6 +6,9 @@ export type OnboardingStepDef = {
   bodyKey: TranslationKey;
   bulletKeys?: TranslationKey[];
   showQuota?: boolean;
+  interactive?: "modules";
+  /** Lewati langkah interaktif saat ulangi panduan dari Pengaturan. */
+  skipOnReplay?: boolean;
 };
 
 export const ONBOARDING_STEP_DEFS: OnboardingStepDef[] = [
@@ -15,27 +18,10 @@ export const ONBOARDING_STEP_DEFS: OnboardingStepDef[] = [
     bodyKey: "onboarding.welcome.body",
   },
   {
-    id: "storage",
-    titleKey: "onboarding.storage.title",
-    bodyKey: "onboarding.storage.body",
-    bulletKeys: ["onboarding.storage.bullet1", "onboarding.storage.bullet2"],
-    showQuota: true,
-  },
-  {
     id: "school",
     titleKey: "onboarding.school.title",
     bodyKey: "onboarding.school.body",
     bulletKeys: ["onboarding.school.bullet1", "onboarding.school.bullet2"],
-  },
-  {
-    id: "schoolLink",
-    titleKey: "onboarding.schoolLink.title",
-    bodyKey: "onboarding.schoolLink.body",
-    bulletKeys: [
-      "onboarding.schoolLink.bullet1",
-      "onboarding.schoolLink.bullet2",
-      "onboarding.schoolLink.bullet3",
-    ],
   },
   {
     id: "class",
@@ -48,6 +34,23 @@ export const ONBOARDING_STEP_DEFS: OnboardingStepDef[] = [
     ],
   },
   {
+    id: "modules",
+    titleKey: "onboarding.modules.title",
+    bodyKey: "onboarding.modules.body",
+    interactive: "modules",
+    skipOnReplay: true,
+  },
+  {
+    id: "session",
+    titleKey: "onboarding.session.title",
+    bodyKey: "onboarding.session.body",
+    bulletKeys: [
+      "onboarding.session.bullet1",
+      "onboarding.session.bullet2",
+      "onboarding.session.bullet3",
+    ],
+  },
+  {
     id: "attendance",
     titleKey: "onboarding.attendance.title",
     bodyKey: "onboarding.attendance.body",
@@ -55,16 +58,6 @@ export const ONBOARDING_STEP_DEFS: OnboardingStepDef[] = [
       "onboarding.attendance.bullet1",
       "onboarding.attendance.bullet2",
       "onboarding.attendance.bullet3",
-    ],
-  },
-  {
-    id: "grades",
-    titleKey: "onboarding.grades.title",
-    bodyKey: "onboarding.grades.body",
-    bulletKeys: [
-      "onboarding.grades.bullet1",
-      "onboarding.grades.bullet2",
-      "onboarding.grades.bullet3",
     ],
   },
   {

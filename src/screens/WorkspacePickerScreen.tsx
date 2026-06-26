@@ -84,31 +84,36 @@ export function WorkspacePickerScreen({
 
   const loadWorkspaces = useCallback(async (opts?: { force?: boolean }) => {
     setError("");
-    setQuotaReady(false);
     const force = opts?.force ?? false;
     if (force) clearFetchCache();
+    try {
+      const quick = await apiListLocalWorkspaces();
+      if (quick.ok) {
+        setWorkspaces(quick.data.workspaces);
+      }
 
-    const quick = await apiListLocalWorkspaces();
-    if (quick.ok) {
-      setWorkspaces(quick.data.workspaces);
+      const [me, link] = await Promise.all([
+        apiMe(undefined, { force: true }),
+        force
+          ? refreshSchoolLink().catch(() => ({ linked: false as const }))
+          : ensureSchoolLinkLoaded().catch(() => ({ linked: false as const })),
+      ]);
+      applySchoolLink(link);
+
+      const merged = await apiListWorkspaces();
+      if (!merged.ok) {
+        setError(merged.error.message);
+        return;
+      }
+      setWorkspaces(merged.data.workspaces);
+      applyMe(me);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("error.generic"));
+    } finally {
+      setQuotaReady(true);
+      setRefreshing(false);
     }
-
-    const [me, link] = await Promise.all([
-      apiMe(undefined, { force: true }),
-      force
-        ? refreshSchoolLink().catch(() => ({ linked: false as const }))
-        : ensureSchoolLinkLoaded().catch(() => ({ linked: false as const })),
-    ]);
-    applySchoolLink(link);
-
-    const merged = await apiListWorkspaces();
-    if (!merged.ok) {
-      setError(merged.error.message);
-      return;
-    }
-    setWorkspaces(merged.data.workspaces);
-    applyMe(me);
-  }, [applyMe, applySchoolLink]);
+  }, [applyMe, applySchoolLink, t]);
 
   useEffect(() => {
     void loadWorkspaces({ force: true }).finally(() => setLoading(false));

@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ScreenScroll } from "@/components/ScreenScroll";
-import { AbsendikMark } from "@/components/brand/AbsendikMark";
+import { CatatanGuruMark } from "@/components/brand/CatatanGuruMark";
 import { AccentCard } from "@/components/ui/AccentCard";
 import { IconBadge } from "@/components/ui/IconBadge";
 import { Icon, type IconName } from "@/components/ui/Icon";
@@ -27,7 +27,7 @@ const STEP_ICONS: IconName[] = ["school", "classes", "attendance", "export"];
 const FEATURES: { key: TranslationKey; icon: IconName }[] = [
   { key: "about.featureGrades", icon: "grades" },
   { key: "about.featurePredikat", icon: "gradeRecap" },
-  { key: "about.featureSchoolLink", icon: "globe" },
+  { key: "about.featureSchoolLink", icon: "journal" },
   { key: "about.featureCloud", icon: "cloud" },
 ];
 
@@ -61,7 +61,7 @@ export function AboutScreen() {
     <ScreenScroll contentContainerStyle={styles.scroll}>
       <View style={[styles.hero, { backgroundColor: BRAND.hero }]}>
         <View style={[styles.heroBlob, { backgroundColor: BRAND.accent }]} />
-        <AbsendikMark size={52} style={styles.heroLogo} />
+        <CatatanGuruMark size={52} style={styles.heroLogo} />
         <Text style={textStyles.heroTitle}>{t("about.title")}</Text>
         <Text style={textStyles.heroSubtitle}>{t("about.subtitle")}</Text>
       </View>

@@ -1,18 +1,18 @@
 {
   "expo": {
-    "name": "Rekap Guru",
-    "slug": "absendik-guru",
+    "name": "Catatan Guru",
+    "slug": "catatan-guru",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "scheme": "absendikguru",
+    "scheme": "catatanguru",
     "ios": {
       "supportsTablet": false,
-      "bundleIdentifier": "com.absendik.guru"
+      "bundleIdentifier": "com.catatanguru.app"
     },
     "android": {
-      "package": "com.absendik.guru",
+      "package": "com.catatanguru.app",
       "softwareKeyboardLayoutMode": "resize",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -24,7 +24,7 @@
           "autoVerify": true,
           "data": [
             {
-              "scheme": "absendikguru"
+              "scheme": "catatanguru"
             }
           ],
           "category": ["BROWSABLE", "DEFAULT"]
@@ -32,6 +32,7 @@
       ]
     },
     "plugins": [
+      "./plugins/with-kotlin-metadata-compat.js",
       "expo-secure-store",
       "expo-web-browser",
       "expo-notifications",
@@ -40,6 +41,7 @@
         "expo-build-properties",
         {
           "android": {
+            "kotlinVersion": "2.3.0",
             "extraProguardRules": "-keep class com.google.android.gms.internal.consent_sdk.** { *; }"
           }
         }
@@ -47,17 +49,14 @@
       [
         "react-native-google-mobile-ads",
         {
-          "androidAppId": "ca-app-pub-3940256099942544~3347511713",
+          "androidAppId": "ca-app-pub-2498265386280857~8098433120",
           "iosAppId": "ca-app-pub-3940256099942544~1458002511",
           "delayAppMeasurementInit": true,
-          "userTrackingUsageDescription": "Iklan yang lebih relevan membantu Rekap Guru tetap gratis. Anda bisa menolak tanpa kehilangan fitur."
+          "userTrackingUsageDescription": "Iklan yang lebih relevan membantu Catatan Guru tetap gratis. Anda bisa menolak tanpa kehilangan fitur."
         }
       ],
       "@react-native-community/datetimepicker",
-      "expo-sharing",
-      "expo-sqlite",
-      "expo-status-bar",
-      "expo-font"
+      "expo-sqlite"
     ],
     "extra": {
       "eas": {

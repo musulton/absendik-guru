@@ -16,6 +16,9 @@ export type ShowActionMenuParams = {
   title?: string;
   subtitle?: string;
   items: ActionMenuItem[];
+  dismissLabel?: string;
+  /** Dipanggil saat tombol bawah (mis. Selesai / Lewati) ditekan — bukan sekadar tutup. */
+  onDismiss?: () => void;
 };
 
 type ActionMenuContextValue = {
@@ -48,6 +51,16 @@ export function ActionMenuProvider({ children }: { children: ReactNode }) {
     [close],
   );
 
+  const handleDismiss = useCallback(() => {
+    const onDismiss = menu?.onDismiss;
+    close();
+    if (onDismiss) {
+      requestAnimationFrame(() => {
+        onDismiss();
+      });
+    }
+  }, [menu?.onDismiss, close]);
+
   return (
     <ActionMenuContext.Provider value={{ showActionMenu }}>
       {children}
@@ -56,7 +69,9 @@ export function ActionMenuProvider({ children }: { children: ReactNode }) {
         title={menu?.title}
         subtitle={menu?.subtitle}
         items={menu?.items ?? []}
+        dismissLabel={menu?.dismissLabel}
         onClose={close}
+        onDismiss={handleDismiss}
         onItemPress={handleItemPress}
       />
     </ActionMenuContext.Provider>

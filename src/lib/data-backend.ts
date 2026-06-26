@@ -42,7 +42,7 @@ export async function shouldUseSchoolCloud(
   return isSchoolCloudBackend(await resolveDataBackend(workspaceId));
 }
 
-/** Apakah workspace ID menunjuk ke sekolah Absendik (prefix + link aktif)? */
+/** Apakah workspace ID menunjuk ke sekolah terhubung (legacy)? */
 export function isSchoolLinkedWorkspace(_workspaceId: string): boolean {
   return false;
 }

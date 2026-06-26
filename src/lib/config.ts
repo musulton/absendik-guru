@@ -20,13 +20,41 @@ function parseEnvBool(raw: string | undefined, defaultValue: boolean): boolean {
 }
 
 export const config = {
+  /** Auth + cadangan Pro (project Supabase Catatan Guru). */
+  guruSupabaseUrl: requireEnv(
+    "EXPO_PUBLIC_GURU_SUPABASE_URL",
+    process.env.EXPO_PUBLIC_GURU_SUPABASE_URL ??
+      process.env.EXPO_PUBLIC_SUPABASE_URL,
+  ),
+  guruSupabaseAnonKey: requireEnv(
+    "EXPO_PUBLIC_GURU_SUPABASE_ANON_KEY",
+    process.env.EXPO_PUBLIC_GURU_SUPABASE_ANON_KEY ??
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  ),
+  /** Opsional: klien Supabase sekolah (legacy, tidak dipakai di rilis saat ini). */
+  schoolSupabaseUrl: requireEnv(
+    "EXPO_PUBLIC_SCHOOL_SUPABASE_URL",
+    process.env.EXPO_PUBLIC_SCHOOL_SUPABASE_URL ??
+      process.env.EXPO_PUBLIC_GURU_SUPABASE_URL ??
+      process.env.EXPO_PUBLIC_SUPABASE_URL,
+  ),
+  schoolSupabaseAnonKey: requireEnv(
+    "EXPO_PUBLIC_SCHOOL_SUPABASE_ANON_KEY",
+    process.env.EXPO_PUBLIC_SCHOOL_SUPABASE_ANON_KEY ??
+      process.env.EXPO_PUBLIC_GURU_SUPABASE_ANON_KEY ??
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+  ),
+  /** @deprecated gunakan guruSupabaseUrl */
   supabaseUrl: requireEnv(
     "EXPO_PUBLIC_SUPABASE_URL",
-    process.env.EXPO_PUBLIC_SUPABASE_URL,
+    process.env.EXPO_PUBLIC_GURU_SUPABASE_URL ??
+      process.env.EXPO_PUBLIC_SUPABASE_URL,
   ),
+  /** @deprecated gunakan guruSupabaseAnonKey */
   supabaseAnonKey: requireEnv(
     "EXPO_PUBLIC_SUPABASE_ANON_KEY",
-    process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
+    process.env.EXPO_PUBLIC_GURU_SUPABASE_ANON_KEY ??
+      process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
   ),
   apiBaseUrl: (
     process.env.EXPO_PUBLIC_API_BASE_URL ?? "http://localhost:3001"
@@ -47,8 +75,6 @@ export const config = {
       process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_ANDROID?.trim() ?? "",
     interstitialIos:
       process.env.EXPO_PUBLIC_ADMOB_INTERSTITIAL_IOS?.trim() ?? "",
-    appOpenAndroid: process.env.EXPO_PUBLIC_ADMOB_APP_OPEN_ANDROID?.trim() ?? "",
-    appOpenIos: process.env.EXPO_PUBLIC_ADMOB_APP_OPEN_IOS?.trim() ?? "",
     /** Dev only: EEA | OTHER | REGULATED_US_STATE | DISABLED */
     consentDebugGeography:
       process.env.EXPO_PUBLIC_ADMOB_CONSENT_DEBUG_GEOGRAPHY?.trim() ?? "",

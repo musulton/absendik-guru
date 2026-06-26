@@ -104,14 +104,6 @@ function interstitialUnitId(): string | null {
   return __DEV__ ? m.TestIds.INTERSTITIAL : null;
 }
 
-function appOpenUnitId(): string | null {
-  const m = getAdmobModule();
-  if (!m) return null;
-  const env = pickPlatform(config.ads.appOpenAndroid, config.ads.appOpenIos);
-  if (env) return env;
-  return __DEV__ ? m.TestIds.APP_OPEN : null;
-}
-
 type FullScreenAd = {
   load: () => void;
   show: () => void;
@@ -195,26 +187,12 @@ const interstitial = createFullScreenManager(() => {
   ) as unknown as FullScreenAd;
 });
 
-const appOpen = createFullScreenManager(() => {
-  const m = getAdmobModule();
-  const unitId = appOpenUnitId();
-  if (!m || !unitId) return null;
-  return m.AppOpenAd.createForAdRequest(
-    unitId,
-    getCachedAdRequestOptions(),
-  ) as unknown as FullScreenAd;
-});
-
 export function reloadFullScreenAds(): void {
   interstitial.reset();
-  appOpen.reset();
   if (adsSdkReady) {
     interstitial.preload();
-    appOpen.preload();
   }
 }
 
 export const preloadInterstitial = interstitial.preload;
 export const showInterstitialIfReady = interstitial.showIfReady;
-export const preloadAppOpen = appOpen.preload;
-export const showAppOpenIfReady = appOpen.showIfReady;

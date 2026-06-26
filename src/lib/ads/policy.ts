@@ -1,5 +1,5 @@
 import type { AdBannerPlacement, AdInterstitialPlacement } from "@/lib/ads/placements";
-import { canShowAppOpenNow, canShowInterstitialNow } from "@/lib/ads/frequency";
+import { canShowInterstitialNow } from "@/lib/ads/frequency";
 import { isCloudSubscriptionActive } from "@/lib/storage-mode";
 
 /** Tanpa langganan — tampilkan iklan. */
@@ -35,9 +35,4 @@ export async function shouldShowInterstitial(
   if (!INTERSTITIAL_PLACEMENTS.has(placement)) return false;
   if (!(await shouldShowAds())) return false;
   return canShowInterstitialNow(placement);
-}
-
-export async function shouldShowAppOpen(): Promise<boolean> {
-  if (!(await shouldShowAds())) return false;
-  return canShowAppOpenNow();
 }

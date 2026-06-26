@@ -7,7 +7,8 @@ import {
   Text,
   View,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { AttendanceSessionHeader } from "@/components/attendance/AttendanceSessionHeader";
 import { GradeTaskCard } from "@/components/grades/GradeTaskCard";
@@ -31,6 +32,7 @@ import {
   useFetchLoadingState,
   useSchoolFetchOverlay,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { FetchLoadingOverlay } from "@/components/ui/FetchLoadingOverlay";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
@@ -54,19 +56,29 @@ import {
 } from "@/lib/dates";
 import { getCachedSchoolLink } from "@/lib/school-link";
 import type { Locale } from "@/lib/i18n/translations";
+import { SessionProgressStrip } from "@/components/session/SessionProgressStrip";
+import { useSessionProgress } from "@/hooks/useSessionProgress";
+import { useSessionStepPress } from "@/hooks/useSessionStepPress";
 import { space } from "@/lib/theme";
-import type { GuruAssignment, GuruGradeStudentRow, GuruGradeTask } from "@/lib/types";
+import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
 import { showGradesModuleMenu } from "@/navigation/classDetailMenu";
+import { showAfterGradesSavePrompt } from "@/navigation/sessionFlow";
+import { finishSessionFlow } from "@/navigation/sessionStepNav";
+import type { HomeStackParamList } from "@/navigation/types";
 
 type Props = {
   workspaceId: string;
   classId: string;
   className: string;
   subjectName?: string | null;
+  initialSessionDate?: string;
   onStudentDetail?: (student: GuruGradeStudentRow) => void;
   onStudents: () => void;
   onGradeRecap: (assignments: GuruAssignment[]) => void;
   onEditClass: () => void;
+  onAttendance?: (sessionDate: string) => void;
+  onTeachingJournal?: (sessionDate: string) => void;
+  onStudentNotes?: (sessionDate: string) => void;
 };
 
 function taskScoreSummary(
@@ -90,12 +102,19 @@ export function GradeEntryScreen({
   classId,
   className,
   subjectName,
+  initialSessionDate,
   onStudentDetail,
   onStudents,
   onGradeRecap,
   onEditClass,
+  onAttendance,
+  onTeachingJournal,
+  onStudentNotes,
 }: Props) {
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  const route = useRoute<RouteProp<HomeStackParamList, "GradeEntry">>();
+  const { modules } = useWorkspaceModules();
   const listStyles = useListStyles();
   const { showActionMenu } = useActionMenu();
   const { colors, font, scale, t, locale, isDark } = useTheme();
@@ -110,7 +129,60 @@ export function GradeEntryScreen({
       : isLocalArchiveWorkspace
         ? todayLocalDevice()
         : todayJakarta();
-  const [taskDate, setTaskDate] = useState(today);
+  const [taskDate, setTaskDate] = useState(initialSessionDate ?? today);
+  const sessionFlow = route.params.sessionFlow === true;
+  const { progress } = useSessionProgress(
+    workspaceId,
+    classId,
+    taskDate,
+    subjectName,
+  );
+  const onSessionStepPress = useSessionStepPress({
+    classId,
+    className,
+    labelColor: route.params.labelColor,
+    subjectName,
+    sessionDate: taskDate,
+    sessionFlow,
+  });
+
+  const handleSessionNext = useCallback(() => {
+    if (modules.studentNotes && onStudentNotes) {
+      showAfterGradesSavePrompt(
+        showActionMenu,
+        t,
+        modules,
+        {
+          onStudentNotes: () => onStudentNotes(taskDate),
+          onFinishSession: () =>
+            finishSessionFlow(navigation, {
+              classId,
+              className,
+              labelColor: route.params.labelColor,
+            }),
+        },
+        { colors, isDark },
+      );
+      return;
+    }
+    finishSessionFlow(navigation, {
+      classId,
+      className,
+      labelColor: route.params.labelColor,
+    });
+  }, [
+    modules,
+    onStudentNotes,
+    showActionMenu,
+    t,
+    taskDate,
+    colors,
+    isDark,
+    navigation,
+    classId,
+    className,
+    route.params.labelColor,
+  ]);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useFetchLoadingState();
   const [savingTaskId, setSavingTaskId] = useState<string | null>(null);
@@ -175,61 +247,66 @@ export function GradeEntryScreen({
   const load = useCallback(async (silent?: boolean) => {
     setError("");
     if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-    const gradeRes = await apiGetGradeDay(workspaceId, classId, taskDate, subjectName);
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-    if (!gradeRes.ok) {
-      const message =
-        isSchoolWorkspace &&
-        (gradeRes.error.code === "network" ||
-          gradeRes.error.code === "invalid_response" ||
-          gradeRes.error.code === "unknown" ||
-          gradeRes.error.code === "server_error" ||
-          gradeRes.error.code === "forbidden")
-          ? t("error.schoolGradesLoadFailed")
-          : gradeRes.error.message;
-      setError(message);
-      return;
-    }
-    const { gradeDay } = gradeRes.data;
-    setTasks(gradeDay.tasks);
-    setTitles(
-      Object.fromEntries(gradeDay.tasks.map((task) => [task.id, task.title])),
-    );
-
-    const nextScores: Record<string, Record<string, string | null>> = {};
-    for (const task of gradeDay.tasks) {
-      nextScores[task.id] = {};
-    }
-
-    if (gradeDay.students.length > 0) {
-      setStudents(gradeDay.students);
-      for (const row of gradeDay.students) {
-        for (const [taskId, score] of Object.entries(row.scores)) {
-          nextScores[taskId] = nextScores[taskId] ?? {};
-          nextScores[taskId][row.studentId] = score;
-        }
-      }
-    } else {
-      const stRes = await apiListStudents(workspaceId, classId);
-      if (!stRes.ok) {
-        setError(stRes.error.message);
+    try {
+      const gradeRes = await apiGetGradeDay(workspaceId, classId, taskDate, subjectName);
+      if (!gradeRes.ok) {
+        const message =
+          isSchoolWorkspace &&
+          (gradeRes.error.code === "network" ||
+            gradeRes.error.code === "invalid_response" ||
+            gradeRes.error.code === "unknown" ||
+            gradeRes.error.code === "server_error" ||
+            gradeRes.error.code === "forbidden")
+            ? t("error.schoolGradesLoadFailed")
+            : gradeRes.error.message;
+        setError(message);
         return;
       }
-      setStudents(
-        stRes.data.students.map((s) => ({
-          studentId: s.id,
-          fullName: s.fullName,
-          studentNumber: s.studentNumber,
-          scores: Object.fromEntries(gradeDay.tasks.map((task) => [task.id, null])),
-        })),
+      const { gradeDay } = gradeRes.data;
+      setTasks(gradeDay.tasks);
+      setTitles(
+        Object.fromEntries(gradeDay.tasks.map((task) => [task.id, task.title])),
       );
+
+      const nextScores: Record<string, Record<string, string | null>> = {};
+      for (const task of gradeDay.tasks) {
+        nextScores[task.id] = {};
+      }
+
+      if (gradeDay.students.length > 0) {
+        setStudents(gradeDay.students);
+        for (const row of gradeDay.students) {
+          for (const [taskId, score] of Object.entries(row.scores)) {
+            nextScores[taskId] = nextScores[taskId] ?? {};
+            nextScores[taskId][row.studentId] = score;
+          }
+        }
+      } else {
+        const stRes = await apiListStudents(workspaceId, classId);
+        if (!stRes.ok) {
+          setError(stRes.error.message);
+          return;
+        }
+        setStudents(
+          stRes.data.students.map((s) => ({
+            studentId: s.id,
+            fullName: s.fullName,
+            studentNumber: s.studentNumber,
+            scores: Object.fromEntries(gradeDay.tasks.map((task) => [task.id, null])),
+          })),
+        );
+      }
+      setScoresByTask(nextScores);
+      setExpandedTaskId((prev) => {
+        if (prev && gradeDay.tasks.some((task) => task.id === prev)) return prev;
+        return null;
+      });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("error.generic"));
+    } finally {
+      finishScreenFetch({ isSchoolWorkspace, silent, setLoading });
     }
-    setScoresByTask(nextScores);
-    setExpandedTaskId((prev) => {
-      if (prev && gradeDay.tasks.some((task) => task.id === prev)) return prev;
-      return null;
-    });
-  }, [workspaceId, classId, taskDate, subjectName, isSchoolWorkspace, setLoading]);
+  }, [workspaceId, classId, taskDate, subjectName, isSchoolWorkspace, setLoading, t]);
 
   const showBlockingLoad = useBlockingScreenLoad(
     loading,
@@ -292,6 +369,7 @@ export function GradeEntryScreen({
     t,
     isDark,
     showActionMenu,
+    taskDate,
   ]);
 
   const shiftDate = useCallback(
@@ -397,7 +475,15 @@ export function GradeEntryScreen({
       setMessage(t("grades.saved"));
       savedThisVisit.current = true;
     },
-    [titles, t, workspaceId, classId, students, scoresByTask, isSchoolWorkspace],
+    [
+      titles,
+      t,
+      workspaceId,
+      classId,
+      students,
+      scoresByTask,
+      isSchoolWorkspace,
+    ],
   );
 
   const handleStartEditTask = useCallback((taskId: string) => {
@@ -509,7 +595,6 @@ export function GradeEntryScreen({
     () => (
       <View style={styles.pageHeader}>
         <AttendanceSessionHeader
-          compact
           className={className}
           subjectName={subjectName}
           isToday={isToday}
@@ -564,6 +649,7 @@ export function GradeEntryScreen({
   }
 
   const emptyStudents = students.length === 0;
+  const showSessionNextCta = sessionFlow;
 
   return (
     <StickyScreen
@@ -571,19 +657,46 @@ export function GradeEntryScreen({
       footer={
         emptyStudents ? null : (
           <StickyActionBar>
-            <PrimaryButton
-              title={t("grades.addTask")}
-              size="compact"
-              loading={creatingTask}
-              disabled={creatingTask}
-              onPress={() => void handleAddTask()}
-            />
+            {showSessionNextCta ? (
+              <View style={styles.footerRow}>
+                <View style={styles.footerBtn}>
+                  <PrimaryButton
+                    title={t("sessionFlow.nextStep")}
+                    variant="secondary"
+                    onPress={handleSessionNext}
+                  />
+                </View>
+                <View style={styles.footerBtn}>
+                  <PrimaryButton
+                    title={t("grades.addTask")}
+                    loading={creatingTask}
+                    disabled={creatingTask}
+                    onPress={() => void handleAddTask()}
+                  />
+                </View>
+              </View>
+            ) : (
+              <PrimaryButton
+                title={t("grades.addTask")}
+                size="compact"
+                loading={creatingTask}
+                disabled={creatingTask}
+                onPress={() => void handleAddTask()}
+              />
+            )}
           </StickyActionBar>
         )
       }
     >
       <View style={[styles.page, { backgroundColor: colors.bg }]}>
-        <View style={styles.fixedHeader}>{listHeader}</View>
+        {sessionFlow ? (
+          <SessionProgressStrip
+            progress={progress}
+            pinned
+            currentModule="grades"
+            onStepPress={onSessionStepPress}
+          />
+        ) : null}
         <FlatList
           ref={listRef}
           style={styles.list}
@@ -598,6 +711,7 @@ export function GradeEntryScreen({
           initialNumToRender={6}
           maxToRenderPerBatch={8}
           windowSize={5}
+          ListHeaderComponent={listHeader}
           ListEmptyComponent={
             emptyStudents ? (
               <EmptyState icon="students" message={t("attendance.noStudents")} />
@@ -614,15 +728,11 @@ export function GradeEntryScreen({
 
 const styles = StyleSheet.create({
   page: { flex: 1, position: "relative" },
-  fixedHeader: {
-    flexShrink: 0,
-  },
   list: { flex: 1 },
   pageHeader: {
-    paddingHorizontal: space.md,
     paddingTop: space.sm,
-    gap: 2,
-    marginBottom: 2,
+    gap: space.sm,
+    marginBottom: space.xs,
   },
   listContent: {
     paddingHorizontal: space.md,
@@ -630,4 +740,6 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   listWithFooter: { paddingBottom: space.xs },
+  footerRow: { flexDirection: "row", gap: space.sm },
+  footerBtn: { flex: 1 },
 });

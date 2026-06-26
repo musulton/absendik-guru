@@ -1,10 +1,12 @@
 /**
  * Data guru: SQLite lokal untuk workspace pribadi.
- * Jika akun terhubung ke Absendik Sekolah, absensi/nilai/kelas/siswa
+ * Data absensi/nilai/kelas/siswa — lokal di SQLite (school-link legacy tidak aktif).
  * workspace sekolah dibaca dari tabel sekolah yang sama via API.
  */
 import * as api from "@/lib/api";
 import * as local from "@/lib/local-store";
+import * as localJournal from "@/lib/local-store-journal";
+import * as localStudentNotes from "@/lib/local-store-student-notes";
 import { hasCloudSubscription } from "@/lib/storage-mode";
 import { getGuruLimitsForMode } from "@/lib/guru-limits";
 import { applyProSubscriptionActive, syncProSubscriptionFromServer } from "@/lib/subscription-sync";
@@ -80,7 +82,7 @@ export { clearFetchCache };
 const SCHOOL_READONLY_ERROR = {
   code: "school_readonly",
   message:
-    "Data kelas dan siswa dikelola admin sekolah di Absendik Sekolah.",
+    "Data kelas dan siswa tidak bisa diubah dari aplikasi ini.",
 } as const;
 
 function asResult<T>(
@@ -1159,5 +1161,137 @@ export async function apiGetStudentGradeDetail(
       studentId,
       subjectName,
     ),
+  );
+}
+
+export async function apiGetTeachingJournal(
+  workspaceId: string,
+  classId: string,
+  sessionDate: string,
+  subjectName?: string | null,
+) {
+  return cachedFetch(
+    cacheKey(["journal", workspaceId, classId, sessionDate, subjectName ?? ""]),
+    FETCH_TTL.session,
+    () =>
+      asResult(
+        localJournal.localGetTeachingJournal(
+          workspaceId,
+          classId,
+          sessionDate,
+          subjectName,
+        ),
+      ),
+  );
+}
+
+export async function apiSaveTeachingJournal(
+  workspaceId: string,
+  classId: string,
+  sessionDate: string,
+  input: Parameters<typeof localJournal.localSaveTeachingJournal>[3],
+  subjectName?: string | null,
+) {
+  const result = await asResult(
+    localJournal.localSaveTeachingJournal(
+      workspaceId,
+      classId,
+      sessionDate,
+      input,
+      subjectName,
+    ),
+  );
+  if (result.ok) {
+    invalidateFetchCache(
+      cacheKey(["journal", workspaceId, classId, sessionDate, subjectName ?? ""]),
+    );
+    notifyLocalWorkspaceMutation(workspaceId);
+  }
+  return result;
+}
+
+export async function apiTeachingJournalRecap(
+  workspaceId: string,
+  classId: string,
+  params: {
+    startDate: string;
+    endDate: string;
+    periodLabel: string;
+    subjectName?: string | null;
+  },
+) {
+  return asResult(
+    localJournal.localListTeachingJournalRecap(workspaceId, classId, params),
+  );
+}
+
+export async function apiListStudentNotes(
+  workspaceId: string,
+  classId: string,
+  studentId: string,
+) {
+  return cachedFetch(
+    cacheKey(["studentNotes", workspaceId, classId, studentId]),
+    FETCH_TTL.session,
+    () =>
+      asResult(
+        localStudentNotes.localListStudentNotes(workspaceId, classId, studentId),
+      ),
+  );
+}
+
+export async function apiCreateStudentNote(
+  workspaceId: string,
+  classId: string,
+  studentId: string,
+  input: Parameters<typeof localStudentNotes.localCreateStudentNote>[3],
+) {
+  const result = await asResult(
+    localStudentNotes.localCreateStudentNote(
+      workspaceId,
+      classId,
+      studentId,
+      input,
+    ),
+  );
+  if (result.ok) {
+    invalidateFetchCache(
+      cacheKey(["studentNotes", workspaceId, classId, studentId]),
+    );
+    notifyLocalWorkspaceMutation(workspaceId);
+  }
+  return result;
+}
+
+export async function apiDeleteStudentNote(
+  workspaceId: string,
+  classId: string,
+  studentId: string,
+  noteId: string,
+) {
+  const result = await asResult(
+    localStudentNotes.localDeleteStudentNote(
+      workspaceId,
+      classId,
+      studentId,
+      noteId,
+    ),
+  );
+  if (result.ok) {
+    invalidateFetchCache(
+      cacheKey(["studentNotes", workspaceId, classId, studentId]),
+    );
+    notifyLocalWorkspaceMutation(workspaceId);
+  }
+  return result;
+}
+
+export async function apiGetStudentNotesDetail(
+  workspaceId: string,
+  classId: string,
+  studentId: string,
+) {
+  return asResult(
+    localStudentNotes.localGetStudentNotesDetail(workspaceId, classId, studentId),
   );
 }

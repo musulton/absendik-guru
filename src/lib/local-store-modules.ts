@@ -21,8 +21,11 @@ export async function localGetWorkspaceModules(
   const row = await db.getFirstAsync<{
     module_attendance_enabled: number | null;
     module_grades_enabled: number | null;
+    module_teaching_journal_enabled: number | null;
+    module_student_notes_enabled: number | null;
   }>(
-    `SELECT module_attendance_enabled, module_grades_enabled
+    `SELECT module_attendance_enabled, module_grades_enabled,
+            module_teaching_journal_enabled, module_student_notes_enabled
      FROM workspaces WHERE id = ?`,
     workspaceId,
   );
@@ -30,6 +33,8 @@ export async function localGetWorkspaceModules(
   return normalizeWorkspaceModules({
     attendance: row.module_attendance_enabled !== 0,
     grades: row.module_grades_enabled !== 0,
+    teachingJournal: row.module_teaching_journal_enabled !== 0,
+    studentNotes: row.module_student_notes_enabled !== 0,
   });
 }
 
@@ -42,10 +47,15 @@ export async function localSetWorkspaceModules(
   const db = await getLocalDb(userId);
   await db.runAsync(
     `UPDATE workspaces
-     SET module_attendance_enabled = ?, module_grades_enabled = ?
+     SET module_attendance_enabled = ?,
+         module_grades_enabled = ?,
+         module_teaching_journal_enabled = ?,
+         module_student_notes_enabled = ?
      WHERE id = ?`,
     normalized.attendance ? 1 : 0,
     normalized.grades ? 1 : 0,
+    normalized.teachingJournal ? 1 : 0,
+    normalized.studentNotes ? 1 : 0,
     workspaceId,
   );
 }

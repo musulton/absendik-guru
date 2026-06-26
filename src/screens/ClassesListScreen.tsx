@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useState } from "react";
-import {
-  FlatList,
-  RefreshControl,
-  StyleSheet,
-  View,
-} from "react-native";
+import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AdFooterStack } from "@/components/ads/AdFooterStack";
@@ -25,6 +20,7 @@ import {
   useBlockingScreenLoad,
   useFetchLoadingState,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { apiListClasses } from "@/lib/guru-repository";
 import { space } from "@/lib/theme";
@@ -73,34 +69,44 @@ export function ClassesListScreen(props: Props) {
       : null;
 
   useTranslatedScreenTitle(
-    isManage
-      ? t("nav.tabManageClasses")
-      : workspace.name || t("nav.tabHome"),
+    isManage ? t("nav.tabManageClasses") : workspace.name || t("nav.tabHome"),
   );
   const [loading, setLoading] = useFetchLoadingState();
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [classes, setClasses] = useState<GuruClass[]>([]);
 
-  const load = useCallback(async (silent?: boolean) => {
-    setError("");
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-    const classRes = await apiListClasses(workspace.id, { force: true });
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-    setRefreshing(false);
-    if (!classRes.ok) {
-      const message =
-        isSchoolWorkspace &&
-        (classRes.error.code === "network" ||
-          classRes.error.code === "invalid_response" ||
-          classRes.error.code === "unknown")
-          ? t("error.schoolClassesLoadFailed")
-          : classRes.error.message;
-      setError(message);
-      return;
-    }
-    setClasses(classRes.data.classes);
-  }, [workspace.id, isSchoolWorkspace, t, setLoading]);
+  const load = useCallback(
+    async (silent?: boolean) => {
+      setError("");
+      if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
+      try {
+        const classRes = await apiListClasses(workspace.id, { force: true });
+        if (!classRes.ok) {
+          const message =
+            isSchoolWorkspace &&
+            (classRes.error.code === "network" ||
+              classRes.error.code === "invalid_response" ||
+              classRes.error.code === "unknown")
+              ? t("error.schoolClassesLoadFailed")
+              : classRes.error.message;
+          setError(message);
+          return;
+        }
+        setClasses(classRes.data.classes);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t("error.generic"));
+      } finally {
+        finishScreenFetch({
+          isSchoolWorkspace,
+          silent,
+          setLoading,
+          setRefreshing,
+        });
+      }
+    },
+    [workspace.id, isSchoolWorkspace, t, setLoading],
+  );
 
   const showBlockingLoad = useBlockingScreenLoad(loading, classes.length > 0);
 
@@ -108,9 +114,11 @@ export function ClassesListScreen(props: Props) {
     void load();
   }, [load]);
 
-  useRefreshOnFocus(() => {
-    void load(true);
-  }, { staleMs: 0 });
+  useRefreshOnFocus(
+    () => {
+      void load(true);
+    },
+  );
 
   useListMutations((event) => {
     if (event.workspaceId !== workspace.id) return;
@@ -293,12 +301,18 @@ export function ClassesListScreen(props: Props) {
     >
       <View style={styles.homeLayout}>
         {manageEntry ? (
-          <View style={[styles.manageEntrySlot, { backgroundColor: colors.bg }]}>
+          <View
+            style={[styles.manageEntrySlot, { backgroundColor: colors.bg }]}
+          >
             {manageEntry}
           </View>
         ) : null}
         <FlatList
-          style={[listStyles.list, styles.classList, { backgroundColor: colors.bg }]}
+          style={[
+            listStyles.list,
+            styles.classList,
+            { backgroundColor: colors.bg },
+          ]}
           contentContainerStyle={listStyles.listContent}
           data={classes}
           keyExtractor={(item) => item.id}

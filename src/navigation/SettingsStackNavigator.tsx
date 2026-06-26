@@ -28,11 +28,11 @@ export function SettingsStackNavigator() {
           navigation,
           t,
           route.name,
-          "Settings",
+          "SettingsHub",
         )
       }
     >
-      <Stack.Screen name="Settings" options={{ title: t("settings.title") }}>
+      <Stack.Screen name="SettingsHub" options={{ title: t("settings.title") }}>
         {({ navigation }) => (
           <SettingsScreen
             account={account}

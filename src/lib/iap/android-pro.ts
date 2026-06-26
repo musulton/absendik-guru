@@ -1,9 +1,8 @@
 import type { Purchase, ProductSubscriptionAndroid } from "react-native-iap";
-import { GURU_PRO_ANDROID_PRODUCT_ID } from "@/lib/iap/config";
+import { GURU_PRO_ANDROID_PRODUCT_ID, isAndroidBillingReady } from "@/lib/iap/config";
 import {
   disableAndroidIapModule,
   getIapModule,
-  isAndroidIapSupported,
 } from "@/lib/iap/native-module";
 import { apiVerifyAndroidPurchase } from "@/lib/api";
 import {
@@ -56,7 +55,7 @@ function pickOfferToken(product: ProductSubscriptionAndroid): string | null {
 
 async function ensureConnection(): Promise<boolean> {
   const m = getIapModule();
-  if (!m || !isAndroidIapSupported()) return false;
+  if (!m || !isAndroidBillingReady()) return false;
   if (connectionReady) return true;
   if (connecting) return connecting;
 

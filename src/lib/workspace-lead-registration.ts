@@ -32,7 +32,7 @@ export function buildSchoolLeadRegistration(
 }
 
 /**
- * Daftarkan metadata sekolah lokal ke server (lead penawaran Absendik Sekolah).
+ * Daftarkan metadata sekolah lokal ke server (opsional).
  * Berlaku Gratis & Pro — tidak memblokir UI jika jaringan gagal.
  */
 export function registerWorkspaceLeadOnServer(workspace: GuruWorkspace): void {

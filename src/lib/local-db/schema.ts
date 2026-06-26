@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS workspaces (
   attendance_mode TEXT NOT NULL DEFAULT 'class',
   module_attendance_enabled INTEGER NOT NULL DEFAULT 1,
   module_grades_enabled INTEGER NOT NULL DEFAULT 1,
+  module_teaching_journal_enabled INTEGER NOT NULL DEFAULT 1,
+  module_student_notes_enabled INTEGER NOT NULL DEFAULT 1,
   grade_predikat_json TEXT,
   student_sort_mode TEXT NOT NULL DEFAULT 'name',
   created_at TEXT NOT NULL
@@ -115,6 +117,42 @@ CREATE TABLE IF NOT EXISTS grade_tasks (
 
 CREATE INDEX IF NOT EXISTS idx_grade_tasks_lookup
   ON grade_tasks(workspace_id, class_id, task_date, COALESCE(subject_name, ''));
+
+CREATE TABLE IF NOT EXISTS teaching_journal_entries (
+  id TEXT PRIMARY KEY NOT NULL,
+  workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  session_date TEXT NOT NULL,
+  subject_name TEXT,
+  material TEXT,
+  method TEXT,
+  notes TEXT,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_teaching_journal_unique
+  ON teaching_journal_entries(
+    workspace_id,
+    class_id,
+    session_date,
+    COALESCE(subject_name, '')
+  );
+
+CREATE TABLE IF NOT EXISTS student_notes (
+  id TEXT PRIMARY KEY NOT NULL,
+  workspace_id TEXT NOT NULL REFERENCES workspaces(id) ON DELETE CASCADE,
+  class_id TEXT NOT NULL REFERENCES classes(id) ON DELETE CASCADE,
+  student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  category TEXT NOT NULL,
+  preset_key TEXT,
+  note_text TEXT NOT NULL,
+  note_date TEXT NOT NULL,
+  created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_student_notes_lookup
+  ON student_notes(workspace_id, class_id, student_id, created_at DESC);
 
 CREATE TABLE IF NOT EXISTS grade_scores (
   id TEXT PRIMARY KEY NOT NULL,

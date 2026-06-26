@@ -36,6 +36,8 @@ export type TranslationKey =
   | "login.featureAttendance"
   | "login.featureGrades"
   | "login.featureRecap"
+  | "login.featureJournal"
+  | "login.featureNotes"
   | "login.google"
   | "login.googleHint"
   | "login.googleProviderDisabled"
@@ -82,6 +84,7 @@ export type TranslationKey =
   | "subjects.empty"
   | "subjects.noStudents"
   | "subjects.addStudent"
+  | "subjects.addStudentPrompt"
   | "subjects.manageHint"
   | "attendance.today"
   | "attendance.hint"
@@ -177,6 +180,12 @@ export type TranslationKey =
   | "studentGradeDetail.records"
   | "studentGradeDetail.filteredSubject"
   | "studentGradeDetail.exportExcel"
+  | "studentNotesDetail.title"
+  | "studentNotesDetail.history"
+  | "studentNotesDetail.empty"
+  | "studentNotesDetail.records"
+  | "journalRecap.empty"
+  | "journalRecap.sessionsRecorded"
   | "students.hint"
   | "students.hintSchool"
   | "students.manageHint"
@@ -269,6 +278,8 @@ export type TranslationKey =
   | "settings.helpSection"
   | "settings.moduleAttendance"
   | "settings.moduleGrades"
+  | "settings.moduleTeachingJournal"
+  | "settings.moduleStudentNotes"
   | "settings.modulesHint"
   | "settings.modulesMinOne"
   | "settings.package"
@@ -374,6 +385,9 @@ export type TranslationKey =
   | "nav.recap"
   | "nav.grades"
   | "nav.gradeRecap"
+  | "nav.journalRecap"
+  | "nav.teachingJournal"
+  | "nav.studentNotes"
   | "nav.manageClass"
   | "nav.manageSubject"
   | "nav.subjectsSection"
@@ -418,28 +432,113 @@ export type TranslationKey =
   | "home.hubHint"
   | "home.hubAttendanceSub"
   | "home.hubGradesSub"
+  | "home.hubTeachingJournalSub"
+  | "home.hubStudentNotesSub"
   | "home.noModulesHint"
   | "home.tapClassForAttendance"
   | "home.tapClassForGrades"
   | "home.tapClassPickModule"
   | "home.openManageSub"
   | "home.classModuleHint"
+  | "home.startSessionTitle"
+  | "home.startSessionSub"
+  | "home.directModuleSection"
+  | "home.recapTitle"
+  | "home.recapSub"
+  | "home.recapPickerTitle"
+  | "home.recapPickerSub"
+  | "home.sessionFlowHint"
+  | "home.classesSessionHint"
+  | "home.classesSessionSubjectHint"
+  | "home.tapClassStartSession"
+  | "sessionFlow.progressTitle"
+  | "sessionFlow.stepShortAttendance"
+  | "sessionFlow.stepShortJournal"
+  | "sessionFlow.stepShortGrades"
+  | "sessionFlow.stepShortNotes"
+  | "sessionFlow.optional"
+  | "sessionFlow.afterAttendanceTitle"
+  | "sessionFlow.afterAttendanceBody"
+  | "sessionFlow.continueJournal"
+  | "sessionFlow.skipJournal"
+  | "sessionFlow.afterJournalTitle"
+  | "sessionFlow.afterJournalBody"
+  | "sessionFlow.continueGrades"
+  | "sessionFlow.skip"
+  | "sessionFlow.afterGradesTitle"
+  | "sessionFlow.afterGradesBody"
+  | "sessionFlow.continueStudentNotes"
+  | "sessionFlow.done"
+  | "sessionFlow.afterNoteTitle"
+  | "sessionFlow.afterNoteBody"
+  | "sessionFlow.pickAnotherStudent"
+  | "sessionFlow.finishSession"
+  | "sessionFlow.nextStep"
   | "home.classesHint"
   | "home.classesSubjectHint"
   | "home.classesAttendanceHint"
   | "home.classesSubjectAttendanceHint"
   | "home.classesGradesHint"
   | "home.classesSubjectGradesHint"
+  | "home.classesJournalHint"
+  | "home.classesSubjectJournalHint"
+  | "home.classesStudentNotesHint"
   | "home.moduleClassesAttendanceHint"
   | "home.moduleClassesGradesHint"
   | "home.moduleClassesSubjectAttendanceHint"
   | "home.moduleClassesSubjectGradesHint"
   | "home.moduleSubjectAttendanceHint"
   | "home.moduleSubjectGradesHint"
+  | "home.moduleSubjectJournalHint"
   | "home.tapSubjectForAttendance"
   | "home.tapSubjectForGrades"
+  | "home.tapSubjectForJournal"
   | "modules.attendance"
   | "modules.grades"
+  | "modules.teachingJournal"
+  | "modules.studentNotes"
+  | "teachingJournal.saved"
+  | "teachingJournal.hint"
+  | "teachingJournal.material"
+  | "teachingJournal.method"
+  | "teachingJournal.notes"
+  | "teachingJournal.materialPlaceholder"
+  | "teachingJournal.methodPlaceholder"
+  | "teachingJournal.notesPlaceholder"
+  | "studentNotes.group.positive"
+  | "studentNotes.group.academic"
+  | "studentNotes.group.attendance"
+  | "studentNotes.group.attitude"
+  | "studentNotes.group.other"
+  | "studentNotes.preset.active_questions"
+  | "studentNotes.preset.helps_friends"
+  | "studentNotes.preset.discipline"
+  | "studentNotes.preset.needs_remedial"
+  | "studentNotes.preset.needs_support"
+  | "studentNotes.preset.understands_well"
+  | "studentNotes.preset.often_late"
+  | "studentNotes.preset.absent_unexcused"
+  | "studentNotes.preset.lacks_focus"
+  | "studentNotes.preset.disrupts_peers"
+  | "studentNotes.preset.good_attitude"
+  | "studentNotes.otherOption"
+  | "studentNotes.otherLabel"
+  | "studentNotes.otherPlaceholder"
+  | "studentNotes.optionLabel"
+  | "studentNotes.selectRequired"
+  | "studentNotes.otherRequired"
+  | "studentNotes.saved"
+  | "studentNotes.deleteTitle"
+  | "studentNotes.deleteBody"
+  | "studentNotes.deleteAction"
+  | "studentNotes.save"
+  | "studentNotes.hint"
+  | "studentNotes.addSection"
+  | "studentNotes.historySection"
+  | "studentNotes.empty"
+  | "studentNotes.tapToOpen"
+  | "studentNotes.tapToAdd"
+  | "studentNotes.classHint"
   | "common.optional"
   | "common.loginFailed"
   | "common.menu"
@@ -481,6 +580,14 @@ export type TranslationKey =
   | "onboarding.class.bullet1"
   | "onboarding.class.bullet2"
   | "onboarding.class.bullet3"
+  | "onboarding.modules.title"
+  | "onboarding.modules.body"
+  | "onboarding.modules.settingsHint"
+  | "onboarding.session.title"
+  | "onboarding.session.body"
+  | "onboarding.session.bullet1"
+  | "onboarding.session.bullet2"
+  | "onboarding.session.bullet3"
   | "onboarding.attendance.title"
   | "onboarding.attendance.body"
   | "onboarding.attendance.bullet1"
@@ -547,10 +654,12 @@ export type TranslationKey =
   | "ads.upgradeShort"
   | "export.shareRecap"
   | "export.shareGradeRecap"
+  | "export.shareJournalRecap"
   | "export.shareGradeHistory"
   | "export.noData"
   | "export.semesterRecapPro"
   | "export.semesterGradePro"
+  | "export.semesterJournalPro"
   | "export.loadRecapFirst"
   | "export.createFileFailed"
   | "export.shareUnsupported"
@@ -591,7 +700,7 @@ export type TranslationKey =
   | "iap.restoreFailed";
 
 const id: Record<TranslationKey, string> = {
-  "app.name": "Rekap Guru",
+  "app.name": "Catatan Guru",
   "app.tagline": "Absensi & nilai per kelas atau mapel — dari genggaman guru",
   "common.save": "Simpan",
   "common.cancel": "Batal",
@@ -603,12 +712,14 @@ const id: Record<TranslationKey, string> = {
   "common.class": "Kelas",
   "common.school": "Sekolah",
   "login.heroSubtitle":
-    "Catat, nilai, dan rekap laporan siswa lebih cepat — cukup dari HP Anda.",
+    "Kelola absensi, nilai, jurnal, dan catatan siswa lebih cepat — cukup dari HP Anda.",
   "login.welcomeTitle": "Halo, Guru!",
   "login.welcomeSub": "Masuk sekali, langsung kelola kelas di genggaman.",
   "login.featureAttendance": "Absensi",
   "login.featureGrades": "Nilai",
   "login.featureRecap": "Rekap Laporan",
+  "login.featureJournal": "Jurnal Mengajar",
+  "login.featureNotes": "Catatan Siswa",
   "login.google": "Masuk dengan Google",
   "login.googleHint": "Paling cepat — pakai akun Google yang sudah ada",
   "login.googleProviderDisabled":
@@ -618,14 +729,14 @@ const id: Record<TranslationKey, string> = {
   "login.googleLocalhostRedirect":
     "Login Google tidak dapat kembali ke aplikasi. Coba lagi dengan koneksi internet stabil.",
   "login.googleOAuthWebOrigin":
-    "OAuth web belum benar. Set EXPO_PUBLIC_OAUTH_WEB_ORIGIN=https://demo.absendik.id (HTTPS publik, bukan IP lokal).",
+    "Login Google gagal. Periksa koneksi internet lalu coba lagi, atau gunakan email dan kata sandi.",
   "login.googleOAuthTimeout":
     "Login Google terlalu lama. Coba lagi atau gunakan email dan kata sandi.",
   "login.googleOAuthCancelled": "Login Google dibatalkan.",
   "login.googleSignInFailed":
     "Login Google gagal. Coba lagi atau gunakan email dan kata sandi.",
   "login.googleRedirectUriMismatch":
-    "Login Google belum dikonfigurasi. Hubungi admin untuk menambahkan redirect URI Supabase di Google Cloud Console.",
+    "Login Google belum bisa dipakai saat ini. Coba lagi nanti atau gunakan email dan kata sandi.",
   "login.googleCloudSetupTitle": "Dev — Google Cloud Authorized redirect URI:",
   "login.googleCloudSetupHint":
     "OAuth client tipe Web application. Client ID/Secret yang sama dipakai di Supabase → Providers → Google.",
@@ -642,7 +753,7 @@ const id: Record<TranslationKey, string> = {
   "login.emailSubmit": "Masuk",
   "login.emailHint": "Gunakan email akun yang sudah terdaftar.",
   "login.schoolLinkHint":
-    "Absendik Guru hadir untuk membantu absensi dan nilai — per rombel atau per mata pelajaran. Waktu Anda lebih berharga untuk mendidik daripada administrasi.",
+    "Catatan Guru hadir untuk membantu absensi dan nilai — per rombel atau per mata pelajaran. Waktu Anda lebih berharga untuk mendidik daripada administrasi.",
   "classes.hintTitle": "Mulai dari kelas",
   "classes.hintBodyClass":
     "Gunakan tombol absensi atau nilai di setiap kelas. Tombol menu lainnya untuk siswa, rekap, dan kelola kelas.",
@@ -653,9 +764,9 @@ const id: Record<TranslationKey, string> = {
   "classes.tapToSubjectsGrades": "Kelola mapel & nilai",
   "classes.empty": "Belum ada kelas. Ketuk + untuk menambahkan kelas pertama.",
   "classes.emptySchool":
-    "Belum ada kelas yang ditugaskan ke Anda. Minta admin sekolah menugaskan kelas/mapel di Absendik Sekolah.",
+    "Belum ada kelas. Ketuk + untuk menambahkan kelas pertama.",
   "classes.hintBodySchool":
-    "Kelas dan siswa dari Absendik Sekolah. Anda bisa absensi dan nilai; penambahan kelas/siswa lewat admin sekolah.",
+    "Kelola kelas dan siswa di tab Pengelolaan, lalu absensi dan nilai di tab Beranda.",
   "classes.addClass": "Tambah kelas",
   "classes.addClassHint": "Contoh: VII-A, VIII-B, atau Kelompok Tahfidz.",
   "classes.manageHint":
@@ -676,6 +787,8 @@ const id: Record<TranslationKey, string> = {
     "Belum ada mata pelajaran. Ketuk + di kanan atas untuk menambahkan.",
   "subjects.noStudents": "Belum ada siswa di kelas ini.",
   "subjects.addStudent": "Tambah siswa",
+  "subjects.addStudentPrompt":
+    "Tambahkan siswa terlebih dahulu untuk mulai pertemuan atau membuka modul ini.",
   "subjects.manageHint":
     "Kelola mata pelajaran kelas ini. Ketuk mapel untuk mengubah atau menghapus.",
   "attendance.today": "Hari ini",
@@ -698,7 +811,7 @@ const id: Record<TranslationKey, string> = {
   "datePicker.title": "Pilih tanggal",
   "attendance.notFuture": "Absensi tidak bisa dibuat untuk tanggal mendatang.",
   "attendance.goToday": "Ke hari ini",
-  "attendance.setAllPresent": "Set semua hadir",
+  "attendance.setAllPresent": "Tandai semua hadir",
   "attendance.incompleteStatus":
     "Pilih status absensi untuk semua siswa terlebih dahulu.",
   "grades.hint":
@@ -736,7 +849,7 @@ const id: Record<TranslationKey, string> = {
     "Atur label dan ambang batas predikat untuk rekap nilai. Warna predikat tetap sama; yang bisa disesuaikan label dan rentang nilainya.",
   "gradePredikat.sectionBands": "Rentang predikat",
   "gradePredikat.labelField": "Label",
-  "gradePredikat.minField": "Min",
+  "gradePredikat.minField": "Nilai minimum",
   "gradePredikat.minAuto": "Otomatis < Cukup",
   "gradePredikat.hint":
     "Ambang harus turun: Sangat baik > Baik > Cukup (1–100). Nilai di bawah Cukup masuk predikat terendah.",
@@ -746,7 +859,7 @@ const id: Record<TranslationKey, string> = {
     "Kembalikan predikat ke default (≥90 / ≥80 / ≥70)?",
   "gradePredikat.saved": "Pengaturan predikat tersimpan.",
   "gradePredikat.schoolReadOnly":
-    "Sekolah terhubung ke Absendik Sekolah — predikat diatur admin di portal web.",
+    "Predikat dikunci untuk sekolah terhubung — atur lewat admin.",
   "gradePredikat.tierHighest": "Tertinggi",
   "gradePredikat.tierLowest": "Terendah",
   "grades.listTitle": "Daftar nilai",
@@ -785,15 +898,21 @@ const id: Record<TranslationKey, string> = {
   "studentGradeDetail.records": "{count} tugas tercatat",
   "studentGradeDetail.filteredSubject": "Mata pelajaran: {subject}",
   "studentGradeDetail.exportExcel": "Unduh Excel",
+  "studentNotesDetail.title": "Riwayat catatan",
+  "studentNotesDetail.history": "Riwayat catatan",
+  "studentNotesDetail.empty": "Belum ada catatan untuk siswa ini.",
+  "studentNotesDetail.records": "{count} catatan tercatat",
+  "journalRecap.empty": "Belum ada jurnal mengajar pada periode ini.",
+  "journalRecap.sessionsRecorded": "{count} pertemuan tercatat",
   "students.hint":
     "Ketuk ikon absensi atau nilai untuk melihat riwayat siswa. Ikon ⋯ untuk mengubah data.",
   "students.hintSchool":
-    "Daftar siswa dari Absendik Sekolah. Penambahan atau perubahan data lewat admin sekolah.",
+    "Kelola daftar siswa di tab Pengelolaan. Ketuk ikon absensi atau nilai untuk riwayat.",
   "students.manageHint":
     "Kelola daftar siswa kelas ini. Ketuk siswa untuk mengubah atau menghapus.",
   "school.readonlyTitle": "Dikelola admin sekolah",
   "school.noStudentsHint":
-    "Belum ada siswa di kelas ini. Minta admin sekolah menambahkan siswa di Absendik Sekolah.",
+    "Belum ada siswa di kelas ini. Ketuk + untuk menambahkan siswa.",
   "students.empty": "Belum ada siswa. Ketuk + untuk menambahkan siswa.",
   "class.nameLabel": "Nama kelas",
   "class.nameRequired": "Nama kelas wajib diisi.",
@@ -827,24 +946,24 @@ const id: Record<TranslationKey, string> = {
   "recap.emptyWeekly": "Belum ada absensi pada minggu ini.",
   "recap.emptyMonthly": "Belum ada absensi pada bulan ini.",
   "recap.emptySemester": "Belum ada absensi pada semester ini.",
-  "student.quotaTitle": "Kuota siswa",
+  "student.quotaTitle": "Batas siswa",
   "student.quotaUsage": "{used} dari {max} siswa aktif",
   "student.quotaLimit":
-    "Kuota siswa sudah penuh. Naik ke paket Pro untuk menambahkan siswa lagi.",
-  "student.quotaPro": "{count} siswa aktif · tanpa batas kuota",
+    "Batas siswa paket gratis sudah tercapai. Paket Pro membuka siswa tanpa batas.",
+  "student.quotaPro": "{count} siswa aktif · tanpa batas",
   "student.fullName": "Nama lengkap",
   "student.number": "Nomor Induk Siswa atau nomor siswa (opsional)",
   "student.nameRequired": "Nama siswa wajib diisi.",
   "student.classLabel": "Kelas {name}",
   "student.deleteTitle": "Hapus siswa?",
   "student.deleteBody":
-    "Siswa akan dinonaktifkan dan tidak dihitung dalam kuota aktif.",
+    "Siswa akan dinonaktifkan dan tidak dihitung dalam batas siswa aktif.",
   "student.deleteAction": "Hapus siswa",
-  "about.title": "Tentang Absendik",
+  "about.title": "Tentang Catatan Guru",
   "about.subtitle": "Absensi & nilai per kelas atau mapel — dari HP guru.",
   "about.whatIs": "Apa ini?",
   "about.whatIsBody":
-    "Catat kehadiran, nilai, dan rekap per kelas atau mata pelajaran — mandiri di HP atau terhubung ke sekolah.",
+    "Catat kehadiran, nilai, jurnal, catatan siswa, dan rekap per kelas atau mata pelajaran — langsung dari HP Anda.",
   "about.howToUse": "Langkah awal",
   "about.step1": "Pilih atau buat sekolah di awal",
   "about.step2": "Tab Pengelolaan: kelas, mapel, dan siswa",
@@ -854,16 +973,16 @@ const id: Record<TranslationKey, string> = {
   "about.featureGrades":
     "Input nilai per tugas, rekap nilai, filter predikat, unduh Excel.",
   "about.featurePredikat":
-    "Sekolah mandiri: atur label & ambang predikat di Pengaturan → Predikat nilai.",
+    "Atur label dan ambang predikat di Pengaturan → Predikat nilai.",
   "about.featureSchoolLink":
-    "Terhubung Absendik Sekolah — kelas & siswa dari admin; Anda fokus absensi dan nilai.",
+    "Jurnal mengajar per pertemuan dan catatan siswa — aktifkan fitur di Pengaturan.",
   "about.featureCloud":
-    "Pro: cadangkan data ke cloud dan pulihkan ke HP lain lewat Pengaturan → Cadangan online.",
+    "Paket Pro: cadangkan data secara online dan pulihkan saat ganti HP lewat Pengaturan → Cadangan online.",
   "about.plansHint":
-    "Perbandingan paket Gratis dan Pro ada di Pengaturan → Paket dan langganan.",
+    "Detail paket gratis dan Paket Pro ada di Pengaturan → Paket dan langganan.",
   "about.schoolHint":
-    "Sekolah pakai Absendik Sekolah? Admin kelola data terpusat; guru bergabung lewat tautan undangan.",
-  "about.footer": "Rekap Guru",
+    "Mengajar di beberapa sekolah? Tambahkan sekolah terpisah untuk setiap lembaga.",
+  "about.footer": "Catatan Guru",
   "settings.title": "Pengaturan",
   "settings.appearance": "Tampilan",
   "settings.language": "Bahasa",
@@ -883,40 +1002,41 @@ const id: Record<TranslationKey, string> = {
   "settings.teachReminders": "Pengingat mengajar",
   "settings.teachRemindersHint": "Notifikasi 10 menit sebelum kelas.",
   "settings.account": "Akun",
-  "settings.about": "Tentang Absendik",
+  "settings.about": "Tentang Catatan Guru",
   "settings.aboutSub": "Panduan aplikasi",
   "settings.switchSchoolProSub": "Ganti sekolah atau tambah sekolah baru",
-  "settings.modulesSection": "Modul fitur",
+  "settings.modulesSection": "Fitur",
   "settings.gradePredikatSection": "Nilai",
   "settings.gradePredikat": "Predikat nilai",
   "settings.gradePredikatSub": "Label dan ambang batas predikat rekap",
   "settings.helpSection": "Bantuan",
   "settings.moduleAttendance": "Absensi",
   "settings.moduleGrades": "Penilaian",
+  "settings.moduleTeachingJournal": "Jurnal mengajar",
+  "settings.moduleStudentNotes": "Catatan siswa",
   "settings.modulesHint":
-    "Pengaturan per sekolah, disimpan di perangkat ini. Minimal satu modul harus aktif.",
-  "settings.modulesMinOne":
-    "Minimal satu modul (Absensi atau Penilaian) harus aktif.",
+    "Aktifkan fitur yang Anda pakai. Minimal satu fitur harus tetap aktif.",
+  "settings.modulesMinOne": "Minimal satu fitur harus tetap aktif.",
   "settings.package": "Paket dan langganan",
   "settings.packageIntro":
-    "Semua paket menyimpan data harian di HP Anda. Pro menambah cadangan online dan fitur lanjutan.",
+    "Data harian tetap tersimpan di HP Anda. Paket Pro menambah cadangan online dan fitur lanjutan.",
   "settings.freePlanLead":
-    "Paket Gratis: 1 sekolah, 5 kelas, hingga 120 siswa aktif, rekap mingguan dan bulanan, ada iklan.",
+    "Paket gratis mencakup 1 sekolah, 5 kelas, hingga 120 siswa, rekap mingguan/bulanan, dan iklan ringan.",
   "settings.freePlanBadge": "Gratis",
-  "settings.freeIncludesTitle": "Paket Gratis — termasuk:",
+  "settings.freeIncludesTitle": "Paket gratis termasuk:",
   "settings.proPlanLead":
-    "Pro aktif — sekolah mandiri tanpa batas di HP (selain Absendik Sekolah), kelas tanpa batas per sekolah, siswa tanpa batas, rekap semester, cadangan online, tanpa iklan.",
-  "settings.proUnlockTitle": "Naik ke Pro membuka:",
-  "settings.proIncludesTitle": "Pro — termasuk:",
+    "Paket Pro aktif — sekolah, kelas, dan siswa tanpa batas; rekap semester; cadangan online; tanpa iklan.",
+  "settings.proUnlockTitle": "Paket Pro membuka:",
+  "settings.proIncludesTitle": "Paket Pro termasuk:",
   "settings.proUpgradeHint":
-    "Bayar lewat Google Play. Satu akun Pro aktif di satu HP — pindahkan di Pengaturan saat ganti perangkat.",
+    "Berlangganan lewat Google Play. Saat ganti HP, Paket Pro bisa dipindahkan dari Pengaturan.",
   "settings.proDevUnlockHint":
     "Mode uji: Pro aktif untuk pengembangan aplikasi.",
-  "settings.subscribeAlertTitle": "Naik ke Pro",
+  "settings.subscribeAlertTitle": "Aktifkan Paket Pro",
   "settings.subscribeAlertBody":
-    "Data harian tetap di HP Anda. Pro menambah:\n\n• Sekolah mandiri tanpa batas (selain Absendik Sekolah)\n• Kelas tanpa batas per sekolah · mapel tanpa batas\n• Siswa tanpa batas\n• Rekap semester\n• Cadangan online dan sinkron otomatis\n• Pulihkan data saat ganti HP (pindah perangkat di Pengaturan)\n• Tanpa iklan\n\nLanjut ke Google Play?",
+    "Data harian tetap di HP Anda. Paket Pro menambah:\n\n• Sekolah, kelas, dan siswa tanpa batas\n• Rekap semester\n• Cadangan online otomatis\n• Pulihkan data saat ganti HP\n• Tanpa iklan\n\nLanjut ke Google Play?",
   "settings.subscribeAlertBodyAndroid":
-    "Data harian tetap di HP Anda. Pro menambah sekolah mandiri tanpa batas, kelas tanpa batas per sekolah, siswa tanpa batas, rekap semester, cadangan online, dan tanpa iklan.\n\n{price}\n\nLanjut ke Google Play?",
+    "Data harian tetap di HP Anda. Paket Pro menambah sekolah, kelas, dan siswa tanpa batas; rekap semester; cadangan online; dan tanpa iklan.\n\n{price}\n\nLanjut ke Google Play?",
   "settings.restorePurchase": "Pulihkan langganan",
   "settings.restoreNotFound":
     "Langganan tidak ditemukan untuk akun ini. Pastikan Anda login dengan akun yang sama saat berlangganan.",
@@ -929,55 +1049,54 @@ const id: Record<TranslationKey, string> = {
   "settings.freeDesc":
     "1 sekolah · 5 kelas · hingga 120 siswa · rekap mingguan dan bulanan · unduh Excel · ada iklan",
   "settings.proDesc":
-    "Sekolah mandiri tanpa batas · kelas tanpa batas per sekolah · siswa tanpa batas · rekap semester · cadangan online · tanpa iklan",
-  "settings.upgradePro": "Naik ke Pro",
-  "settings.proActive": "Pro aktif",
-  "settings.proDeviceConflict": "Pro terdaftar di perangkat lain",
+    "Sekolah tanpa batas · kelas tanpa batas per sekolah · siswa tanpa batas · rekap semester · cadangan online · tanpa iklan",
+  "settings.upgradePro": "Aktifkan Paket Pro",
+  "settings.proActive": "Paket Pro aktif",
+  "settings.proDeviceConflict": "Paket Pro aktif di perangkat lain",
   "settings.proDeviceConflictBody":
-    "Langganan Pro aktif di {device}. Pindahkan ke HP ini jika Anda yang memakai akun ini.",
+    "Paket Pro aktif di {device}. Pindahkan ke HP ini jika Anda yang memakai akun ini.",
   "settings.proDeviceUnknown": "perangkat lain",
   "settings.transferDevice": "Pindahkan ke HP ini",
   "settings.transferDeviceConfirm":
-    "Pro akan aktif di HP ini dan nonaktif di perangkat lama untuk cadangan online. Lanjut?",
-  "settings.transferDeviceSuccess": "Pro dipindahkan ke HP ini.",
+    "Paket Pro akan aktif di HP ini dan nonaktif di perangkat lama untuk cadangan online. Lanjut?",
+  "settings.transferDeviceSuccess": "Paket Pro dipindahkan ke HP ini.",
   "settings.cloud": "Cadangan online",
   "settings.cloudIntro":
-    "Khusus Pro: salin data dari HP ke cadangan online, lalu pulihkan saat ganti HP.",
+    "Paket Pro: salin data ke cadangan online yang aman, lalu pulihkan saat ganti HP.",
   "settings.sync": "Cadangkan sekarang",
   "settings.syncDesc":
-    "Unggah sekolah, kelas, siswa, absensi, dan nilai dari HP ini.",
+    "Unggah sekolah, kelas, siswa, absensi, nilai, jurnal, dan catatan siswa ke cadangan online.",
   "settings.restore": "Pulihkan cadangan",
   "settings.restoreDesc":
-    "Ganti isi HP dengan cadangan terakhir. Data di HP saat ini akan diganti.",
-  "settings.cloudHint": "Cadangan online hanya tersedia di paket Pro.",
+    "Ganti data di HP ini dengan cadangan online terakhir. Data saat ini akan diganti.",
+  "settings.cloudHint": "Cadangan online tersedia di Paket Pro.",
   "settings.autoCloudSync": "Cadangkan otomatis",
   "settings.autoCloudSyncHint":
-    "Data di HP dicadangkan secara berkala (saat aplikasi aktif dan setelah perubahan). Aktif otomatis untuk Pro.",
-  "workspace.badgeSchool": "Absendik Sekolah",
+    "Data dicadangkan secara berkala saat aplikasi aktif dan setelah ada perubahan. Aktif otomatis untuk Paket Pro.",
+  "workspace.badgeSchool": "Terhubung",
   "workspace.badgeLocal": "Di HP",
-  "workspace.badgeLocalArchive": "Arsip sebelum terhubung",
+  "workspace.badgeLocalArchive": "Data lama",
   "workspace.localArchiveHint":
-    "Data lama dengan nama sama sekolah tetap ada di sini — buka untuk rekap dan unduh Excel. Absensi baru lewat Absendik Sekolah.",
+    "Salinan data lama dengan nama sekolah yang sama — buka untuk rekap dan unduh Excel.",
   "workspace.localArchiveBanner":
-    "Arsip data sebelum terhubung ke sekolah. Rekap dan unduh Excel masih bisa dipakai; absensi baru lewat Absendik Sekolah.",
-  "workspace.openLocalArchive": "Arsip lokal di HP",
-  "workspace.openLocalArchiveBody":
-    "{count} sekolah · data lama sebelum terhubung ke Absendik Sekolah",
-  "workspace.localArchiveScreenTitle": "Arsip lokal di HP",
+    "Arsip data lama di HP. Rekap dan unduh Excel masih bisa dipakai.",
+  "workspace.openLocalArchive": "Data lama",
+  "workspace.openLocalArchiveBody": "{count} sekolah · salinan data lama",
+  "workspace.localArchiveScreenTitle": "Data lama",
   "workspace.localArchiveScreenHint":
-    "Data lama di HP sebelum terhubung ke sekolah. Rekap dan unduh Excel masih bisa dipakai; absensi baru lewat Absendik Sekolah.",
+    "Data lama yang tersimpan di HP. Rekap dan unduh Excel masih bisa dipakai.",
   "workspace.localArchiveCount": "{count} arsip tersedia",
   "workspace.localArchiveEmptyTitle": "Tidak ada arsip",
   "workspace.localArchiveEmptyBody":
-    "Arsip muncul jika pernah input di HP lalu terhubung ke Absendik Sekolah dengan nama yang sama.",
+    "Arsip muncul jika Anda pernah menyimpan data lokal dengan nama sekolah yang sama.",
   "createWorkspace.linkedSchoolExists":
-    "Anda sudah terhubung ke sekolah ini lewat Absendik Sekolah. Pilih sekolah berlabel Absendik Sekolah, bukan menambah sekolah baru di HP.",
-  "settings.danger": "Zona berbahaya",
+    "Sekolah ini sudah ada di daftar. Pilih dari daftar sekolah, bukan menambah duplikat.",
+  "settings.danger": "Hapus data",
   "settings.wipe": "Hapus data di HP",
   "settings.wipeHint":
-    "Menghapus kelas, siswa, absensi, dan nilai di HP ini. Akun Anda tidak ikut terhapus.",
+    "Menghapus kelas, siswa, absensi, nilai, jurnal, dan catatan di HP ini. Akun Anda tidak ikut terhapus.",
   "settings.dataHint":
-    "Data absensi dan nilai tersimpan di HP ini. Pro menambah cadangan online.",
+    "Data harian disimpan di HP. Cadangan Paket Pro tersimpan online dan bisa dipulihkan dari Pengaturan.",
   "settings.adPrivacy": "Privasi iklan",
   "settings.adPrivacySub": "Atur izin iklan dan preferensi privasi Anda.",
   "pkg.free.school": "1 sekolah",
@@ -987,7 +1106,7 @@ const id: Record<TranslationKey, string> = {
   "pkg.free.excel": "Unduh Excel",
   "pkg.free.local": "Data di HP",
   "pkg.free.ads": "Ada iklan",
-  "pkg.pro.school": "Sekolah mandiri tanpa batas",
+  "pkg.pro.school": "Sekolah tanpa batas",
   "pkg.pro.classes": "Kelas tanpa batas per sekolah · mapel tanpa batas",
   "pkg.pro.students": "Siswa tanpa batas",
   "pkg.pro.semester": "Rekap semester",
@@ -1026,6 +1145,9 @@ const id: Record<TranslationKey, string> = {
   "nav.recap": "Rekap absensi",
   "nav.grades": "Isi nilai",
   "nav.gradeRecap": "Rekap nilai",
+  "nav.journalRecap": "Rekap jurnal",
+  "nav.teachingJournal": "Jurnal mengajar",
+  "nav.studentNotes": "Catatan siswa",
   "nav.manageClass": "Kelola kelas",
   "nav.manageSubject": "Kelola mata pelajaran",
   "nav.subjectsSection": "Mata pelajaran",
@@ -1041,7 +1163,7 @@ const id: Record<TranslationKey, string> = {
   "nav.viewRecap": "Lihat rekap",
   "nav.accountSection": "Profil dan aplikasi",
   "nav.schoolSection": "Sekolah",
-  "nav.sessionSection": "Sesi",
+  "nav.sessionSection": "Pertemuan",
   "nav.guide": "Panduan penggunaan",
   "nav.guideSub": "Ulangi panduan fitur aplikasi",
   "nav.allClasses": "Semua kelas",
@@ -1049,7 +1171,7 @@ const id: Record<TranslationKey, string> = {
   "classPicker.students": "Pilih kelas untuk mengelola daftar siswanya.",
   "classPicker.tapToOpen": "Buka kelas",
   "manage.hubHint":
-    "Kelola data kelas, mata pelajaran, dan siswa di sini. Absensi dan penilaian ada di tab Beranda.",
+    "Kelola data kelas, mata pelajaran, siswa, dan predikat nilai di sini.",
   "manage.hubClasses": "Kelas",
   "manage.hubClassesSub": "Tambah, ubah, atau hapus kelas",
   "manage.hubSubjects": "Mata pelajaran",
@@ -1072,16 +1194,62 @@ const id: Record<TranslationKey, string> = {
   "students.tapToEdit": "Ketuk untuk ubah data siswa",
   "settings.restorePurchaseHint":
     "Sudah berlangganan di perangkat lain? Pulihkan pembelian setelah login.",
-  "home.hubHint": "Pilih modul yang ingin Anda gunakan.",
+  "home.hubHint": "Pilih fitur yang ingin Anda gunakan.",
   "home.hubAttendanceSub": "Isi absensi harian per kelas atau mata pelajaran",
   "home.hubGradesSub": "Input nilai tugas dan lihat rekap penilaian",
+  "home.hubTeachingJournalSub":
+    "Catat materi, metode, dan catatan setiap pertemuan",
+  "home.hubStudentNotesSub": "Catat perkembangan siswa di luar nilai akademik",
   "home.noModulesHint":
-    "Belum ada modul aktif. Aktifkan Absensi atau Penilaian di tab Pengaturan.",
+    "Belum ada fitur aktif. Aktifkan fitur di tab Pengaturan.",
   "home.tapClassForAttendance": "Isi absensi kelas ini",
   "home.tapClassForGrades": "Isi nilai kelas ini",
   "home.tapClassPickModule": "Absensi & penilaian",
-  "home.openManageSub": "Kelas, mata pelajaran, dan siswa",
-  "home.classModuleHint": "Pilih modul untuk kelas ini.",
+  "home.openManageSub":
+    "Kelas, mata pelajaran, siswa, predikat nilai, dan peng-urutan siswa.",
+  "home.classModuleHint": "Pilih fitur untuk kelas ini.",
+  "home.startSessionTitle": "Mulai pertemuan",
+  "home.startSessionSub":
+    "Absensi → jurnal → nilai (opsional) → catatan siswa (opsional)",
+  "home.directModuleSection": "Akses langsung",
+  "home.recapTitle": "Rekap",
+  "home.recapSub": "Lihat rekap absensi, nilai, dan jurnal mengajar",
+  "home.recapPickerTitle": "Pilih rekap",
+  "home.recapPickerSub": "Absensi, nilai, atau jurnal mengajar",
+  "home.sessionFlowHint":
+    "Mulai pertemuan untuk alur berurutan, atau pilih fitur di bawah untuk langsung ke tujuan.",
+  "home.classesSessionHint":
+    "Ketuk kelas untuk mulai pertemuan atau buka fitur langsung.",
+  "home.classesSessionSubjectHint":
+    "Ketuk kelas untuk mulai pertemuan atau pilih fitur per mata pelajaran.",
+  "home.tapClassStartSession": "Mulai pertemuan",
+  "sessionFlow.progressTitle": "Progres pertemuan",
+  "sessionFlow.stepShortAttendance": "Absensi",
+  "sessionFlow.stepShortJournal": "Jurnal",
+  "sessionFlow.stepShortGrades": "Nilai",
+  "sessionFlow.stepShortNotes": "Catatan",
+  "sessionFlow.optional": "opsional",
+  "sessionFlow.afterAttendanceTitle": "Lanjut isi jurnal?",
+  "sessionFlow.afterAttendanceBody":
+    "Absensi tersimpan. Isi jurnal mengajar untuk pertemuan ini?",
+  "sessionFlow.continueJournal": "Isi jurnal",
+  "sessionFlow.skipJournal": "Langsung ke nilai",
+  "sessionFlow.afterJournalTitle": "Ada tugas/ulangan?",
+  "sessionFlow.afterJournalBody":
+    "Jurnal tersimpan. Input nilai untuk pertemuan ini?",
+  "sessionFlow.continueGrades": "Input nilai",
+  "sessionFlow.skip": "Lewati",
+  "sessionFlow.afterGradesTitle": "Ada siswa perlu dicatat?",
+  "sessionFlow.afterGradesBody":
+    "Tambahkan catatan perkembangan siswa untuk pertemuan ini?",
+  "sessionFlow.continueStudentNotes": "Pilih siswa",
+  "sessionFlow.done": "Selesai",
+  "sessionFlow.afterNoteTitle": "Catatan tersimpan",
+  "sessionFlow.afterNoteBody":
+    "Pilih siswa lain atau selesaikan pertemuan ini.",
+  "sessionFlow.pickAnotherStudent": "Siswa lain",
+  "sessionFlow.finishSession": "Selesai pertemuan",
+  "sessionFlow.nextStep": "Selanjutnya",
   "home.classesHint": "Ketuk kelas untuk absensi atau penilaian.",
   "home.classesSubjectHint":
     "Ketuk kelas untuk memilih mata pelajaran, lalu absensi atau penilaian.",
@@ -1091,6 +1259,11 @@ const id: Record<TranslationKey, string> = {
   "home.classesGradesHint": "Ketuk kelas untuk mengisi nilai.",
   "home.classesSubjectGradesHint":
     "Ketuk kelas, pilih mata pelajaran, lalu isi nilai.",
+  "home.classesJournalHint": "Ketuk kelas untuk mengisi jurnal mengajar.",
+  "home.classesSubjectJournalHint":
+    "Ketuk kelas, pilih mata pelajaran, lalu isi jurnal.",
+  "home.classesStudentNotesHint":
+    "Ketuk kelas, pilih siswa, lalu tambahkan catatan.",
   "home.moduleClassesAttendanceHint":
     "Pilih kelas untuk mengisi absensi hari ini.",
   "home.moduleClassesGradesHint": "Pilih kelas untuk menginput nilai.",
@@ -1101,10 +1274,59 @@ const id: Record<TranslationKey, string> = {
   "home.moduleSubjectAttendanceHint":
     "Ketuk mata pelajaran untuk mengisi absensi.",
   "home.moduleSubjectGradesHint": "Ketuk mata pelajaran untuk input nilai.",
+  "home.moduleSubjectJournalHint": "Ketuk mata pelajaran untuk mengisi jurnal.",
   "home.tapSubjectForAttendance": "Isi absensi mapel ini",
   "home.tapSubjectForGrades": "Isi nilai mapel ini",
+  "home.tapSubjectForJournal": "Isi jurnal mapel ini",
   "modules.attendance": "Absensi",
   "modules.grades": "Penilaian",
+  "modules.teachingJournal": "Jurnal mengajar",
+  "modules.studentNotes": "Catatan siswa",
+  "teachingJournal.saved": "Jurnal mengajar tersimpan.",
+  "teachingJournal.hint":
+    "Catat kegiatan pembelajaran per pertemuan. Terkait tanggal dan kelas yang sama dengan absensi dan penilaian.",
+  "teachingJournal.material": "Materi pembelajaran",
+  "teachingJournal.method": "Metode pembelajaran",
+  "teachingJournal.notes": "Catatan",
+  "teachingJournal.materialPlaceholder":
+    "Contoh: Persamaan linear satu variabel",
+  "teachingJournal.methodPlaceholder": "Contoh: Diskusi kelompok, LKPD",
+  "teachingJournal.notesPlaceholder": "Catatan tambahan untuk pertemuan ini",
+  "studentNotes.group.positive": "Positif",
+  "studentNotes.group.academic": "Akademik",
+  "studentNotes.group.attendance": "Kehadiran",
+  "studentNotes.group.attitude": "Sikap",
+  "studentNotes.group.other": "Lainnya",
+  "studentNotes.preset.active_questions": "Aktif bertanya",
+  "studentNotes.preset.helps_friends": "Membantu teman",
+  "studentNotes.preset.discipline": "Disiplin",
+  "studentNotes.preset.needs_remedial": "Perlu remedial",
+  "studentNotes.preset.needs_support": "Perlu pendampingan",
+  "studentNotes.preset.understands_well": "Memahami materi dengan baik",
+  "studentNotes.preset.often_late": "Sering terlambat",
+  "studentNotes.preset.absent_unexcused": "Tidak hadir tanpa keterangan",
+  "studentNotes.preset.lacks_focus": "Kurang fokus saat pembelajaran",
+  "studentNotes.preset.disrupts_peers": "Mengganggu teman",
+  "studentNotes.preset.good_attitude": "Sikap baik",
+  "studentNotes.otherOption": "Lainnya — isi sendiri",
+  "studentNotes.otherLabel": "Catatan",
+  "studentNotes.otherPlaceholder": "Tulis catatan khusus untuk siswa ini…",
+  "studentNotes.optionLabel": "Pilih catatan",
+  "studentNotes.selectRequired": "Pilih salah satu jenis catatan.",
+  "studentNotes.otherRequired": "Isi catatan wajib diisi.",
+  "studentNotes.saved": "Catatan siswa tersimpan.",
+  "studentNotes.deleteTitle": "Hapus catatan?",
+  "studentNotes.deleteBody": "Catatan ini akan dihapus permanen.",
+  "studentNotes.deleteAction": "Hapus",
+  "studentNotes.save": "Simpan catatan",
+  "studentNotes.hint":
+    "Pilih jenis catatan untuk siswa ini. Gunakan Lainnya jika perlu menulis catatan khusus.",
+  "studentNotes.addSection": "Catatan baru",
+  "studentNotes.historySection": "Riwayat catatan",
+  "studentNotes.empty": "Belum ada catatan untuk siswa ini.",
+  "studentNotes.tapToOpen": "Ketuk untuk buka catatan",
+  "studentNotes.tapToAdd": "Ketuk untuk menambah catatan",
+  "studentNotes.classHint": "Pilih siswa untuk menambah atau melihat catatan.",
   "common.optional": "Opsional",
   "common.loginFailed": "Gagal masuk.",
   "common.menu": "Menu",
@@ -1113,12 +1335,12 @@ const id: Record<TranslationKey, string> = {
   "workspace.emptyTitle": "Belum ada sekolah",
   "workspace.emptyBody": "Tambahkan sekolah pertama untuk mulai mengajar.",
   "workspace.notLinkedSchoolHint":
-    "Akun ini belum terhubung ke Absendik Sekolah. Keluar, lalu masuk dengan email & kata sandi yang admin sekolah buat — bukan login Google terpisah.",
+    "Belum ada sekolah. Ketuk Tambah sekolah untuk membuat sekolah pertama.",
   "workspace.manualPickHint":
-    "Akun terhubung ke Absendik Sekolah di bawah. Untuk sekolah mandiri di HP, ketuk Tambah sekolah. Arsip lokal lama ada di menu bawah jika pernah dipakai.",
-  "workspace.freeLimitTitle": "Kuota sekolah terpenuhi",
+    "Pilih sekolah dari daftar, atau ketuk Tambah sekolah untuk lembaga lain.",
+  "workspace.freeLimitTitle": "Batas paket gratis tercapai",
   "workspace.freeLimitBody":
-    "Paket gratis hanya mendukung 1 sekolah mandiri di HP (selain Absendik Sekolah). Kuota Anda sudah penuh. Ingin naik ke Pro untuk menambah sekolah mandiri tanpa batas?",
+    "Batas paket gratis sudah tercapai. Paket Pro membuka sekolah tanpa batas.",
   "bootstrap.retry": "Coba lagi",
   "bootstrap.signOut": "Keluar dari akun",
   "bootstrap.profileLoadFailed": "Tidak bisa memuat profil.",
@@ -1129,50 +1351,59 @@ const id: Record<TranslationKey, string> = {
   "onboarding.next": "Lanjut",
   "onboarding.start": "Mulai pakai aplikasi",
   "onboarding.stepA11y": "Langkah {step}",
-  "onboarding.welcome.title": "Selamat datang di Absendik Guru",
+  "onboarding.welcome.title": "Selamat datang di Catatan Guru",
   "onboarding.welcome.body":
-    "Catat absensi, nilai tugas, dan rekap — per kelas atau per mata pelajaran, langsung dari HP Anda.",
+    "Catat absensi, nilai, jurnal, dan catatan siswa dalam satu aplikasi sederhana.",
   "onboarding.storage.title": "Data tersimpan di HP Anda",
   "onboarding.storage.body":
-    "Kelas, siswa, absensi, dan nilai disimpan di HP. Pencatatan harian tetap bisa tanpa internet. Paket Pro menambah cadangan online.",
+    "Data harian bisa dipakai tanpa internet. Paket Pro menambah cadangan online saat Anda membutuhkannya.",
   "onboarding.storage.bullet1":
-    "Gratis: 1 sekolah, 5 kelas, 120 siswa, rekap mingguan/bulanan, unduh Excel, ada iklan",
+    "Paket gratis: 1 sekolah, 5 kelas, 120 siswa, rekap mingguan/bulanan, unduh Excel, ada iklan",
   "onboarding.storage.bullet2":
-    "Pro: sekolah mandiri tanpa batas, kelas tanpa batas per sekolah, siswa tanpa batas, rekap semester, cadangan online, tanpa iklan",
-  "onboarding.school.title": "Sekolah mandiri di HP",
+    "Paket Pro: sekolah, kelas, dan siswa tanpa batas, rekap semester, cadangan online, tanpa iklan",
+  "onboarding.school.title": "Sekolah Anda",
   "onboarding.school.body":
-    "Buat sekolah/workspace sendiri jika belum terhubung ke Absendik Sekolah. Gratis: 1 sekolah; Pro: sekolah mandiri tanpa batas (selain Absendik Sekolah).",
-  "onboarding.school.bullet1":
-    "Atur cara absensi: per kelas atau per mata pelajaran",
+    "Tambahkan sekolah pertama Anda, lalu pilih cara absensi yang paling cocok.",
+  "onboarding.school.bullet1": "Absensi bisa per kelas atau per mata pelajaran",
   "onboarding.school.bullet2":
-    "Gratis: 5 kelas per sekolah · Pro: kelas tanpa batas per sekolah · mapel tanpa batas",
-  "onboarding.schoolLink.title": "Terhubung Absendik Sekolah",
+    "Mengajar di beberapa sekolah? Paket Pro membuka sekolah tanpa batas",
+  "onboarding.schoolLink.title": "Beberapa sekolah",
   "onboarding.schoolLink.body":
-    "Jika sekolah memakai Absendik Sekolah, kelas dan siswa sudah disiapkan admin — tidak perlu input ulang.",
+    "Mengajar di lebih dari satu lembaga? Tambahkan sekolah terpisah untuk masing-masing.",
   "onboarding.schoolLink.bullet1":
-    "Gabung lewat tautan undangan dari Absendik Sekolah",
+    "Setiap sekolah punya kelas, siswa, dan rekap sendiri",
   "onboarding.schoolLink.bullet2":
-    "Pilih workspace berlabel Absendik Sekolah untuk absensi & nilai harian",
+    "Ganti sekolah lewat menu Ganti sekolah di Beranda",
   "onboarding.schoolLink.bullet3":
-    "Penambahan kelas/siswa tetap lewat admin sekolah, bukan di app guru",
+    "Paket Pro membuka sekolah tanpa batas di satu HP",
   "onboarding.class.title": "Kelas & siswa",
   "onboarding.class.body":
-    "Kelola kelas & siswa di tab Pengelolaan; absensi dan nilai harian di tab Beranda.",
-  "onboarding.class.bullet1":
-    "Tab Pengelolaan → kelas, mata pelajaran, dan daftar siswa",
-  "onboarding.class.bullet2":
-    "Tab Beranda → pilih kelas → modul Absensi atau Nilai",
-  "onboarding.class.bullet3":
-    "Mode absensi per kelas atau per mata pelajaran diatur saat buat sekolah",
-  "onboarding.attendance.title": "Absensi harian",
+    "Tambahkan kelas, mata pelajaran, dan siswa sekali saja. Setelah itu, kegiatan harian lebih cepat.",
+  "onboarding.class.bullet1": "Kelola kelas, mata pelajaran, dan daftar siswa",
+  "onboarding.class.bullet2": "Buka kelas dari Beranda untuk mulai mengajar",
+  "onboarding.class.bullet3": "Urutan siswa dan warna kelas bisa disesuaikan",
+  "onboarding.modules.title": "Fitur yang Anda pakai",
+  "onboarding.modules.body":
+    "Pilih fitur yang ingin ditampilkan di aplikasi. Anda bisa mengubahnya nanti.",
+  "onboarding.modules.settingsHint":
+    "Pilihan ini bisa diubah kapan saja di menu Pengaturan → Fitur.",
+  "onboarding.session.title": "Mulai pertemuan",
+  "onboarding.session.body":
+    "Dari list modul kelas, ketuk Mulai pertemuan untuk alur berurutan dalam satu sesi mengajar.",
+  "onboarding.session.bullet1":
+    "Absensi → jurnal → nilai → catatan siswa (sesuai fitur yang aktif)",
+  "onboarding.session.bullet2":
+    "Setelah simpan, lanjut ke langkah berikutnya; progres terlihat di atas layar",
+  "onboarding.session.bullet3":
+    "Setiap fitur juga bisa dibuka langsung dari list modul tanpa alur pertemuan",
+  "onboarding.attendance.title": "Kegiatan harian",
   "onboarding.attendance.body":
-    "Langkah yang paling sering Anda lakukan setiap hari.",
+    "Pilih kelas, lalu catat hal yang terjadi pada pertemuan hari ini.",
   "onboarding.attendance.bullet1":
-    "Beranda → Absensi → pilih kelas (dan mapel jika mode per mapel)",
-  "onboarding.attendance.bullet2":
-    "Status awal kosong; pilih Hadir/Sakit/Izin/Alpha atau tap Set semua hadir",
+    "Absensi: tandai hadir, sakit, izin, atau alpha",
+  "onboarding.attendance.bullet2": "Nilai: tambah tugas lalu isi nilai siswa",
   "onboarding.attendance.bullet3":
-    "Menu ⋮ di header: rekap absensi, daftar siswa, kelola kelas",
+    "Jurnal dan catatan siswa bisa diisi bila diperlukan",
   "onboarding.grades.title": "Nilai tugas",
   "onboarding.grades.body":
     "Catat nilai ulangan, PR, atau tugas lain per kelas atau mapel.",
@@ -1181,26 +1412,25 @@ const id: Record<TranslationKey, string> = {
   "onboarding.grades.bullet2":
     "Tambah tugas, isi nilai tiap siswa di kolom kanan, lalu Simpan",
   "onboarding.grades.bullet3":
-    "Menu ⋮ → Rekap nilai; sekolah mandiri bisa atur predikat di Pengaturan",
+    "Menu ⋮ → Rekap nilai; atur predikat di Pengaturan jika perlu",
   "onboarding.more.title": "Rekap & cadangan",
   "onboarding.more.body":
-    "Setelah data terisi, buka rekap untuk administrasi. Pro bisa cadangkan ke cloud.",
-  "onboarding.more.bullet1":
-    "Rekap absensi & nilai: mingguan/bulanan (Gratis & Pro), filter & cari siswa",
-  "onboarding.more.bullet2": "Rekap semester (Pro)",
-  "onboarding.more.bullet3": "Unduh laporan ke Excel dari layar rekap",
+    "Saat data sudah terisi, rekap dan unduh Excel bisa dibuat kapan saja.",
+  "onboarding.more.bullet1": "Rekap absensi, nilai, dan jurnal",
+  "onboarding.more.bullet2": "Unduh Excel untuk laporan",
+  "onboarding.more.bullet3":
+    "Paket Pro membuka rekap semester dan cadangan online",
   "onboarding.more.bullet4":
-    "Pengaturan: modul fitur, predikat nilai, Pro, cadangan online, pengingat jadwal",
+    "Fitur yang tidak dipakai bisa dimatikan di Pengaturan",
   "onboarding.startStep.title": "Siap memulai",
-  "onboarding.startStep.body":
-    "Mulai dengan menambah sekolah mandiri atau gabung ke Absendik Sekolah.",
+  "onboarding.startStep.body": "Mulai dengan menambah sekolah pertama Anda.",
   "onboarding.startStep.bullet1":
-    "Data harian di HP; cadangan cloud hanya jika Anda aktifkan (Pro)",
+    "Data harian di HP; cadangan online hanya dengan paket Pro",
   "createWorkspace.nameRequired": "Nama sekolah wajib diisi.",
   "createWorkspace.levelRequired": "Jenjang wajib dipilih.",
   "createWorkspace.cityRequired": "Kota wajib diisi.",
   "createWorkspace.hint":
-    "Paket gratis: 1 sekolah mandiri, 5 kelas. Pro: sekolah mandiri tanpa batas (selain Absendik Sekolah), kelas tanpa batas per sekolah.",
+    "Paket gratis mendukung 1 sekolah dan 5 kelas. Paket Pro membuka sekolah dan kelas tanpa batas.",
   "createWorkspace.nameLabel": "Nama sekolah *",
   "createWorkspace.namePlaceholder": "SMP Negeri 1 Bandung",
   "createWorkspace.levelLabel": "Jenjang *",
@@ -1232,29 +1462,30 @@ const id: Record<TranslationKey, string> = {
   "classMenu.editOrDelete": "Ubah atau hapus kelas",
   "ads.sponsorTitle": "Dukungan sponsor",
   "ads.placement.attendanceSaved":
-    "Absensi tersimpan. Terima kasih sudah memakai Absendik Gratis.",
+    "Absensi tersimpan. Terima kasih sudah memakai versi gratis Catatan Guru.",
   "ads.placement.gradeSaved":
-    "Nilai tersimpan. Terima kasih sudah memakai Absendik Gratis.",
+    "Nilai tersimpan. Terima kasih sudah memakai versi gratis Catatan Guru.",
   "ads.placement.recapExport":
-    "Unduh rekap berhasil. Terima kasih sudah memakai Absendik Gratis.",
+    "Unduh rekap berhasil. Terima kasih sudah memakai versi gratis Catatan Guru.",
   "ads.placement.syncComplete":
-    "Cadangan selesai. Terima kasih sudah memakai Absendik Gratis.",
-  "ads.placement.default": "Terima kasih sudah memakai Absendik Gratis.",
+    "Cadangan selesai. Terima kasih sudah memakai versi gratis Catatan Guru.",
+  "ads.placement.default":
+    "Terima kasih sudah memakai versi gratis Catatan Guru.",
   "ads.mockLabel": "Ruang iklan",
   "ads.mockSub":
     "Iklan jarang ditampilkan dan tidak muncul saat mengisi absensi atau nilai.",
   "ads.continue": "Lanjut",
-  "ads.upgradeProNoAds": "Pro · tanpa iklan",
-  "ads.bannerHint": "Dukungan iklan membantu Absendik Guru tetap gratis.",
-  "ads.upgradeShort": "Pro · tanpa iklan",
+  "ads.upgradeProNoAds": "Paket Pro · tanpa iklan",
+  "ads.bannerHint": "Dukungan iklan membantu Catatan Guru tetap gratis.",
+  "ads.upgradeShort": "Paket Pro · tanpa iklan",
   "export.shareRecap": "Unduh rekap Excel",
   "export.shareGradeRecap": "Unduh rekap nilai Excel",
+  "export.shareJournalRecap": "Unduh rekap jurnal Excel",
   "export.shareGradeHistory": "Unduh riwayat nilai Excel",
   "export.noData": "Tidak ada data untuk diunduh.",
-  "export.semesterRecapPro":
-    "Unduh rekap semester tersedia untuk pelanggan Pro.",
-  "export.semesterGradePro":
-    "Unduh nilai semester tersedia untuk pelanggan Pro.",
+  "export.semesterRecapPro": "Unduh rekap semester tersedia di Paket Pro.",
+  "export.semesterGradePro": "Unduh nilai semester tersedia di Paket Pro.",
+  "export.semesterJournalPro": "Unduh jurnal semester tersedia di Paket Pro.",
   "export.loadRecapFirst":
     "Muat rekap terlebih dahulu, lalu unduh dari layar rekap.",
   "export.createFileFailed": "Gagal membuat file Excel.",
@@ -1268,55 +1499,55 @@ const id: Record<TranslationKey, string> = {
   "export.exportCancelled": "Unduhan dibatalkan.",
   "export.storagePermissionTitle": "Akses penyimpanan",
   "export.storagePermissionMessage":
-    "Absendik Guru perlu izin menyimpan file Excel ke penyimpanan perangkat Anda.",
+    "Catatan Guru perlu izin menyimpan file Excel ke penyimpanan perangkat Anda.",
   "export.storagePermissionDenied":
     "Izin penyimpanan ditolak. Anda masih bisa mencoba lewat menu bagikan setelah file dibuat.",
   "student.quotaAtMax":
-    "Maksimal {max} siswa. Naik ke Pro untuk menambah siswa.",
+    "Batas {max} siswa sudah tercapai. Paket Pro membuka siswa tanpa batas.",
   "error.notSignedIn": "Belum login.",
   "error.noServerResponse":
-    "Server tidak merespons. Periksa koneksi internet lalu coba lagi.",
+    "Tidak ada respons. Periksa koneksi internet lalu coba lagi.",
   "error.serverInvalidResponse":
-    "Server merespons tidak valid. Coba lagi atau perbarui aplikasi.",
+    "Terjadi gangguan. Coba lagi atau perbarui aplikasi.",
   "error.connectionFailed":
-    "Tidak bisa terhubung ke server. Periksa koneksi internet lalu coba lagi.",
+    "Tidak bisa terhubung. Periksa koneksi internet lalu coba lagi.",
   "error.requestFailed": "Permintaan gagal.",
   "error.schoolClassesLoadFailed":
-    "Gagal memuat kelas dari Absendik Sekolah. Tarik layar ke bawah untuk refresh.",
+    "Gagal memuat kelas. Tarik layar ke bawah untuk memperbarui.",
   "error.schoolGradesLoadFailed":
-    "Gagal memuat nilai dari Absendik Sekolah. Tarik layar ke bawah untuk refresh.",
+    "Gagal memuat nilai. Tarik layar ke bawah untuk memperbarui.",
   "error.schoolGradesSaveFailed":
     "Gagal menyimpan nilai. Periksa koneksi lalu coba lagi.",
   "error.schoolGradeRecapLoadFailed":
     "Gagal memuat rekap nilai. Tarik layar ke bawah untuk refresh.",
   "error.generic": "Terjadi kesalahan. Coba lagi.",
   "cloud.needPro":
-    "Aktifkan langganan Pro dulu untuk mencadangkan data online.",
+    "Aktifkan Paket Pro dulu untuk mencadangkan data secara online.",
   "cloud.nothingToBackup": "Tidak ada data di HP untuk dicadangkan.",
   "cloud.needProRestore":
-    "Aktifkan langganan Pro dulu untuk memulihkan cadangan.",
+    "Aktifkan Paket Pro dulu untuk memulihkan cadangan online.",
   "cloud.noBackupYet":
-    "Belum ada cadangan online. Cadangkan data dari HP lama terlebih dahulu.",
+    "Belum ada cadangan online. Cadangkan dari HP lama terlebih dahulu.",
   "local.dbOpenFailed": "Data di HP gagal dibuka. Coba buka ulang aplikasi.",
   "local.freeSchoolLimit":
-    "Paket gratis hanya mendukung 1 sekolah mandiri di HP. Naik ke Pro untuk sekolah mandiri tanpa batas (selain Absendik Sekolah).",
+    "Batas paket gratis sudah tercapai. Paket Pro membuka sekolah tanpa batas.",
   "local.classLimitBody":
-    "Kuota kelas penuh untuk sekolah ini (maks. {max} kelas). Naik ke Pro untuk limit lebih besar.",
+    "Batas {max} kelas untuk sekolah ini sudah tercapai. Paket Pro membuka kelas tanpa batas.",
   "cloud.restoreFailed": "Gagal memulihkan cadangan.",
   "iap.purchaseInProgress": "Pembelian masih diproses.",
-  "workspace.schoolQuotaFull":
-    "Kuota sekolah mandiri penuh (maks. {max} sekolah, tidak termasuk Absendik Sekolah).",
+  "workspace.schoolQuotaFull": "Batas {max} sekolah sudah tercapai.",
   "iap.cancelled": "Pembelian dibatalkan.",
   "iap.purchaseFailed": "Pembelian gagal.",
-  "iap.tokenMissing": "Token pembelian tidak ditemukan.",
+  "iap.tokenMissing":
+    "Pembelian tidak dikenali. Coba pulihkan langganan atau hubungi dukungan.",
   "iap.noActiveSubscription":
-    "Tidak ada langganan Pro aktif di akun Google Play ini.",
+    "Tidak ada Paket Pro aktif di akun Google Play ini.",
   "iap.openPlayFailed": "Tidak bisa membuka Google Play.",
   "iap.restoreFailed": "Gagal memulihkan pembelian.",
 };
 
 const en: Record<TranslationKey, string> = {
-  "app.name": "Rekap Guru",
+  "app.name": "Catatan Guru",
   "app.tagline": "Attendance & grades per class or subject — in your pocket",
   "common.save": "Save",
   "common.cancel": "Cancel",
@@ -1334,6 +1565,8 @@ const en: Record<TranslationKey, string> = {
   "login.featureAttendance": "Attendance",
   "login.featureGrades": "Grades",
   "login.featureRecap": "Reports",
+  "login.featureJournal": "Journal",
+  "login.featureNotes": "Student Notes",
   "login.google": "Sign in with Google",
   "login.googleHint": "Fastest way — use your existing Google account",
   "login.googleProviderDisabled":
@@ -1350,7 +1583,7 @@ const en: Record<TranslationKey, string> = {
   "login.googleSignInFailed":
     "Google sign-in failed. Try again or use email and password.",
   "login.googleRedirectUriMismatch":
-    "Google sign-in is not configured. Ask an admin to add the Supabase redirect URI in Google Cloud Console.",
+    "Google sign-in is not available right now. Try again later or use email and password.",
   "login.googleCloudSetupTitle": "Dev — Google Cloud Authorized redirect URI:",
   "login.googleCloudSetupHint":
     "Web application OAuth client. Use the same Client ID/Secret in Supabase → Providers → Google.",
@@ -1365,9 +1598,9 @@ const en: Record<TranslationKey, string> = {
   "login.email": "Email",
   "login.password": "Password",
   "login.emailSubmit": "Sign in",
-  "login.emailHint": "Use the email connected to Absendik Sekolah.",
+  "login.emailHint": "Use the email registered to your account.",
   "login.schoolLinkHint":
-    "Absendik Guru helps with attendance and grades — per homeroom or per subject. Your time is better spent teaching than on admin work.",
+    "Catatan Guru helps with attendance and grades — per homeroom or per subject. Your time is better spent teaching than on admin work.",
   "classes.hintTitle": "Start from a class",
   "classes.hintBodyClass":
     "Use the attendance or grades button on each class. The other menu button opens students, reports, and class settings.",
@@ -1377,10 +1610,9 @@ const en: Record<TranslationKey, string> = {
   "classes.tapToSubjects": "Choose subject",
   "classes.tapToSubjectsGrades": "Subjects & grades",
   "classes.empty": "No classes yet. Tap + to add your first class.",
-  "classes.emptySchool":
-    "No classes assigned to you yet. Ask your school admin to assign classes/subjects in Absendik Sekolah.",
+  "classes.emptySchool": "No classes yet. Tap + to add your first class.",
   "classes.hintBodySchool":
-    "Classes and students come from Absendik Sekolah. You can take attendance and enter grades; adding classes/students is done by the school admin.",
+    "Manage classes and students in Manage, then take attendance and enter grades from Home.",
   "classes.addClass": "Add class",
   "classes.addClassHint": "Examples: VII-A, VIII-B, Tahfidz group.",
   "classes.manageHint":
@@ -1400,6 +1632,8 @@ const en: Record<TranslationKey, string> = {
   "subjects.empty": "No subjects yet. Tap + at the top right to add one.",
   "subjects.noStudents": "No students in this class yet.",
   "subjects.addStudent": "Add student",
+  "subjects.addStudentPrompt":
+    "Add students first to start a session or open this module.",
   "subjects.manageHint":
     "Manage subjects for this class. Tap a subject to edit or delete it.",
   "attendance.today": "Today",
@@ -1467,7 +1701,7 @@ const en: Record<TranslationKey, string> = {
   "gradePredikat.resetConfirm": "Reset bands to default (≥90 / ≥80 / ≥70)?",
   "gradePredikat.saved": "Grade band settings saved.",
   "gradePredikat.schoolReadOnly":
-    "Linked to Absendik Sekolah — bands are managed by admin on the web portal.",
+    "Grade bands are locked for linked schools — managed by admin.",
   "gradePredikat.tierHighest": "Highest",
   "gradePredikat.tierLowest": "Lowest",
   "grades.listTitle": "Grade list",
@@ -1505,15 +1739,21 @@ const en: Record<TranslationKey, string> = {
   "studentGradeDetail.records": "{count} tasks recorded",
   "studentGradeDetail.filteredSubject": "Subject filter: {subject}",
   "studentGradeDetail.exportExcel": "Download Excel",
+  "studentNotesDetail.title": "Note history",
+  "studentNotesDetail.history": "Note history",
+  "studentNotesDetail.empty": "No notes recorded for this student yet.",
+  "studentNotesDetail.records": "{count} notes recorded",
+  "journalRecap.empty": "No teaching journal entries in this period.",
+  "journalRecap.sessionsRecorded": "{count} sessions recorded",
   "students.hint":
     "Tap the attendance or grade icon to view a student's history. Use ⋯ to edit their profile.",
   "students.hintSchool":
-    "Student list from Absendik Sekolah. Adding or editing students is done by the school admin.",
+    "Manage students in Manage. Tap attendance or grade icons for history.",
   "students.manageHint":
     "Manage students in this class. Tap a student to edit or delete them.",
   "school.readonlyTitle": "Managed by school admin",
   "school.noStudentsHint":
-    "No students in this class yet. Ask your school admin to add students in Absendik Sekolah.",
+    "No students in this class yet. Tap + to add a student.",
   "students.empty": "No students yet. Tap + to add a student.",
   "class.nameLabel": "Class name",
   "class.nameRequired": "Class name is required.",
@@ -1547,10 +1787,11 @@ const en: Record<TranslationKey, string> = {
   "recap.emptyWeekly": "No attendance recorded this week.",
   "recap.emptyMonthly": "No attendance recorded this month.",
   "recap.emptySemester": "No attendance recorded this semester.",
-  "student.quotaTitle": "Student quota",
+  "student.quotaTitle": "Student limit",
   "student.quotaUsage": "{used} of {max} students",
   "student.quotaPro": "{count} students · no limit",
-  "student.quotaLimit": "Student limit reached. Go Pro to add more students.",
+  "student.quotaLimit":
+    "Free plan student limit reached. Pro unlocks unlimited students.",
   "student.fullName": "Full name",
   "student.number": "Student ID (optional)",
   "student.nameRequired": "Student name is required.",
@@ -1559,11 +1800,11 @@ const en: Record<TranslationKey, string> = {
   "student.deleteBody":
     "The student will be deactivated and no longer counts toward your student limit.",
   "student.deleteAction": "Delete student",
-  "about.title": "About Absendik",
+  "about.title": "About Catatan Guru",
   "about.subtitle": "Attendance & grades per class or subject — on your phone.",
   "about.whatIs": "What is it?",
   "about.whatIsBody":
-    "Track attendance, grades, and reports by class or subject — on your own or linked to a school.",
+    "Track attendance, grades, teaching journals, student notes, and reports by class or subject — right from your phone.",
   "about.howToUse": "Quick start",
   "about.step1": "Pick or create a school first",
   "about.step2": "Manage tab: classes, subjects, and students",
@@ -1573,16 +1814,16 @@ const en: Record<TranslationKey, string> = {
   "about.featureGrades":
     "Task scores, grade reports, band filters, Excel export.",
   "about.featurePredikat":
-    "Independent schools: set band labels & thresholds in Settings → Grade bands.",
+    "Set grade band labels and score thresholds in Settings → Grade bands.",
   "about.featureSchoolLink":
-    "Link Absendik Sekolah — classes & students from admin; you focus on attendance and grades.",
+    "Teaching journal per session and student notes — enable features in Settings.",
   "about.featureCloud":
-    "Pro: back up to the cloud and restore on another phone via Settings → Online backup.",
+    "Pro plan: back up online and restore when you change phones via Settings → Online backup.",
   "about.plansHint":
     "Free vs Pro plan details are in Settings → Plan & subscription.",
   "about.schoolHint":
-    "School on Absendik Sekolah? Admins manage centrally; teachers join via invitation link.",
-  "about.footer": "Rekap Guru",
+    "Teach at multiple schools? Add a separate school for each institution.",
+  "about.footer": "Catatan Guru",
   "settings.title": "Settings",
   "settings.appearance": "Appearance",
   "settings.language": "Language",
@@ -1602,39 +1843,40 @@ const en: Record<TranslationKey, string> = {
   "settings.teachReminders": "Teaching reminders",
   "settings.teachRemindersHint": "Notify 10 minutes before class.",
   "settings.account": "Account",
-  "settings.about": "About Absendik",
+  "settings.about": "About Catatan Guru",
   "settings.aboutSub": "Short app guide",
   "settings.switchSchoolProSub": "Switch school or add a new one",
-  "settings.modulesSection": "Feature modules",
+  "settings.modulesSection": "Features",
   "settings.gradePredikatSection": "Grades",
   "settings.gradePredikat": "Grade bands",
   "settings.gradePredikatSub": "Labels and score thresholds for grade recap",
   "settings.helpSection": "Help",
   "settings.moduleAttendance": "Attendance",
   "settings.moduleGrades": "Grades",
+  "settings.moduleTeachingJournal": "Teaching journal",
+  "settings.moduleStudentNotes": "Student notes",
   "settings.modulesHint":
-    "Per-school setting stored on this device only. At least one module must stay on.",
-  "settings.modulesMinOne":
-    "At least one module (Attendance or Grades) must stay enabled.",
+    "Turn on the features you use. At least one feature must stay on.",
+  "settings.modulesMinOne": "At least one feature must stay enabled.",
   "settings.package": "Plan & subscription",
   "settings.packageIntro":
-    "All plans keep daily data on your phone. Pro adds online backup and advanced features.",
+    "Daily data stays on your phone. Pro adds online backup and advanced features.",
   "settings.freePlanLead":
-    "Free plan: 1 school, 5 classes, up to 120 active students, weekly & monthly reports, includes ads.",
+    "Free plan includes 1 school, 5 classes, up to 120 students, weekly/monthly reports, and light ads.",
   "settings.freePlanBadge": "Free",
   "settings.freeIncludesTitle": "Free plan includes:",
   "settings.proPlanLead":
-    "Pro active — unlimited independent schools on your phone (excluding Absendik Sekolah), unlimited classes per school, unlimited students, semester reports, online backup, no ads.",
-  "settings.proUnlockTitle": "Go Pro to unlock:",
+    "Pro is active — unlimited schools, classes, and students; semester reports; online backup; no ads.",
+  "settings.proUnlockTitle": "Pro unlocks:",
   "settings.proIncludesTitle": "Pro includes:",
   "settings.proUpgradeHint":
-    "Pay via Google Play. One Pro account per phone — transfer in Settings when you switch devices.",
+    "Subscribe via Google Play. When you change phones, Pro can be transferred from Settings.",
   "settings.proDevUnlockHint": "Test mode: Pro is enabled for app development.",
-  "settings.subscribeAlertTitle": "Go Pro",
+  "settings.subscribeAlertTitle": "Activate Pro",
   "settings.subscribeAlertBody":
-    "Daily data stays on your phone. Pro adds:\n\n• Unlimited independent schools (excluding Absendik Sekolah)\n• Unlimited classes per school · unlimited subjects\n• Unlimited students\n• Semester reports\n• Online backup & automatic sync\n• Restore data when you change phones (transfer device in Settings)\n• No ads\n\nContinue to Google Play?",
+    "Daily data stays on your phone. Pro adds:\n\n• Unlimited schools, classes, and students\n• Semester reports\n• Automatic online backup\n• Restore data when you change phones\n• No ads\n\nContinue to Google Play?",
   "settings.subscribeAlertBodyAndroid":
-    "Daily data stays on your phone. Pro adds unlimited schools, unlimited classes per school, unlimited students, semester reports, online backup, and no ads.\n\n{price}\n\nContinue to Google Play?",
+    "Daily data stays on your phone. Pro adds unlimited schools, classes, and students; semester reports; online backup; and no ads.\n\n{price}\n\nContinue to Google Play?",
   "settings.restorePurchase": "Restore subscription",
   "settings.restoreNotFound":
     "No subscription found for this account. Make sure you are signed in with the same account used to subscribe.",
@@ -1648,9 +1890,9 @@ const en: Record<TranslationKey, string> = {
     "1 school · 5 classes · up to 120 students · weekly & monthly reports · download Excel · includes ads",
   "settings.proDesc":
     "Unlimited schools · unlimited classes per school · unlimited students · semester reports · online backup · no ads",
-  "settings.upgradePro": "Go Pro",
+  "settings.upgradePro": "Activate Pro",
   "settings.proActive": "Pro active",
-  "settings.proDeviceConflict": "Pro registered on another device",
+  "settings.proDeviceConflict": "Pro is active on another device",
   "settings.proDeviceConflictBody":
     "Pro is active on {device}. Transfer to this phone if this is your account.",
   "settings.proDeviceUnknown": "another device",
@@ -1660,42 +1902,41 @@ const en: Record<TranslationKey, string> = {
   "settings.transferDeviceSuccess": "Pro transferred to this phone.",
   "settings.cloud": "Online backup",
   "settings.cloudIntro":
-    "Pro only: copy data from your phone to online backup, then restore when you switch phones.",
+    "Pro only: copy your data to secure online backup, then restore when you switch phones.",
   "settings.sync": "Back up now",
   "settings.syncDesc":
-    "Upload schools, classes, students, attendance, and grades from this phone.",
+    "Upload schools, classes, students, attendance, grades, journal, and student notes to online backup.",
   "settings.restore": "Restore backup",
   "settings.restoreDesc":
-    "Replace this phone's data with the latest backup. Current data on this phone will be overwritten.",
+    "Replace this phone's data with the latest online backup. Current data will be overwritten.",
   "settings.cloudHint": "Online backup is available on the Pro plan.",
   "settings.autoCloudSync": "Automatic backup",
   "settings.autoCloudSyncHint":
-    "Data on your phone is backed up periodically (when the app is active and after changes). On by default for Pro.",
-  "workspace.badgeSchool": "Absendik Sekolah",
+    "Data is backed up periodically when the app is active and after changes. On by default for Pro.",
+  "workspace.badgeSchool": "Linked",
   "workspace.badgeLocal": "On your phone",
-  "workspace.badgeLocalArchive": "Archive before link",
+  "workspace.badgeLocalArchive": "Older data",
   "workspace.localArchiveHint":
-    "Older data with the same school name stays here — open it for reports and Excel downloads. New attendance goes through Absendik Sekolah.",
+    "Older data with the same school name — open for reports and Excel downloads.",
   "workspace.localArchiveBanner":
-    "Archive from before you linked to your school. Reports and downloads still work; new attendance uses Absendik Sekolah.",
-  "workspace.openLocalArchive": "Local archive on phone",
-  "workspace.openLocalArchiveBody":
-    "{count} school(s) · data from before Absendik Sekolah link",
-  "workspace.localArchiveScreenTitle": "Local archive on phone",
+    "Local archive on your phone. Reports and downloads still work.",
+  "workspace.openLocalArchive": "Older data",
+  "workspace.openLocalArchiveBody": "{count} school(s) · older data",
+  "workspace.localArchiveScreenTitle": "Older data",
   "workspace.localArchiveScreenHint":
-    "Old on-device data from before your school was linked. Reports and downloads still work; new attendance uses Absendik Sekolah.",
+    "Older on-device data. Reports and downloads still work.",
   "workspace.localArchiveCount": "{count} archive(s) available",
   "workspace.localArchiveEmptyTitle": "No archives",
   "workspace.localArchiveEmptyBody":
-    "An archive appears if you used the app locally first, then linked to Absendik Sekolah with the same school name.",
+    "An archive appears if you saved local data with the same school name before.",
   "createWorkspace.linkedSchoolExists":
-    "You are already linked to this school via Absendik Sekolah. Pick the Absendik Sekolah school instead of adding a duplicate on your phone.",
-  "settings.danger": "Danger zone",
+    "This school is already in your list. Pick it from the list instead of adding a duplicate.",
+  "settings.danger": "Delete data",
   "settings.wipe": "Delete data on this phone",
   "settings.wipeHint":
-    "Removes classes, students, attendance, and grades on this phone. Your account is not deleted.",
+    "Removes classes, students, attendance, grades, journal, and notes on this phone. Your account is not deleted.",
   "settings.dataHint":
-    "Attendance & grades are stored on this phone. Pro adds online backup.",
+    "Daily data stays on your phone. Pro backups are stored online and can be restored from Settings.",
   "settings.adPrivacy": "Ad privacy",
   "settings.adPrivacySub": "Manage ad permissions and privacy preferences.",
   "pkg.free.school": "1 school",
@@ -1744,6 +1985,9 @@ const en: Record<TranslationKey, string> = {
   "nav.recap": "Attendance recap",
   "nav.grades": "Add grades",
   "nav.gradeRecap": "Grade recap",
+  "nav.journalRecap": "Journal recap",
+  "nav.teachingJournal": "Teaching journal",
+  "nav.studentNotes": "Student notes",
   "nav.manageClass": "Manage class",
   "nav.manageSubject": "Manage subject",
   "nav.subjectsSection": "Subjects",
@@ -1792,13 +2036,55 @@ const en: Record<TranslationKey, string> = {
   "home.hubHint": "Choose a module to get started.",
   "home.hubAttendanceSub": "Take daily attendance by class or subject",
   "home.hubGradesSub": "Enter task grades and view grade reports",
-  "home.noModulesHint":
-    "No modules are active. Enable Attendance or Grades in Settings.",
+  "home.hubTeachingJournalSub":
+    "Record material, method, and notes for each session",
+  "home.hubStudentNotesSub": "Track student progress beyond academic grades",
+  "home.noModulesHint": "No modules are active. Enable modules in Settings.",
   "home.tapClassForAttendance": "Take attendance for this class",
   "home.tapClassForGrades": "Enter grades for this class",
   "home.tapClassPickModule": "Attendance & grades",
   "home.openManageSub": "Classes, subjects, and students",
   "home.classModuleHint": "Choose a module for this class.",
+  "home.startSessionTitle": "Start session",
+  "home.startSessionSub":
+    "Attendance → journal → grades (optional) → student notes (optional)",
+  "home.directModuleSection": "Open module directly",
+  "home.recapTitle": "Reports",
+  "home.recapSub": "View attendance, grade, and teaching journal reports",
+  "home.recapPickerTitle": "Choose report",
+  "home.recapPickerSub": "Attendance, grades, or teaching journal",
+  "home.sessionFlowHint":
+    "Start a session for the step-by-step flow, or pick a module below to jump in.",
+  "home.classesSessionHint":
+    "Tap a class to start a session or open a module directly.",
+  "home.classesSessionSubjectHint":
+    "Tap a class to start a session or pick a module by subject.",
+  "home.tapClassStartSession": "Start session",
+  "sessionFlow.progressTitle": "Session progress",
+  "sessionFlow.stepShortAttendance": "Att",
+  "sessionFlow.stepShortJournal": "Jrn",
+  "sessionFlow.stepShortGrades": "Grd",
+  "sessionFlow.stepShortNotes": "Nte",
+  "sessionFlow.optional": "optional",
+  "sessionFlow.afterAttendanceTitle": "Continue to journal?",
+  "sessionFlow.afterAttendanceBody":
+    "Attendance saved. Fill in the teaching journal for this session?",
+  "sessionFlow.continueJournal": "Open journal",
+  "sessionFlow.skipJournal": "Go to grades",
+  "sessionFlow.afterJournalTitle": "Any homework or test?",
+  "sessionFlow.afterJournalBody":
+    "Journal saved. Enter grades for this session?",
+  "sessionFlow.continueGrades": "Enter grades",
+  "sessionFlow.skip": "Skip",
+  "sessionFlow.afterGradesTitle": "Any students to note?",
+  "sessionFlow.afterGradesBody": "Add student progress notes for this session?",
+  "sessionFlow.continueStudentNotes": "Pick student",
+  "sessionFlow.done": "Done",
+  "sessionFlow.afterNoteTitle": "Note saved",
+  "sessionFlow.afterNoteBody": "Pick another student or finish this session.",
+  "sessionFlow.pickAnotherStudent": "Another student",
+  "sessionFlow.finishSession": "Finish session",
+  "sessionFlow.nextStep": "Next",
   "home.classesHint": "Tap a class for attendance or grades.",
   "home.classesSubjectHint":
     "Tap a class, pick a subject, then take attendance or enter grades.",
@@ -1808,6 +2094,11 @@ const en: Record<TranslationKey, string> = {
   "home.classesGradesHint": "Tap a class to enter grades.",
   "home.classesSubjectGradesHint":
     "Tap a class, pick a subject, then enter grades.",
+  "home.classesJournalHint": "Tap a class to open the teaching journal.",
+  "home.classesSubjectJournalHint":
+    "Tap a class, pick a subject, then fill in the journal.",
+  "home.classesStudentNotesHint":
+    "Tap a class, pick a student, then add notes.",
   "home.moduleClassesAttendanceHint":
     "Choose a class to take today's attendance.",
   "home.moduleClassesGradesHint": "Choose a class to enter grades.",
@@ -1817,10 +2108,59 @@ const en: Record<TranslationKey, string> = {
     "Choose a class, then a subject for grades.",
   "home.moduleSubjectAttendanceHint": "Tap a subject to take attendance.",
   "home.moduleSubjectGradesHint": "Tap a subject to enter grades.",
+  "home.moduleSubjectJournalHint": "Tap a subject to open the journal.",
   "home.tapSubjectForAttendance": "Take attendance for this subject",
   "home.tapSubjectForGrades": "Enter grades for this subject",
+  "home.tapSubjectForJournal": "Open journal for this subject",
   "modules.attendance": "Attendance",
   "modules.grades": "Grades",
+  "modules.teachingJournal": "Teaching journal",
+  "modules.studentNotes": "Student notes",
+  "teachingJournal.saved": "Teaching journal saved.",
+  "teachingJournal.hint":
+    "Record learning activities per session. Linked to the same date and class as attendance and grades.",
+  "teachingJournal.material": "Learning material",
+  "teachingJournal.method": "Teaching method",
+  "teachingJournal.notes": "Notes",
+  "teachingJournal.materialPlaceholder":
+    "e.g. Linear equations in one variable",
+  "teachingJournal.methodPlaceholder": "e.g. Group discussion, worksheet",
+  "teachingJournal.notesPlaceholder": "Additional notes for this session",
+  "studentNotes.group.positive": "Positive",
+  "studentNotes.group.academic": "Academic",
+  "studentNotes.group.attendance": "Attendance",
+  "studentNotes.group.attitude": "Attitude",
+  "studentNotes.group.other": "Other",
+  "studentNotes.preset.active_questions": "Asks questions actively",
+  "studentNotes.preset.helps_friends": "Helps classmates",
+  "studentNotes.preset.discipline": "Disciplined",
+  "studentNotes.preset.needs_remedial": "Needs remedial help",
+  "studentNotes.preset.needs_support": "Needs extra support",
+  "studentNotes.preset.understands_well": "Understands material well",
+  "studentNotes.preset.often_late": "Often late",
+  "studentNotes.preset.absent_unexcused": "Absent without notice",
+  "studentNotes.preset.lacks_focus": "Lacks focus in class",
+  "studentNotes.preset.disrupts_peers": "Disrupts classmates",
+  "studentNotes.preset.good_attitude": "Good attitude",
+  "studentNotes.otherOption": "Other — write your own",
+  "studentNotes.otherLabel": "Note",
+  "studentNotes.otherPlaceholder": "Write a custom note for this student…",
+  "studentNotes.optionLabel": "Pick a note",
+  "studentNotes.selectRequired": "Pick one note type.",
+  "studentNotes.otherRequired": "Note text is required.",
+  "studentNotes.saved": "Student note saved.",
+  "studentNotes.deleteTitle": "Delete note?",
+  "studentNotes.deleteBody": "This note will be permanently deleted.",
+  "studentNotes.deleteAction": "Delete",
+  "studentNotes.save": "Save note",
+  "studentNotes.hint":
+    "Pick a note type for this student. Use Other for a custom note.",
+  "studentNotes.addSection": "New note",
+  "studentNotes.historySection": "Note history",
+  "studentNotes.empty": "No notes for this student yet.",
+  "studentNotes.tapToOpen": "Tap to open notes",
+  "studentNotes.tapToAdd": "Tap to add a note",
+  "studentNotes.classHint": "Pick a student to add or view notes.",
   "common.optional": "Optional",
   "common.loginFailed": "Sign-in failed.",
   "common.menu": "Menu",
@@ -1829,12 +2169,12 @@ const en: Record<TranslationKey, string> = {
   "workspace.emptyTitle": "No schools yet",
   "workspace.emptyBody": "Add your first school to start teaching.",
   "workspace.notLinkedSchoolHint":
-    "This account is not linked to Absendik Sekolah. Sign out, then sign in with the email and password your school admin created — not a separate Google login.",
+    "No schools yet. Tap Add school to create your first school.",
   "workspace.manualPickHint":
-    "Your account is linked to the Absendik Sekolah entry below. For an independent school on this phone, tap Add school. Older local archives appear at the bottom if you used them before.",
-  "workspace.freeLimitTitle": "School quota full",
+    "Pick a school from the list, or tap Add school for another institution.",
+  "workspace.freeLimitTitle": "Free plan limit reached",
   "workspace.freeLimitBody":
-    "The free plan includes 1 local school on your device (in addition to Absendik Sekolah). Your quota is full. Upgrade to Pro for unlimited local schools?",
+    "Free plan limit reached. Pro unlocks unlimited schools.",
   "bootstrap.retry": "Try again",
   "bootstrap.signOut": "Sign out",
   "bootstrap.profileLoadFailed": "Could not load profile.",
@@ -1846,49 +2186,58 @@ const en: Record<TranslationKey, string> = {
   "onboarding.next": "Continue",
   "onboarding.start": "Get started",
   "onboarding.stepA11y": "Step {step}",
-  "onboarding.welcome.title": "Welcome to Absendik Guru",
+  "onboarding.welcome.title": "Welcome to Catatan Guru",
   "onboarding.welcome.body":
-    "Record attendance, task grades, and reports — per homeroom or subject, right from your phone.",
+    "Record attendance, grades, teaching journals, and student notes in one simple app.",
   "onboarding.storage.title": "Data stays on your phone",
   "onboarding.storage.body":
-    "Classes, students, attendance, and grades are stored on your phone. Daily work works offline. Pro adds online backup.",
+    "Daily work works offline. Pro adds online backup when you need it.",
   "onboarding.storage.bullet1":
     "Free: 1 school, 5 classes, 120 students, weekly & monthly reports, download Excel, includes ads",
   "onboarding.storage.bullet2":
-    "Pro: unlimited independent schools, unlimited classes per school, unlimited students, semester reports, online backup, no ads",
-  "onboarding.school.title": "Your own school on the phone",
+    "Pro plan: unlimited schools, classes, and students, semester reports, online backup, no ads",
+  "onboarding.school.title": "Your school",
   "onboarding.school.body":
-    "Create a workspace if you are not linked to Absendik Sekolah yet. Free: 1 school; Pro: unlimited independent schools (excluding Absendik Sekolah).",
-  "onboarding.school.bullet1":
-    "Set how attendance works: by class or by subject",
+    "Add your first school, then choose the attendance style that fits your teaching.",
+  "onboarding.school.bullet1": "Attendance can be by class or by subject",
   "onboarding.school.bullet2":
-    "Free: 5 classes per school · Pro: unlimited classes per school · unlimited subjects",
-  "onboarding.schoolLink.title": "Link Absendik Sekolah",
+    "Teach at multiple schools? Pro unlocks unlimited schools",
+  "onboarding.schoolLink.title": "Multiple schools",
   "onboarding.schoolLink.body":
-    "When your school uses Absendik Sekolah, admins prepare classes and students — no duplicate entry.",
+    "Teach at more than one institution? Add a separate school for each one.",
   "onboarding.schoolLink.bullet1":
-    "Join via invitation link from Absendik Sekolah",
-  "onboarding.schoolLink.bullet2":
-    "Pick the Absendik Sekolah workspace for daily attendance & grades",
-  "onboarding.schoolLink.bullet3":
-    "Adding classes or students stays with the school admin, not in the teacher app",
+    "Each school has its own classes, students, and reports",
+  "onboarding.schoolLink.bullet2": "Switch schools via Choose school on Home",
+  "onboarding.schoolLink.bullet3": "Pro unlocks unlimited schools on one phone",
   "onboarding.class.title": "Classes & students",
   "onboarding.class.body":
-    "Manage classes & students on the Manage tab; daily attendance and grades on Home.",
-  "onboarding.class.bullet1":
-    "Manage tab → classes, subjects, and student lists",
-  "onboarding.class.bullet2":
-    "Home tab → pick a class → Attendance or Grades module",
-  "onboarding.class.bullet3":
-    "Set class-wide or subject-based attendance when creating a school",
-  "onboarding.attendance.title": "Daily attendance",
-  "onboarding.attendance.body": "The step you do most often every day.",
+    "Add classes, subjects, and students once. Daily teaching becomes faster after that.",
+  "onboarding.class.bullet1": "Manage classes, subjects, and student lists",
+  "onboarding.class.bullet2": "Open a class from Home to start teaching",
+  "onboarding.class.bullet3": "Student order and class colors can be adjusted",
+  "onboarding.modules.title": "Features you use",
+  "onboarding.modules.body":
+    "Choose which features appear in the app. You can change this later.",
+  "onboarding.modules.settingsHint":
+    "You can update these anytime in Settings → Features.",
+  "onboarding.session.title": "Start a session",
+  "onboarding.session.body":
+    "From a class module list, tap Start session for a guided flow through one teaching period.",
+  "onboarding.session.bullet1":
+    "Attendance → journal → grades → student notes (based on enabled features)",
+  "onboarding.session.bullet2":
+    "After saving, continue to the next step; progress appears at the top",
+  "onboarding.session.bullet3":
+    "Each feature can also be opened directly from the module list",
+  "onboarding.attendance.title": "Daily teaching",
+  "onboarding.attendance.body":
+    "Pick a class, then record what happened in today's session.",
   "onboarding.attendance.bullet1":
-    "Home → Attendance → pick a class (and subject if subject mode)",
+    "Attendance: mark present, sick, excused, or absent",
   "onboarding.attendance.bullet2":
-    "Status starts empty; pick Present/Sick/Excused/Absent or tap Mark all present",
+    "Grades: add an assignment and fill student scores",
   "onboarding.attendance.bullet3":
-    "Header ⋮ menu: attendance report, student list, manage class",
+    "Journal and student notes can be added when needed",
   "onboarding.grades.title": "Task grades",
   "onboarding.grades.body":
     "Record quiz, homework, or other task scores by class or subject.",
@@ -1900,23 +2249,20 @@ const en: Record<TranslationKey, string> = {
     "Header ⋮ → Grade report; independent schools can set bands in Settings",
   "onboarding.more.title": "Reports & backup",
   "onboarding.more.body":
-    "After data is filled in, open reports for admin needs. Pro can back up to the cloud.",
-  "onboarding.more.bullet1":
-    "Attendance & grade reports: weekly/monthly (Free & Pro), filters & search",
-  "onboarding.more.bullet2": "Semester reports (Pro)",
-  "onboarding.more.bullet3": "Download Excel from the report screen",
-  "onboarding.more.bullet4":
-    "Settings: feature modules, grade bands, Pro, online backup, schedule reminders",
+    "Once data is recorded, reports and Excel downloads are ready whenever you need them.",
+  "onboarding.more.bullet1": "Attendance, grade, and journal reports",
+  "onboarding.more.bullet2": "Download Excel for reports",
+  "onboarding.more.bullet3": "Pro unlocks semester reports and online backup",
+  "onboarding.more.bullet4": "Unused features can be turned off in Settings",
   "onboarding.startStep.title": "Ready to start",
-  "onboarding.startStep.body":
-    "Start by adding your own school or joining Absendik Sekolah.",
+  "onboarding.startStep.body": "Start by adding your first school.",
   "onboarding.startStep.bullet1":
-    "Daily data stays on your phone; cloud backup only if you enable it (Pro)",
+    "Daily data stays on your phone; online backup is available with Pro",
   "createWorkspace.nameRequired": "School name is required.",
   "createWorkspace.levelRequired": "School level is required.",
   "createWorkspace.cityRequired": "City is required.",
   "createWorkspace.hint":
-    "Free plan: 1 independent school, 5 classes. Pro: unlimited independent schools (excluding Absendik Sekolah), unlimited classes per school.",
+    "Free plan supports 1 school and 5 classes. Pro unlocks unlimited schools and classes.",
   "createWorkspace.nameLabel": "School name *",
   "createWorkspace.namePlaceholder": "Example: Lincoln Middle School",
   "createWorkspace.levelLabel": "Level *",
@@ -1948,27 +2294,30 @@ const en: Record<TranslationKey, string> = {
   "classMenu.editOrDelete": "Edit or delete class",
   "ads.sponsorTitle": "Sponsored message",
   "ads.placement.attendanceSaved":
-    "Attendance saved. Thanks for using Absendik Free.",
-  "ads.placement.gradeSaved": "Grades saved. Thanks for using Absendik Free.",
+    "Attendance saved. Thanks for using the free version of Catatan Guru.",
+  "ads.placement.gradeSaved":
+    "Grades saved. Thanks for using the free version of Catatan Guru.",
   "ads.placement.recapExport":
-    "Report downloaded. Thanks for using Absendik Free.",
+    "Report downloaded. Thanks for using the free version of Catatan Guru.",
   "ads.placement.syncComplete":
-    "Backup complete. Thanks for using Absendik Free.",
-  "ads.placement.default": "Thanks for using Absendik Free.",
+    "Backup complete. Thanks for using the free version of Catatan Guru.",
+  "ads.placement.default": "Thanks for using the free version of Catatan Guru.",
   "ads.mockLabel": "Ad space",
   "ads.mockSub":
     "Ads appear rarely and never while you are taking attendance or entering grades.",
   "ads.continue": "Continue",
   "ads.upgradeProNoAds": "Pro · no ads",
-  "ads.bannerHint": "Ad support helps keep Absendik free on your phone.",
+  "ads.bannerHint": "Ad support helps keep Catatan Guru free on your phone.",
   "ads.upgradeShort": "Pro · no ads",
   "export.shareRecap": "Download attendance report",
   "export.shareGradeRecap": "Download grade report",
+  "export.shareJournalRecap": "Download journal report",
   "export.shareGradeHistory": "Download grade history",
   "export.noData": "Nothing to download yet.",
   "export.semesterRecapPro":
     "Semester attendance reports are available on Pro.",
   "export.semesterGradePro": "Semester grade reports are available on Pro.",
+  "export.semesterJournalPro": "Semester journal reports are available on Pro.",
   "export.loadRecapFirst":
     "Load the report first, then download from the report screen.",
   "export.createFileFailed": "Could not create the Excel file.",
@@ -1982,22 +2331,23 @@ const en: Record<TranslationKey, string> = {
   "export.exportCancelled": "Download cancelled.",
   "export.storagePermissionTitle": "Storage access",
   "export.storagePermissionMessage":
-    "Absendik Guru needs permission to save Excel files to your device storage.",
+    "Catatan Guru needs permission to save Excel files to your device storage.",
   "export.storagePermissionDenied":
     "Storage permission denied. You can still try saving via the share menu after the file is created.",
-  "student.quotaAtMax": "Maximum {max} students. Go Pro to add more.",
+  "student.quotaAtMax":
+    "Limit of {max} students reached. Pro unlocks unlimited students.",
   "error.notSignedIn": "Not signed in.",
   "error.noServerResponse":
-    "The server did not respond. Check your internet connection and try again.",
+    "No response. Check your internet connection and try again.",
   "error.serverInvalidResponse":
-    "The server returned an invalid response. Try again or update the app.",
+    "Something went wrong. Try again or update the app.",
   "error.connectionFailed":
-    "Could not reach the server. Check your internet connection and try again.",
+    "Could not connect. Check your internet connection and try again.",
   "error.requestFailed": "Request failed.",
   "error.schoolClassesLoadFailed":
-    "Could not load classes from Absendik Sekolah. Pull down to refresh.",
+    "Could not load classes. Pull down to refresh.",
   "error.schoolGradesLoadFailed":
-    "Could not load grades from Absendik Sekolah. Pull down to refresh.",
+    "Could not load grades. Pull down to refresh.",
   "error.schoolGradesSaveFailed":
     "Could not save grades. Check your connection and try again.",
   "error.schoolGradeRecapLoadFailed":
@@ -2005,22 +2355,22 @@ const en: Record<TranslationKey, string> = {
   "error.generic": "Something went wrong. Please try again.",
   "cloud.needPro": "Activate Pro first to back up data online.",
   "cloud.nothingToBackup": "Nothing on this phone to back up yet.",
-  "cloud.needProRestore": "Activate Pro first to restore a backup.",
+  "cloud.needProRestore": "Activate Pro first to restore an online backup.",
   "cloud.noBackupYet":
     "No online backup yet. Back up from your old phone first.",
   "local.dbOpenFailed":
     "Could not open data on this phone. Try reopening the app.",
   "local.freeSchoolLimit":
-    "The free plan supports one independent school on your phone. Go Pro for unlimited independent schools (excluding Absendik Sekolah).",
+    "Free plan limit reached. Pro unlocks unlimited schools.",
   "local.classLimitBody":
-    "Class limit reached for this school (max {max} classes). Go Pro for a higher limit.",
+    "Limit of {max} classes reached for this school. Pro unlocks unlimited classes.",
   "cloud.restoreFailed": "Could not restore backup.",
   "iap.purchaseInProgress": "Purchase still processing.",
-  "workspace.schoolQuotaFull":
-    "Independent school limit reached (max {max} schools, excluding Absendik Sekolah).",
+  "workspace.schoolQuotaFull": "School limit reached (max {max} schools).",
   "iap.cancelled": "Purchase cancelled.",
   "iap.purchaseFailed": "Purchase failed.",
-  "iap.tokenMissing": "Purchase token not found.",
+  "iap.tokenMissing":
+    "Purchase not recognized. Try restoring your subscription or contact support.",
   "iap.noActiveSubscription":
     "No active Pro subscription on this Google Play account.",
   "iap.openPlayFailed": "Could not open Google Play.",

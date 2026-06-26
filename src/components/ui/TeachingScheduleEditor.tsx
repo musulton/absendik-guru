@@ -1,6 +1,5 @@
 import { useMemo, useState } from "react";
 import {
-  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -9,6 +8,7 @@ import {
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { useTheme } from "@/context/AppPreferencesContext";
 import { withHaptic } from "@/lib/haptics";
 import {
@@ -256,26 +256,7 @@ export function TeachingScheduleEditor({ value, onChange }: Props) {
       ) : null}
 
       {Platform.OS === "ios" ? (
-        <Modal
-          visible={pickerOpen}
-          transparent
-          animationType="fade"
-          onRequestClose={closeTimePicker}
-        >
-          <View style={styles.overlay}>
-            <Pressable
-              style={[
-                styles.backdrop,
-                {
-                  backgroundColor: isDark
-                    ? "rgba(0,0,0,0.62)"
-                    : "rgba(15,23,42,0.38)",
-                },
-              ]}
-              onPress={withHaptic(closeTimePicker)}
-              accessibilityRole="button"
-              accessibilityLabel={t("common.cancel")}
-            />
+        <BottomSheetModal visible={pickerOpen} onClose={closeTimePicker}>
             <View
               style={[
                 styles.sheet,
@@ -329,8 +310,7 @@ export function TeachingScheduleEditor({ value, onChange }: Props) {
                 </Text>
               </Pressable>
             </View>
-          </View>
-        </Modal>
+        </BottomSheetModal>
       ) : null}
     </View>
   );
@@ -377,13 +357,6 @@ const styles = StyleSheet.create({
     borderStyle: "dashed",
     paddingVertical: 8,
     paddingHorizontal: 12,
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     borderTopLeftRadius: radius.lg,

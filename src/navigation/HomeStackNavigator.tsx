@@ -9,7 +9,14 @@ import { goToManageTab } from "@/navigation/navHelpers";
 import {
   navigateHomeClassModule,
   openHomeClassFromList,
+  getSessionEntryModule,
 } from "@/navigation/homeClassFlow";
+import {
+  navigateAfterSessionSave,
+  navigateSessionStepAfterSave,
+  openSubjectListStep,
+  withSessionFlow,
+} from "@/navigation/sessionStepNav";
 import type { HomeModule, HomeStackParamList } from "@/navigation/types";
 import { ClassesListScreen } from "@/screens/ClassesListScreen";
 import { ClassModuleHubScreen } from "@/screens/ClassModuleHubScreen";
@@ -18,16 +25,31 @@ import { AttendanceScreen } from "@/screens/AttendanceScreen";
 import { StudentAttendanceDetailScreen } from "@/screens/StudentAttendanceDetailScreen";
 import { ClassRecapScreen } from "@/screens/ClassRecapScreen";
 import { ClassGradeRecapScreen } from "@/screens/ClassGradeRecapScreen";
+import { ClassTeachingJournalRecapScreen } from "@/screens/ClassTeachingJournalRecapScreen";
 import { GradeEntryScreen } from "@/screens/GradeEntryScreen";
+import { TeachingJournalScreen } from "@/screens/TeachingJournalScreen";
+import { StudentNotesScreen } from "@/screens/StudentNotesScreen";
+import { ClassStudentsScreen } from "@/screens/ClassStudentsScreen";
 import { StudentGradeDetailScreen } from "@/screens/StudentGradeDetailScreen";
+import { StudentNotesDetailScreen } from "@/screens/StudentNotesDetailScreen";
 import { useParsedAssignments } from "@/navigation/useParsedAssignments";
 import { ManageStackNavigator } from "@/navigation/ManageStackNavigator";
 import { SettingsStackNavigator } from "@/navigation/SettingsStackNavigator";
+import { AddStudentsPromptProvider, useAddStudentsPrompt } from "@/context/AddStudentsPromptContext";
 import { CreateStudentScreen } from "@/screens/CreateStudentScreen";
 
 const Stack = createNativeStackNavigator<HomeStackParamList>();
 
 export function HomeStackNavigator() {
+  return (
+    <AddStudentsPromptProvider>
+      <HomeStackNavigatorContent />
+    </AddStudentsPromptProvider>
+  );
+}
+
+function HomeStackNavigatorContent() {
+  const { showAddStudentsPrompt } = useAddStudentsPrompt();
   const { colors, t, isDark, fontSize } = useAppPreferences();
   const { workspace, isSchoolWorkspace } = useWorkspace();
   const { modules } = useWorkspaceModules();
@@ -63,10 +85,14 @@ export function HomeStackNavigator() {
                 {
                   t,
                   isSchoolWorkspace,
-                  onAddStudent: () =>
+                  showAddStudentsPrompt,
+                  onAddStudent: (addOpts) =>
                     navigation.navigate("CreateStudent", {
                       classId: guruClass.id,
                       className: guruClass.name,
+                      labelColor: guruClass.labelColor,
+                      startSessionAfterCreate:
+                        addOpts?.startSessionAfterCreate,
                     }),
                 },
               )
@@ -75,7 +101,7 @@ export function HomeStackNavigator() {
               navigation.navigate("Manage", { screen: "ManageHub" })
             }
             onOpenSettings={() =>
-              navigation.navigate("Settings", { screen: "Settings" })
+              navigation.navigate("Settings", { screen: "SettingsHub" })
             }
           />
         )}
@@ -87,16 +113,45 @@ export function HomeStackNavigator() {
       >
         {({ navigation, route }) => (
           <ClassModuleHubScreen
+            workspaceId={workspace.id}
+            classId={route.params.classId}
             className={route.params.className}
             labelColor={route.params.labelColor}
             activeStudentCount={route.params.activeStudentCount}
             onOpenModule={(module: HomeModule) =>
               navigateHomeClassModule(navigation, workspace, route.params, module)
             }
-            onAddStudent={() =>
+            onOpenRecap={(kind, assignments) => {
+              const base = {
+                classId: route.params.classId,
+                className: route.params.className,
+                assignmentsJson: JSON.stringify(assignments),
+              };
+              if (kind === "attendance") {
+                navigation.navigate("ClassRecap", base);
+              } else if (kind === "grades") {
+                navigation.navigate("ClassGradeRecap", base);
+              } else {
+                navigation.navigate("ClassTeachingJournalRecap", base);
+              }
+            }}
+            onStartSession={() => {
+              const entry = getSessionEntryModule(modules);
+              if (!entry) return;
+              navigateHomeClassModule(
+                navigation,
+                workspace,
+                route.params,
+                entry,
+                { sessionFlow: true },
+              );
+            }}
+            onAddStudent={(addOpts) =>
               navigation.navigate("CreateStudent", {
                 classId: route.params.classId,
                 className: route.params.className,
+                labelColor: route.params.labelColor,
+                startSessionAfterCreate: addOpts?.startSessionAfterCreate,
               })
             }
           />
@@ -115,11 +170,17 @@ export function HomeStackNavigator() {
             className={route.params.className}
             labelColor={route.params.labelColor}
             onAttendance={(subjectName) =>
-              navigation.navigate("Attendance", {
-                classId: route.params.classId,
-                className: route.params.className,
-                subjectName,
-              })
+              openSubjectListStep(
+                navigation,
+                "Attendance",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName,
+                }),
+                route.params.sessionFlow,
+              )
             }
             onAddSubject={() =>
               goToManageTab(navigation, "CreateSubject", {
@@ -151,14 +212,40 @@ export function HomeStackNavigator() {
               })
             }
             onGrades={(subjectName) =>
-              navigation.navigate("GradeEntry", {
-                classId: route.params.classId,
-                className: route.params.className,
-                subjectName,
-              })
+              openSubjectListStep(
+                navigation,
+                "GradeEntry",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName,
+                }),
+                route.params.sessionFlow,
+              )
+            }
+            onTeachingJournal={(subjectName) =>
+              openSubjectListStep(
+                navigation,
+                "TeachingJournal",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName,
+                }),
+                route.params.sessionFlow,
+              )
             }
             onGradeRecap={(assignments) =>
               navigation.navigate("ClassGradeRecap", {
+                classId: route.params.classId,
+                className: route.params.className,
+                assignmentsJson: JSON.stringify(assignments),
+              })
+            }
+            onJournalRecap={(assignments) =>
+              navigation.navigate("ClassTeachingJournalRecap", {
                 classId: route.params.classId,
                 className: route.params.className,
                 assignmentsJson: JSON.stringify(assignments),
@@ -223,17 +310,42 @@ export function HomeStackNavigator() {
                 assignmentsJson: JSON.stringify(assignments),
               })
             }
-            onGrades={() =>
-              navigation.navigate("GradeEntry", {
-                classId: route.params.classId,
-                className: route.params.className,
-              })
+            onTeachingJournal={(sessionDate) =>
+              navigateAfterSessionSave(
+                navigation,
+                "TeachingJournal",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName: route.params.subjectName,
+                  sessionDate,
+                }),
+                route.params.sessionFlow,
+              )
             }
-            onGradeRecap={(assignments) =>
-              navigation.navigate("ClassGradeRecap", {
+            onGrades={(sessionDate) =>
+              navigateAfterSessionSave(
+                navigation,
+                "GradeEntry",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName: route.params.subjectName,
+                  sessionDate,
+                }),
+                route.params.sessionFlow,
+              )
+            }
+            onStudentNotes={(sessionDate) =>
+              navigateSessionStepAfterSave(navigation, "studentNotes", {
                 classId: route.params.classId,
                 className: route.params.className,
-                assignmentsJson: JSON.stringify(assignments),
+                labelColor: route.params.labelColor,
+                subjectName: route.params.subjectName,
+                sessionDate,
+                sessionFlow: route.params.sessionFlow,
               })
             }
             onEditClass={() =>
@@ -264,6 +376,176 @@ export function HomeStackNavigator() {
       </Stack.Screen>
 
       <Stack.Screen
+        name="TeachingJournal"
+        options={({ route }) => ({
+          title: route.params.subjectName
+            ? `${t("nav.teachingJournal")} — ${route.params.subjectName}`
+            : t("nav.teachingJournal"),
+        })}
+      >
+        {({ navigation, route }) => (
+          <TeachingJournalScreen
+            workspaceId={workspace.id}
+            classId={route.params.classId}
+            className={route.params.className}
+            subjectName={route.params.subjectName}
+            initialSessionDate={route.params.sessionDate}
+            onAttendance={(sessionDate) =>
+              navigation.navigate(
+                "Attendance",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName: route.params.subjectName,
+                  sessionDate,
+                }),
+              )
+            }
+            onGrades={(sessionDate) =>
+              navigateAfterSessionSave(
+                navigation,
+                "GradeEntry",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName: route.params.subjectName,
+                  sessionDate,
+                }),
+                route.params.sessionFlow,
+              )
+            }
+            onStudents={() =>
+              navigation.navigate("ClassStudentsHome", {
+                classId: route.params.classId,
+                className: route.params.className,
+              })
+            }
+            onStudentNotes={(sessionDate) =>
+              navigateSessionStepAfterSave(navigation, "studentNotes", {
+                classId: route.params.classId,
+                className: route.params.className,
+                labelColor: route.params.labelColor,
+                subjectName: route.params.subjectName,
+                sessionDate,
+                sessionFlow: route.params.sessionFlow,
+              })
+            }
+            onJournalRecap={(assignments) =>
+              navigation.navigate("ClassTeachingJournalRecap", {
+                classId: route.params.classId,
+                className: route.params.className,
+                assignmentsJson: JSON.stringify(assignments),
+              })
+            }
+            onEditClass={() =>
+              goToManageTab(navigation, "EditClass", {
+                classId: route.params.classId,
+                className: route.params.className,
+              })
+            }
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="ClassStudentsHome"
+        options={({ route }) => ({
+          title: `${t("nav.students")} — ${route.params.className}`,
+        })}
+      >
+        {({ navigation, route }) => (
+          <ClassStudentsScreen
+            workspaceId={workspace.id}
+            classId={route.params.classId}
+            className={route.params.className}
+            purpose="notes"
+            onAddStudent={() =>
+              navigation.navigate("CreateStudent", {
+                classId: route.params.classId,
+                className: route.params.className,
+              })
+            }
+            onSessionManageStudents={() =>
+              goToManageTab(navigation, "ClassStudents", {
+                classId: route.params.classId,
+                className: route.params.className,
+              })
+            }
+            onEditClass={() =>
+              goToManageTab(navigation, "EditClass", {
+                classId: route.params.classId,
+                className: route.params.className,
+              })
+            }
+            onEditStudent={(student) =>
+              navigation.navigate(
+                "StudentNotes",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  studentId: student.id,
+                  fullName: student.fullName,
+                  studentNumber: student.studentNumber ?? "",
+                  sessionDate: route.params.sessionDate,
+                  subjectName: route.params.subjectName,
+                  labelColor: route.params.labelColor,
+                }),
+              )
+            }
+            onStudentNotes={(student) =>
+              navigation.navigate(
+                "StudentNotes",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  studentId: student.id,
+                  fullName: student.fullName,
+                  studentNumber: student.studentNumber ?? "",
+                  sessionDate: route.params.sessionDate,
+                  subjectName: route.params.subjectName,
+                  labelColor: route.params.labelColor,
+                }),
+              )
+            }
+            onStudentNotesDetail={(student) =>
+              navigation.navigate("StudentNotesDetail", {
+                classId: route.params.classId,
+                className: route.params.className,
+                studentId: student.id,
+                fullName: student.fullName,
+                studentNumber: student.studentNumber ?? "",
+              })
+            }
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="StudentNotes"
+        options={({ route }) => ({ title: route.params.fullName })}
+      >
+        {({ navigation, route }) => (
+          <StudentNotesScreen
+            workspaceId={workspace.id}
+            classId={route.params.classId}
+            className={route.params.className}
+            studentId={route.params.studentId}
+            fullName={route.params.fullName}
+            studentNumber={route.params.studentNumber}
+            onManageStudents={() => navigation.goBack()}
+            onEditClass={() =>
+              goToManageTab(navigation, "EditClass", {
+                classId: route.params.classId,
+                className: route.params.className,
+              })
+            }
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
         name="CreateStudent"
         options={{ title: t("subjects.addStudent") }}
       >
@@ -272,7 +554,27 @@ export function HomeStackNavigator() {
             workspaceId={workspace.id}
             classId={route.params.classId}
             className={route.params.className}
-            onCreated={() => navigation.goBack()}
+            onCreated={() => {
+              if (route.params.startSessionAfterCreate) {
+                const entry = getSessionEntryModule(modules);
+                navigation.pop();
+                if (!entry) return;
+                navigateHomeClassModule(
+                  navigation,
+                  workspace,
+                  {
+                    classId: route.params.classId,
+                    className: route.params.className,
+                    labelColor: route.params.labelColor,
+                    activeStudentCount: 1,
+                  },
+                  entry,
+                  { sessionFlow: true },
+                );
+                return;
+              }
+              navigation.goBack();
+            }}
             onCancel={() => navigation.goBack()}
           />
         )}
@@ -318,10 +620,45 @@ export function HomeStackNavigator() {
             classId={route.params.classId}
             className={route.params.className}
             subjectName={route.params.subjectName}
+            initialSessionDate={route.params.sessionDate}
             onStudents={() =>
               goToManageTab(navigation, "ClassStudents", {
                 classId: route.params.classId,
                 className: route.params.className,
+              })
+            }
+            onAttendance={(sessionDate) =>
+              navigation.navigate(
+                "Attendance",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName: route.params.subjectName,
+                  sessionDate,
+                }),
+              )
+            }
+            onTeachingJournal={(sessionDate) =>
+              navigation.navigate(
+                "TeachingJournal",
+                withSessionFlow(route.params.sessionFlow, {
+                  classId: route.params.classId,
+                  className: route.params.className,
+                  labelColor: route.params.labelColor,
+                  subjectName: route.params.subjectName,
+                  sessionDate,
+                }),
+              )
+            }
+            onStudentNotes={(sessionDate) =>
+              navigateSessionStepAfterSave(navigation, "studentNotes", {
+                classId: route.params.classId,
+                className: route.params.className,
+                labelColor: route.params.labelColor,
+                subjectName: route.params.subjectName,
+                sessionDate,
+                sessionFlow: route.params.sessionFlow,
               })
             }
             onGradeRecap={(assignments) =>
@@ -378,6 +715,22 @@ export function HomeStackNavigator() {
       </Stack.Screen>
 
       <Stack.Screen
+        name="ClassTeachingJournalRecap"
+        options={({ route }) => ({
+          title: `${t("nav.journalRecap")} — ${route.params.className}`,
+        })}
+      >
+        {({ route }) => (
+          <ClassTeachingJournalRecapRoute
+            workspace={workspace}
+            classId={route.params.classId}
+            className={route.params.className}
+            assignmentsJson={route.params.assignmentsJson}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
         name="StudentGradeDetail"
         options={({ route }) => ({ title: route.params.fullName })}
       >
@@ -390,6 +743,22 @@ export function HomeStackNavigator() {
             fullName={route.params.fullName}
             studentNumber={route.params.studentNumber}
             subjectName={route.params.subjectName}
+          />
+        )}
+      </Stack.Screen>
+
+      <Stack.Screen
+        name="StudentNotesDetail"
+        options={({ route }) => ({ title: route.params.fullName })}
+      >
+        {({ route }) => (
+          <StudentNotesDetailScreen
+            workspaceId={workspace.id}
+            classId={route.params.classId}
+            className={route.params.className}
+            studentId={route.params.studentId}
+            fullName={route.params.fullName}
+            studentNumber={route.params.studentNumber}
           />
         )}
       </Stack.Screen>
@@ -471,6 +840,29 @@ function ClassGradeRecapRoute({
       attendanceMode={workspace.attendanceMode}
       assignments={assignments}
       onStudentDetail={onStudentDetail}
+    />
+  );
+}
+
+function ClassTeachingJournalRecapRoute({
+  workspace,
+  classId,
+  className,
+  assignmentsJson,
+}: {
+  workspace: import("@/lib/types").GuruWorkspace;
+  classId: string;
+  className: string;
+  assignmentsJson: string;
+}) {
+  const assignments = useParsedAssignments(assignmentsJson);
+  return (
+    <ClassTeachingJournalRecapScreen
+      workspaceId={workspace.id}
+      classId={classId}
+      className={className}
+      attendanceMode={workspace.attendanceMode}
+      assignments={assignments}
     />
   );
 }

@@ -1,12 +1,11 @@
 import { useMemo } from "react";
 import {
-  Modal,
   Pressable,
   StyleSheet,
   Text,
   View,
 } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { CenteredModal } from "@/components/ui/CenteredModal";
 import { useTheme } from "@/context/AppPreferencesContext";
 import type { AdInterstitialPlacement } from "@/lib/ads/placements";
 import type { TranslationKey } from "@/lib/i18n/translations";
@@ -33,17 +32,13 @@ export function AdInterstitialModal({
   onClose,
   onUpgrade,
 }: Props) {
-  const insets = useSafeAreaInsets();
   const { colors, font, scale, t } = useTheme();
   const styles = useMemo(
     () =>
       StyleSheet.create({
-        backdrop: {
-          flex: 1,
-          backgroundColor: "rgba(15, 23, 42, 0.45)",
-          justifyContent: "center",
+        wrap: {
           paddingHorizontal: space.lg,
-          paddingBottom: space.xl,
+          paddingVertical: space.xl,
         },
         card: {
           backgroundColor: colors.surface,
@@ -93,13 +88,8 @@ export function AdInterstitialModal({
       : t("ads.placement.default");
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
-      <View style={[styles.backdrop, { paddingTop: insets.top + space.lg }]}>
+    <CenteredModal visible={visible} onClose={onClose}>
+      <View style={styles.wrap}>
         <View style={styles.card}>
           <Text style={styles.title}>{t("ads.sponsorTitle")}</Text>
           <Text style={styles.body}>{message}</Text>
@@ -134,6 +124,6 @@ export function AdInterstitialModal({
           </View>
         </View>
       </View>
-    </Modal>
+    </CenteredModal>
   );
 }

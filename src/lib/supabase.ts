@@ -25,7 +25,10 @@ async function supabaseFetch(
   }
 }
 
-export const supabase = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+export const supabase = createClient(
+  config.guruSupabaseUrl,
+  config.guruSupabaseAnonKey,
+  {
   auth: {
     storage: AsyncStorage,
     persistSession: true,

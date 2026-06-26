@@ -2,7 +2,6 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { AdFooterStack } from "@/components/ads/AdFooterStack";
 import { ScreenScroll } from "@/components/ScreenScroll";
 import { Icon, type IconName } from "@/components/ui/Icon";
-import { ScreenHint } from "@/components/ui/ScreenHint";
 import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useTheme } from "@/context/AppPreferencesContext";
 import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
@@ -98,7 +97,6 @@ export function ManageHubScreen({
       footer={<AdFooterStack placement="manage_hub" onUpgrade={onUpgrade} />}
     >
       <ScreenScroll>
-        <ScreenHint>{t("manage.hubHint")}</ScreenHint>
         <View style={styles.list}>
           {items.map((item) => (
             <Pressable
@@ -115,7 +113,10 @@ export function ManageHubScreen({
               ]}
             >
               <View
-                style={[styles.iconWrap, { backgroundColor: colors.primaryMuted }]}
+                style={[
+                  styles.iconWrap,
+                  { backgroundColor: colors.primaryMuted },
+                ]}
               >
                 <Icon name={item.icon} size={20} color={colors.primary} />
               </View>

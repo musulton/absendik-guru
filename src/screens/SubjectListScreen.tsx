@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
-  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -17,6 +16,7 @@ import { ScreenHint } from "@/components/ui/ScreenHint";
 import { SectionLabel } from "@/components/ui/SectionLabel";
 import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useTheme } from "@/context/AppPreferencesContext";
+import { useAddStudentsPrompt } from "@/context/AddStudentsPromptContext";
 import { useActionMenu } from "@/context/ActionMenuContext";
 import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
@@ -27,6 +27,7 @@ import {
   useBlockingScreenLoad,
   useFetchLoadingState,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
 import { apiListAssignments, apiListStudents } from "@/lib/guru-repository";
@@ -52,7 +53,9 @@ type HomeProps = {
   onStudents: () => void;
   onRecap: (assignments: GuruAssignment[]) => void;
   onGrades: (subjectName: string) => void;
+  onTeachingJournal: (subjectName: string) => void;
   onGradeRecap: (assignments: GuruAssignment[]) => void;
+  onJournalRecap: (assignments: GuruAssignment[]) => void;
   onEditClass: () => void;
   onAddStudent: () => void;
 };
@@ -76,6 +79,7 @@ export function SubjectListScreen(props: Props) {
   const { workspace, isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
   const isMutationLocked = isSchoolWorkspace || isLocalArchiveWorkspace;
   const { colors, t, isDark } = useTheme();
+  const { showAddStudentsPrompt } = useAddStudentsPrompt();
   const { showActionMenu } = useActionMenu();
   const listStyles = useListStyles();
   const [loading, setLoading] = useFetchLoadingState();
@@ -87,19 +91,28 @@ export function SubjectListScreen(props: Props) {
   const load = useCallback(async (silent?: boolean) => {
     setError("");
     if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-    const [stRes, asRes] = await Promise.all([
-      apiListStudents(workspace.id, classId, { force: true }),
-      apiListAssignments(workspace.id, classId, { force: true }),
-    ]);
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-    setRefreshing(false);
-    if (!stRes.ok) {
-      setError(stRes.error.message);
-      return;
+    try {
+      const [stRes, asRes] = await Promise.all([
+        apiListStudents(workspace.id, classId, { force: true }),
+        apiListAssignments(workspace.id, classId, { force: true }),
+      ]);
+      if (!stRes.ok) {
+        setError(stRes.error.message);
+        return;
+      }
+      setStudentCount(stRes.data.students.length);
+      if (asRes.ok) setAssignments(asRes.data.assignments);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("error.generic"));
+    } finally {
+      finishScreenFetch({
+        isSchoolWorkspace,
+        silent,
+        setLoading,
+        setRefreshing,
+      });
     }
-    setStudentCount(stRes.data.students.length);
-    if (asRes.ok) setAssignments(asRes.data.assignments);
-  }, [workspace.id, classId, isSchoolWorkspace, setLoading]);
+  }, [workspace.id, classId, isSchoolWorkspace, setLoading, t]);
 
   const showBlockingLoad = useBlockingScreenLoad(
     loading,
@@ -112,7 +125,7 @@ export function SubjectListScreen(props: Props) {
 
   useRefreshOnFocus(() => {
     void load(true);
-  }, { staleMs: 0 });
+  });
 
   useListMutations((event) => {
     if (event.workspaceId !== workspace.id) return;
@@ -143,11 +156,13 @@ export function SubjectListScreen(props: Props) {
 
   const showClassMenu = useCallback(() => {
     if (props.purpose !== "home") return;
+    if (props.module === "studentNotes") return;
     showSubjectListModuleMenu(showActionMenu, t, {
       title: className,
       module: props.module,
       onRecap: () => props.onRecap(assignments),
       onGradeRecap: () => props.onGradeRecap(assignments),
+      onJournalRecap: () => props.onJournalRecap(assignments),
       onEditClass: isMutationLocked ? undefined : props.onEditClass,
     });
   }, [
@@ -198,15 +213,11 @@ export function SubjectListScreen(props: Props) {
 
   const promptNoStudents = useCallback(() => {
     if (props.purpose !== "home") return;
-    if (isMutationLocked) {
-      Alert.alert(t("school.readonlyTitle"), t("school.noStudentsHint"));
-      return;
-    }
-    Alert.alert(t("subjects.noStudents"), t("subjects.addStudent"), [
-      { text: t("common.cancel"), style: "cancel" },
-      { text: t("subjects.addStudent"), onPress: props.onAddStudent },
-    ]);
-  }, [props, isMutationLocked, t]);
+    showAddStudentsPrompt({
+      isSchoolWorkspace: isMutationLocked,
+      onAddStudent: props.onAddStudent,
+    });
+  }, [props, isMutationLocked, showAddStudentsPrompt]);
 
   const openAttendance = useCallback(
     (subjectName: string) => {
@@ -232,6 +243,18 @@ export function SubjectListScreen(props: Props) {
     [studentCount, promptNoStudents, props],
   );
 
+  const openJournal = useCallback(
+    (subjectName: string) => {
+      if (props.purpose !== "home") return;
+      if (studentCount === 0) {
+        promptNoStudents();
+        return;
+      }
+      props.onTeachingJournal(subjectName);
+    },
+    [studentCount, promptNoStudents, props],
+  );
+
   const showSubjectManage = useCallback(
     (assignment: GuruAssignment) => {
       if (isMutationLocked) return;
@@ -243,6 +266,17 @@ export function SubjectListScreen(props: Props) {
   const renderItem = useCallback(
     ({ item }: { item: GuruAssignment }) => {
       if (props.purpose === "home") {
+        if (props.module === "teachingJournal") {
+          return (
+            <SubjectListCard
+              variant="navigate"
+              title={item.subjectName!}
+              labelColorId={item.labelColor}
+              actionHint={t("home.tapSubjectForJournal")}
+              onPress={() => openJournal(item.subjectName!)}
+            />
+          );
+        }
         const isAttendance = props.module === "attendance";
         return (
           <SubjectListCard
@@ -277,6 +311,7 @@ export function SubjectListScreen(props: Props) {
       t,
       openAttendance,
       openGrades,
+      openJournal,
       showSubjectManage,
       props,
     ],
@@ -307,7 +342,9 @@ export function SubjectListScreen(props: Props) {
             : props.purpose === "home"
               ? props.module === "attendance"
                 ? t("home.moduleSubjectAttendanceHint")
-                : t("home.moduleSubjectGradesHint")
+                : props.module === "grades"
+                  ? t("home.moduleSubjectGradesHint")
+                  : t("home.moduleSubjectJournalHint")
               : t("subjects.manageHint")}
         </ScreenHint>
         <ErrorBanner message={error} />

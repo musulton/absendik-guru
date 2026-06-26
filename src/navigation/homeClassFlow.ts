@@ -1,4 +1,3 @@
-import { Alert } from "react-native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { TranslationKey } from "@/lib/i18n/translations";
 import type { GuruClass, GuruWorkspace } from "@/lib/types";
@@ -18,7 +17,32 @@ export function listActiveHomeModules(modules: WorkspaceModules): HomeModule[] {
   const active: HomeModule[] = [];
   if (modules.attendance) active.push("attendance");
   if (modules.grades) active.push("grades");
+  if (modules.teachingJournal) active.push("teachingJournal");
+  if (modules.studentNotes) active.push("studentNotes");
   return active;
+}
+
+const SESSION_ORDER: HomeModule[] = [
+  "attendance",
+  "teachingJournal",
+  "grades",
+  "studentNotes",
+];
+
+/** Modul pertama dalam alur pertemuan yang aktif. */
+export function getSessionEntryModule(
+  modules: WorkspaceModules,
+): HomeModule | null {
+  return SESSION_ORDER.find((module) => modules[module]) ?? null;
+}
+
+export function moduleNeedsStudents(module: HomeModule): boolean {
+  return (
+    module === "attendance" ||
+    module === "grades" ||
+    module === "teachingJournal" ||
+    module === "studentNotes"
+  );
 }
 
 export function getHomeClassListCopy(
@@ -42,26 +66,37 @@ export function getHomeClassListCopy(
         : "home.classesGradesHint",
     };
   }
+  if (active.length === 1 && active[0] === "teachingJournal") {
+    return {
+      cardHintKey: "modules.teachingJournal",
+      screenHintKey: isSubjectMode
+        ? "home.classesSubjectJournalHint"
+        : "home.classesJournalHint",
+    };
+  }
+  if (active.length === 1 && active[0] === "studentNotes") {
+    return {
+      cardHintKey: "modules.studentNotes",
+      screenHintKey: "home.classesStudentNotesHint",
+    };
+  }
   return {
-    cardHintKey: "home.tapClassPickModule",
+    cardHintKey: "home.tapClassStartSession",
     screenHintKey: isSubjectMode
-      ? "home.classesSubjectHint"
-      : "home.classesHint",
+      ? "home.classesSessionSubjectHint"
+      : "home.classesSessionHint",
   };
 }
 
 export function promptAddStudentsForClass(
-  t: (key: TranslationKey) => string,
+  show: (options: {
+    isSchoolWorkspace: boolean;
+    onAddStudent: () => void;
+  }) => void,
+  _t: (key: TranslationKey) => string,
   opts: { isSchoolWorkspace: boolean; onAddStudent: () => void },
 ): void {
-  if (opts.isSchoolWorkspace) {
-    Alert.alert(t("school.readonlyTitle"), t("school.noStudentsHint"));
-    return;
-  }
-  Alert.alert(t("subjects.noStudents"), t("subjects.addStudent"), [
-    { text: t("common.cancel"), style: "cancel" },
-    { text: t("subjects.addStudent"), onPress: opts.onAddStudent },
-  ]);
+  show(opts);
 }
 
 export function navigateHomeClassModule(
@@ -69,26 +104,53 @@ export function navigateHomeClassModule(
   workspace: GuruWorkspace,
   target: HomeClassTarget,
   module: HomeModule,
+  opts?: { sessionFlow?: boolean },
 ): void {
+  const flow = opts?.sessionFlow ? { sessionFlow: true as const } : {};
+  if (module === "studentNotes") {
+    navigation.navigate("ClassStudentsHome", {
+      classId: target.classId,
+      className: target.className,
+      labelColor: target.labelColor,
+      ...flow,
+    });
+    return;
+  }
+
   if (workspace.attendanceMode === "subject") {
     navigation.navigate("SubjectList", {
       classId: target.classId,
       className: target.className,
       labelColor: target.labelColor,
       module,
+      ...flow,
     });
     return;
   }
+
   if (module === "attendance") {
     navigation.navigate("Attendance", {
       classId: target.classId,
       className: target.className,
+      labelColor: target.labelColor,
+      ...flow,
+    });
+    return;
+  }
+  if (module === "teachingJournal") {
+    navigation.navigate("TeachingJournal", {
+      classId: target.classId,
+      className: target.className,
+      labelColor: target.labelColor,
+      ...flow,
     });
     return;
   }
   navigation.navigate("GradeEntry", {
     classId: target.classId,
     className: target.className,
+    labelColor: target.labelColor,
+    ...flow,
   });
 }
 
@@ -100,7 +162,11 @@ export function openHomeClassFromList(
   opts: {
     t: (key: TranslationKey) => string;
     isSchoolWorkspace: boolean;
-    onAddStudent: () => void;
+    onAddStudent: (options?: { startSessionAfterCreate?: boolean }) => void;
+    showAddStudentsPrompt: (options: {
+      isSchoolWorkspace: boolean;
+      onAddStudent: () => void;
+    }) => void;
   },
 ): void {
   const target: HomeClassTarget = {
@@ -112,14 +178,16 @@ export function openHomeClassFromList(
   const active = listActiveHomeModules(modules);
 
   if (active.length === 1) {
-    if (target.activeStudentCount === 0) {
-      promptAddStudentsForClass(opts.t, {
+    const module = active[0];
+    if (moduleNeedsStudents(module) && target.activeStudentCount === 0) {
+      promptAddStudentsForClass(opts.showAddStudentsPrompt, opts.t, {
         isSchoolWorkspace: opts.isSchoolWorkspace,
-        onAddStudent: opts.onAddStudent,
+        onAddStudent: () =>
+          opts.onAddStudent({ startSessionAfterCreate: true }),
       });
       return;
     }
-    navigateHomeClassModule(navigation, workspace, target, active[0]);
+    navigateHomeClassModule(navigation, workspace, target, module);
     return;
   }
 

@@ -15,6 +15,7 @@ import {
   useBlockingScreenLoad,
   useFetchLoadingState,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
 import { apiListClasses } from "@/lib/guru-repository";
@@ -44,15 +45,24 @@ export function ClassPickerScreen({ mode, onPickClass, onUpgrade }: Props) {
   const load = useCallback(async (silent?: boolean) => {
     setError("");
     if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-    const classRes = await apiListClasses(workspace.id, { force: true });
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-    setRefreshing(false);
-    if (!classRes.ok) {
-      setError(classRes.error.message);
-      return;
+    try {
+      const classRes = await apiListClasses(workspace.id, { force: true });
+      if (!classRes.ok) {
+        setError(classRes.error.message);
+        return;
+      }
+      setClasses(classRes.data.classes);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("error.generic"));
+    } finally {
+      finishScreenFetch({
+        isSchoolWorkspace,
+        silent,
+        setLoading,
+        setRefreshing,
+      });
     }
-    setClasses(classRes.data.classes);
-  }, [workspace.id, isSchoolWorkspace, setLoading]);
+  }, [workspace.id, isSchoolWorkspace, setLoading, t]);
 
   const showBlockingLoad = useBlockingScreenLoad(loading, classes.length > 0);
 
@@ -62,7 +72,7 @@ export function ClassPickerScreen({ mode, onPickClass, onUpgrade }: Props) {
 
   useRefreshOnFocus(() => {
     void load(true);
-  }, { staleMs: 0 });
+  });
 
   useListMutations((event) => {
     if (event.workspaceId !== workspace.id) return;

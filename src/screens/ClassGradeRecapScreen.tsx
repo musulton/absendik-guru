@@ -26,6 +26,7 @@ import {
   useFetchLoadingState,
   useSchoolFetchOverlay,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { FetchLoadingOverlay } from "@/components/ui/FetchLoadingOverlay";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
@@ -168,48 +169,56 @@ export function ClassGradeRecapScreen({
 
     setError("");
     if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-
-    let result;
-    if (periodKind === "weekly") {
-      result = await apiGradeWeeklyRecap(
-        workspaceId,
-        classId,
-        weekDate,
-        subjectParam(),
-      );
-    } else if (periodKind === "monthly") {
-      result = await apiGradeMonthlyRecap(
-        workspaceId,
-        classId,
-        month,
-        subjectParam(),
-      );
-    } else {
-      result = await apiGradeSemesterRecap(
-        workspaceId,
-        classId,
-        semester.year,
-        semester.semester,
-        subjectParam(),
-      );
-    }
-
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-    setRefreshing(false);
-    if (!result.ok) {
-      const message =
-        isSchoolWorkspace &&
-        (result.error.code === "network" ||
-          result.error.code === "invalid_response" ||
-          result.error.code === "unknown" ||
-          result.error.code === "server_error")
-          ? t("error.schoolGradeRecapLoadFailed")
-          : result.error.message;
-      setError(message);
+    try {
+      let result;
+      if (periodKind === "weekly") {
+        result = await apiGradeWeeklyRecap(
+          workspaceId,
+          classId,
+          weekDate,
+          subjectParam(),
+        );
+      } else if (periodKind === "monthly") {
+        result = await apiGradeMonthlyRecap(
+          workspaceId,
+          classId,
+          month,
+          subjectParam(),
+        );
+      } else {
+        result = await apiGradeSemesterRecap(
+          workspaceId,
+          classId,
+          semester.year,
+          semester.semester,
+          subjectParam(),
+        );
+      }
+      if (!result.ok) {
+        const message =
+          isSchoolWorkspace &&
+          (result.error.code === "network" ||
+            result.error.code === "invalid_response" ||
+            result.error.code === "unknown" ||
+            result.error.code === "server_error")
+            ? t("error.schoolGradeRecapLoadFailed")
+            : result.error.message;
+        setError(message);
+        setRecap(null);
+        return;
+      }
+      setRecap(result.data.recap);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t("error.generic"));
       setRecap(null);
-      return;
+    } finally {
+      finishScreenFetch({
+        isSchoolWorkspace,
+        silent,
+        setLoading,
+        setRefreshing,
+      });
     }
-    setRecap(result.data.recap);
   }, [
     workspaceId,
     classId,

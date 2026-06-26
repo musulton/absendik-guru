@@ -33,12 +33,14 @@ import { useListStyles } from "@/lib/use-themed-styles";
 import { useTranslatedScreenTitle } from "@/hooks/useTranslatedScreenTitle";
 import { space } from "@/lib/theme";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
+import { useListMutations } from "@/hooks/useListMutations";
 import { useScrollToListIndex } from "@/hooks/useScrollToListIndex";
 import {
   useBlockingScreenLoad,
   useFetchLoadingState,
   useSchoolFetchOverlay,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { FetchLoadingOverlay } from "@/components/ui/FetchLoadingOverlay";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
@@ -67,7 +69,13 @@ import type {
   GuruAttendanceStudent,
 } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/translations";
+import { SessionProgressStrip } from "@/components/session/SessionProgressStrip";
+import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
+import { useSessionProgress } from "@/hooks/useSessionProgress";
+import { useSessionStepPress } from "@/hooks/useSessionStepPress";
 import { showAttendanceModuleMenu } from "@/navigation/classDetailMenu";
+import { showAfterAttendanceSavePrompt } from "@/navigation/sessionFlow";
+import { finishSessionFlow } from "@/navigation/sessionStepNav";
 import type { AppStackParamList } from "@/navigation/types";
 
 type Nav = NativeStackNavigationProp<AppStackParamList, "Attendance">;
@@ -82,6 +90,9 @@ type Props = {
   onStudents: () => void;
   onRecap: (assignments: GuruAssignment[]) => void;
   onEditClass: () => void;
+  onTeachingJournal?: (sessionDate: string) => void;
+  onGrades?: (sessionDate: string) => void;
+  onStudentNotes?: (sessionDate: string) => void;
 };
 
 function statusPalette(
@@ -118,8 +129,12 @@ export function AttendanceScreen({
   onStudents,
   onRecap,
   onEditClass,
+  onTeachingJournal,
+  onGrades,
+  onStudentNotes,
 }: Props) {
   const navigation = useNavigation<Nav>();
+  const { modules } = useWorkspaceModules();
   const route = useRoute<RouteProp<AppStackParamList, "Attendance">>();
   const { isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
   const isMutationLocked = isSchoolWorkspace || isLocalArchiveWorkspace;
@@ -139,7 +154,24 @@ export function AttendanceScreen({
       : isLocalArchiveWorkspace
         ? todayLocalDevice()
         : todayJakarta();
-  const [sessionDate, setSessionDate] = useState(today);
+  const [sessionDate, setSessionDate] = useState(
+    route.params.sessionDate ?? today,
+  );
+  const sessionFlow = route.params.sessionFlow === true;
+  const { progress, reload: reloadSessionProgress } = useSessionProgress(
+    workspaceId,
+    classId,
+    sessionDate,
+    subjectName,
+  );
+  const onSessionStepPress = useSessionStepPress({
+    classId,
+    className,
+    labelColor: route.params.labelColor,
+    subjectName,
+    sessionDate,
+    sessionFlow,
+  });
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [loading, setLoading] = useFetchLoadingState();
   const [saving, setSaving] = useState(false);
@@ -196,23 +228,28 @@ export function AttendanceScreen({
     async (silent?: boolean) => {
       setError("");
       if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-      const [result, dayBlock] = await Promise.all([
-        apiGetAttendance(workspaceId, classId, sessionDate, subjectName),
-        isSchoolWorkspace
-          ? apiGetSchoolDayBlock(workspaceId, sessionDate)
-          : Promise.resolve(null),
-      ]);
-      if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-      setDayBlockMessage(dayBlock ? formatSchoolDayBlockMessage(dayBlock) : "");
-      if (!result.ok) {
-        setError(result.error.message);
-        return;
+      try {
+        const [result, dayBlock] = await Promise.all([
+          apiGetAttendance(workspaceId, classId, sessionDate, subjectName),
+          isSchoolWorkspace
+            ? apiGetSchoolDayBlock(workspaceId, sessionDate)
+            : Promise.resolve(null),
+        ]);
+        setDayBlockMessage(dayBlock ? formatSchoolDayBlockMessage(dayBlock) : "");
+        if (!result.ok) {
+          setError(result.error.message);
+          return;
+        }
+        const { attendance } = result.data;
+        setRows(attendance.students);
+        const saved = Boolean(attendance.session);
+        setHasSaved(saved);
+        setEditing(!saved);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : t("error.generic"));
+      } finally {
+        finishScreenFetch({ isSchoolWorkspace, silent, setLoading });
       }
-      const { attendance } = result.data;
-      setRows(attendance.students);
-      const saved = Boolean(attendance.session);
-      setHasSaved(saved);
-      setEditing(!saved);
     },
     [
       workspaceId,
@@ -221,6 +258,7 @@ export function AttendanceScreen({
       subjectName,
       isSchoolWorkspace,
       setLoading,
+      t,
     ],
   );
 
@@ -230,6 +268,13 @@ export function AttendanceScreen({
   useEffect(() => {
     void load();
   }, [load]);
+
+  useListMutations((event) => {
+    if (event.workspaceId !== workspaceId || event.classId !== classId) return;
+    if (event.type === "student-created" || event.type === "student-deleted") {
+      void load(true);
+    }
+  });
 
   useRefreshOnFocus(() => {
     void load(true);
@@ -270,6 +315,9 @@ export function AttendanceScreen({
     });
   }, [
     navigation,
+    classId,
+    className,
+    route.params.labelColor,
     className,
     workspaceId,
     classId,
@@ -280,6 +328,8 @@ export function AttendanceScreen({
     t,
     isDark,
     showActionMenu,
+    sessionDate,
+    sessionFlow,
   ]);
 
   const setAllPresent = useCallback(() => {
@@ -401,16 +451,57 @@ export function AttendanceScreen({
     savedThisVisit.current = true;
     setMessage(t("attendance.saved"));
     setExpandedNotes(new Set());
+    void reloadSessionProgress();
+    if (sessionFlow) {
+      showAfterAttendanceSavePrompt(
+        showActionMenu,
+        t,
+        modules,
+        {
+          onJournal:
+            modules.teachingJournal && onTeachingJournal
+              ? () => onTeachingJournal(sessionDate)
+              : undefined,
+          onGrades:
+            modules.grades && onGrades
+              ? () => onGrades(sessionDate)
+              : undefined,
+          onStudentNotes:
+            modules.studentNotes && onStudentNotes
+              ? () => onStudentNotes(sessionDate)
+              : undefined,
+          onFinishSession: () =>
+            finishSessionFlow(navigation, {
+              classId,
+              className,
+              labelColor: route.params.labelColor,
+            }),
+        },
+        { colors, isDark },
+      );
+    }
   }, [
     rows,
     t,
     workspaceId,
     classId,
+    className,
     sessionDate,
     recordsPayload,
     subjectName,
     isSchoolWorkspace,
     dayBlockMessage,
+    modules,
+    onTeachingJournal,
+    onGrades,
+    onStudentNotes,
+    reloadSessionProgress,
+    showActionMenu,
+    colors,
+    isDark,
+    sessionFlow,
+    navigation,
+    route.params.labelColor,
   ]);
 
   const handleStartEdit = useCallback(() => {
@@ -481,7 +572,6 @@ export function AttendanceScreen({
     () => (
       <View style={styles.pageHeader}>
         <AttendanceSessionHeader
-          compact
           className={className}
           subjectName={subjectName}
           isToday={isToday}
@@ -609,6 +699,14 @@ export function AttendanceScreen({
       }
     >
       <View style={[styles.page, { backgroundColor: colors.bg }]}>
+        {sessionFlow ? (
+          <SessionProgressStrip
+            progress={progress}
+            pinned
+            currentModule="attendance"
+            onStepPress={onSessionStepPress}
+          />
+        ) : null}
         <FlatList
           ref={listRef}
           style={styles.list}
@@ -643,7 +741,7 @@ const styles = StyleSheet.create({
   list: { flex: 1 },
   pageHeader: {
     paddingTop: space.sm,
-    gap: space.xs,
+    gap: space.sm,
     marginBottom: space.xs,
   },
   summaryRow: {

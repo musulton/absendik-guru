@@ -1,7 +1,6 @@
 import { useMemo, useState } from "react";
 import {
   FlatList,
-  Modal,
   Pressable,
   StyleSheet,
   Text,
@@ -9,6 +8,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { Icon } from "@/components/ui/Icon";
 import { LabelBadge } from "@/components/ui/LabelBadge";
 import { useTheme } from "@/context/AppPreferencesContext";
@@ -44,7 +44,7 @@ export function FilterPicker({
   inline,
   inlineMinimal,
 }: Props) {
-  const { colors, font, scale, t, isDark } = useTheme();
+  const { colors, font, scale, t } = useTheme();
   const textStyles = useMemo(
     () => ({
       inlineLabel: { fontWeight: "600" as const, flexShrink: 0 },
@@ -146,22 +146,7 @@ export function FilterPicker({
         )}
       </Pressable>
 
-      <Modal
-        visible={open}
-        transparent
-        animationType="fade"
-        onRequestClose={close}
-      >
-        <View style={styles.overlay}>
-          <Pressable
-            style={[
-              styles.backdrop,
-              { backgroundColor: isDark ? "rgba(0,0,0,0.62)" : "rgba(15,23,42,0.38)" },
-            ]}
-            onPress={withHaptic(close)}
-            accessibilityRole="button"
-            accessibilityLabel={t("common.cancel")}
-          />
+      <BottomSheetModal visible={open} onClose={close}>
           <View
             style={[
               styles.sheet,
@@ -241,8 +226,7 @@ export function FilterPicker({
               }}
             />
           </View>
-        </View>
-      </Modal>
+      </BottomSheetModal>
     </>
   );
 }
@@ -296,13 +280,6 @@ const styles = StyleSheet.create({
   triggerPlaceholder: {
     flex: 1,
     fontWeight: "600",
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     borderTopLeftRadius: radius.xl,

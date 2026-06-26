@@ -40,6 +40,8 @@ const ICONS = {
   export: "download",
   search: "search",
   sort: "list",
+  journal: "book-open",
+  studentNote: "message-square",
   logout: "log-out",
   bell: "bell",
   cloud: "cloud",

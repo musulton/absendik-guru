@@ -1,14 +1,17 @@
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { FlatList, RefreshControl, StyleSheet, View } from "react-native";
 import { useNavigation, useRoute, type RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { AdFooterStack } from "@/components/ads/AdFooterStack";
+import { PrimaryButton } from "@/components/PrimaryButton";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { HeaderActions } from "@/components/ui/HeaderActions";
 import { ScreenHint } from "@/components/ui/ScreenHint";
 import { StudentListCard } from "@/components/ui/StudentListCard";
 import { StickyScreen } from "@/components/ui/StickyScreen";
+import { StickyActionBar } from "@/components/ui/StickyActionBar";
 import { useTheme } from "@/context/AppPreferencesContext";
+import { useActionMenu } from "@/context/ActionMenuContext";
 import { useWorkspaceModules } from "@/context/WorkspaceModulesContext";
 import { useWorkspace } from "@/context/WorkspaceContext";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
@@ -20,15 +23,27 @@ import {
   useBlockingScreenLoad,
   useFetchLoadingState,
   shouldShowFetchLoading,
+  finishScreenFetch,
 } from "@/hooks/useBlockingScreenLoad";
 import { ScreenLoadingView } from "@/components/ui/ScreenLoadingView";
 import { apiListStudents } from "@/lib/guru-repository";
+import {
+  todayInTimezone,
+  todayJakarta,
+  todayLocalDevice,
+} from "@/lib/dates";
+import { getCachedSchoolLink } from "@/lib/school-link";
+import { SessionProgressStrip } from "@/components/session/SessionProgressStrip";
+import { useSessionProgress } from "@/hooks/useSessionProgress";
+import { useSessionStepPress } from "@/hooks/useSessionStepPress";
+import { showStudentNotesModuleMenu } from "@/navigation/classDetailMenu";
+import { finishSessionFlow } from "@/navigation/sessionStepNav";
 import { useListStyles } from "@/lib/use-themed-styles";
 import { useTranslatedScreenTitle } from "@/hooks/useTranslatedScreenTitle";
 import { EmptyState } from "@/components/ui/EmptyState";
 import type { GuruStudent } from "@/lib/types";
 import { space } from "@/lib/theme";
-import type { ManageStackParamList } from "@/navigation/types";
+import type { HomeStackParamList, ManageStackParamList } from "@/navigation/types";
 
 type Nav = NativeStackNavigationProp<
   ManageStackParamList,
@@ -39,59 +54,116 @@ type Props = {
   workspaceId: string;
   classId: string;
   className: string;
-  purpose?: "home" | "manage";
+  purpose?: "home" | "manage" | "notes";
   onAddStudent: () => void;
   onEditStudent: (student: GuruStudent) => void;
   onStudentDetail?: (student: GuruStudent) => void;
   onStudentGradeDetail?: (student: GuruStudent) => void;
+  onStudentNotes?: (student: GuruStudent) => void;
+  onStudentNotesDetail?: (student: GuruStudent) => void;
   onUpgrade?: () => void;
+  onSessionManageStudents?: () => void;
+  onEditClass?: () => void;
 };
 
 export function ClassStudentsScreen({
   workspaceId,
   classId,
+  className,
   purpose = "home",
   onAddStudent,
   onEditStudent,
   onStudentDetail,
   onStudentGradeDetail,
+  onStudentNotes,
+  onStudentNotesDetail,
   onUpgrade,
+  onSessionManageStudents,
+  onEditClass,
 }: Props) {
   const isManage = purpose === "manage";
+  const isNotes = purpose === "notes";
   const navigation = useNavigation<Nav>();
-  const route =
-    useRoute<RouteProp<ManageStackParamList, "ClassStudents">>();
+  const homeNavigation =
+    useNavigation<NativeStackNavigationProp<HomeStackParamList>>();
+  const route = useRoute();
+  const notesRoute = useRoute<RouteProp<HomeStackParamList, "ClassStudentsHome">>();
+  const routeParams = route.params as
+    | { className?: string; refreshAt?: number }
+    | undefined;
+  const screenClassName = className ?? routeParams?.className ?? "";
   const listStyles = useListStyles();
   const { colors, t, isDark } = useTheme();
+  const { showActionMenu } = useActionMenu();
   const { modules } = useWorkspaceModules();
   const { isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
   const isMutationLocked = isSchoolWorkspace || isLocalArchiveWorkspace;
 
-  useTranslatedScreenTitle(
-    `${t("nav.students")} — ${route.params.className}`,
-  );
+  useTranslatedScreenTitle(`${t("nav.students")} — ${screenClassName}`);
   const [loading, setLoading] = useFetchLoadingState();
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
   const [students, setStudents] = useState<GuruStudent[]>([]);
   const loadGeneration = useRef(0);
 
-  const refreshAt = route.params.refreshAt;
+  const refreshAt = routeParams?.refreshAt;
+
+  const sessionToday = useMemo(() => {
+    const schoolTimezone = getCachedSchoolLink()?.timezone;
+    if (isSchoolWorkspace && schoolTimezone) {
+      return todayInTimezone(schoolTimezone);
+    }
+    if (isLocalArchiveWorkspace) return todayLocalDevice();
+    return todayJakarta();
+  }, [isSchoolWorkspace, isLocalArchiveWorkspace]);
+
+  const sessionDate = isNotes
+    ? (notesRoute.params.sessionDate ?? sessionToday)
+    : sessionToday;
+  const subjectName = isNotes ? (notesRoute.params.subjectName ?? null) : null;
+  const labelColor = isNotes ? notesRoute.params.labelColor : undefined;
+  const sessionFlow = isNotes && notesRoute.params.sessionFlow === true;
+
+  const { progress } = useSessionProgress(
+    workspaceId,
+    classId,
+    sessionDate,
+    subjectName,
+  );
+  const onSessionStepPress = useSessionStepPress({
+    classId,
+    className,
+    labelColor,
+    subjectName,
+    sessionDate,
+    sessionFlow: sessionFlow || undefined,
+  });
 
   const load = useCallback(async (silent?: boolean) => {
     const generation = ++loadGeneration.current;
     setError("");
     if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(true);
-    const result = await apiListStudents(workspaceId, classId, { force: true });
-    if (generation !== loadGeneration.current) return;
-    if (shouldShowFetchLoading(isSchoolWorkspace, silent)) setLoading(false);
-    setRefreshing(false);
-    if (!result.ok) {
-      setError(result.error.message);
-      return;
+    try {
+      const result = await apiListStudents(workspaceId, classId, { force: true });
+      if (generation !== loadGeneration.current) return;
+      if (!result.ok) {
+        setError(result.error.message);
+        return;
+      }
+      setStudents(result.data.students);
+    } catch (err) {
+      if (generation === loadGeneration.current) {
+        setError(err instanceof Error ? err.message : t("error.generic"));
+      }
+    } finally {
+      finishScreenFetch({
+        isSchoolWorkspace,
+        silent,
+        setLoading,
+        setRefreshing,
+      });
     }
-    setStudents(result.data.students);
-  }, [workspaceId, classId, isSchoolWorkspace, setLoading]);
+  }, [workspaceId, classId, isSchoolWorkspace, setLoading, t]);
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
@@ -132,7 +204,7 @@ export function ClassStudentsScreen({
 
   useRefreshOnFocus(() => {
     void load(true);
-  }, { staleMs: 0 });
+  });
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -141,18 +213,48 @@ export function ClassStudentsScreen({
           actions={
             isMutationLocked
               ? []
-              : [
-                  {
-                    icon: "plus" as const,
-                    onPress: onAddStudent,
-                    accessibilityLabel: t("subjects.addStudent"),
-                  },
-                ]
+              : isNotes
+                ? [
+                    {
+                      icon: "more" as const,
+                      onPress: () => {
+                        showStudentNotesModuleMenu(showActionMenu, t, {
+                          title: className,
+                          onManageStudents:
+                            onSessionManageStudents ?? onAddStudent,
+                          onEditClass: isMutationLocked ? undefined : onEditClass,
+                        });
+                      },
+                    },
+                    {
+                      icon: "plus" as const,
+                      onPress: onAddStudent,
+                      accessibilityLabel: t("subjects.addStudent"),
+                    },
+                  ]
+                : [
+                    {
+                      icon: "plus" as const,
+                      onPress: onAddStudent,
+                      accessibilityLabel: t("subjects.addStudent"),
+                    },
+                  ]
           }
         />
       ),
     });
-  }, [navigation, onAddStudent, isMutationLocked, isDark, t]);
+  }, [
+    navigation,
+    onAddStudent,
+    isMutationLocked,
+    isDark,
+    t,
+    isNotes,
+    className,
+    showActionMenu,
+    onSessionManageStudents,
+    onEditClass,
+  ]);
 
   const renderItem = useCallback(
     ({ item }: { item: GuruStudent }) => {
@@ -168,14 +270,36 @@ export function ClassStudentsScreen({
         );
       }
 
+      if (isNotes) {
+        return (
+          <StudentListCard
+            variant="notes"
+            fullName={item.fullName}
+            studentNumber={item.studentNumber}
+            actionHint={t("studentNotes.tapToAdd")}
+            historyLabel={t("studentNotesDetail.title")}
+            onPress={() =>
+              onStudentNotes ? onStudentNotes(item) : onEditStudent(item)
+            }
+            onHistory={
+              onStudentNotesDetail ? () => onStudentNotesDetail(item) : undefined
+            }
+          />
+        );
+      }
+
       return (
         <StudentListCard
           fullName={item.fullName}
           studentNumber={item.studentNumber}
-          attendanceLabel={t("studentDetail.title")}
-          gradesLabel={t("studentGradeDetail.title")}
+          studentNotesLabel={t("nav.studentNotes")}
+          studentNotesHistoryLabel={t("studentNotesDetail.title")}
           showAttendance={modules.attendance}
           showGrades={modules.grades}
+          showStudentNotes={modules.studentNotes && Boolean(onStudentNotes)}
+          showStudentNotesHistory={
+            modules.studentNotes && Boolean(onStudentNotesDetail)
+          }
           onAttendance={() =>
             onStudentDetail
               ? onStudentDetail(item)
@@ -186,6 +310,14 @@ export function ClassStudentsScreen({
               ? onStudentGradeDetail(item)
               : onEditStudent(item)
           }
+          onStudentNotesHistory={
+            onStudentNotesDetail ? () => onStudentNotesDetail(item) : undefined
+          }
+          onStudentNotes={() =>
+            onStudentNotes
+              ? onStudentNotes(item)
+              : onEditStudent(item)
+          }
         />
       );
     },
@@ -193,10 +325,14 @@ export function ClassStudentsScreen({
       t,
       onStudentDetail,
       onStudentGradeDetail,
+      onStudentNotes,
+      onStudentNotesDetail,
       onEditStudent,
       modules.attendance,
       modules.grades,
+      modules.studentNotes,
       isManage,
+      isNotes,
     ],
   );
 
@@ -213,11 +349,37 @@ export function ClassStudentsScreen({
   return (
     <StickyScreen
       footer={
-        <AdFooterStack placement="class_students" onUpgrade={onUpgrade} />
+        isNotes && sessionFlow ? (
+          <StickyActionBar>
+            <PrimaryButton
+              title={t("sessionFlow.finishSession")}
+              variant="secondary"
+              onPress={() =>
+                finishSessionFlow(homeNavigation, {
+                  classId,
+                  className,
+                  labelColor: notesRoute.params.labelColor,
+                  activeStudentCount: students.length,
+                })
+              }
+            />
+          </StickyActionBar>
+        ) : isNotes ? null : (
+          <AdFooterStack placement="class_students" onUpgrade={onUpgrade} />
+        )
       }
     >
-      <FlatList
-        style={[listStyles.list, { backgroundColor: colors.bg }]}
+      <View style={styles.listWrap}>
+        {isNotes && sessionFlow ? (
+          <SessionProgressStrip
+            progress={progress}
+            pinned
+            currentModule="studentNotes"
+            onStepPress={onSessionStepPress}
+          />
+        ) : null}
+        <FlatList
+          style={[listStyles.list, styles.listFlex, { backgroundColor: colors.bg }]}
         contentContainerStyle={[listStyles.listContent, styles.listContent]}
         data={students}
         keyExtractor={keyExtractor}
@@ -235,7 +397,9 @@ export function ClassStudentsScreen({
             <ScreenHint>
               {isManage
                 ? t("students.manageHint")
-                : isLocalArchiveWorkspace
+                : isNotes
+                  ? t("studentNotes.classHint")
+                  : isLocalArchiveWorkspace
                   ? t("workspace.localArchiveBanner")
                   : isSchoolWorkspace
                     ? t("students.hintSchool")
@@ -248,10 +412,13 @@ export function ClassStudentsScreen({
           <EmptyState icon="students" message={t("students.empty")} />
         }
       />
+      </View>
     </StickyScreen>
   );
 }
 
 const styles = StyleSheet.create({
+  listWrap: { flex: 1 },
+  listFlex: { flex: 1 },
   listContent: { paddingTop: space.sm },
 });

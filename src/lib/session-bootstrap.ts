@@ -10,7 +10,7 @@ export type GuruSessionBootstrap = {
 
 /**
  * Setelah login berhasil: sinkron tier Pro/Gratis dari server,
- * refresh status terhubung Absendik Sekolah, muat profil guru.
+ * refresh status school-link legacy, muat profil guru.
  */
 export async function bootstrapGuruSession(
   accessToken?: string | null,

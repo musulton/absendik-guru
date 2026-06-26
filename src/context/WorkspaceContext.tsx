@@ -3,7 +3,7 @@ import type { GuruAccount, GuruWorkspace } from "@/lib/types";
 
 type WorkspaceContextValue = {
   workspace: GuruWorkspace;
-  /** Workspace terhubung ke Absendik Sekolah — kelas/siswa dari admin sekolah. */
+  /** Workspace terhubung cloud (legacy) — kelas/siswa read-only. */
   isSchoolWorkspace: boolean;
   /** Workspace lokal arsip — data sebelum terhubung; rekap/export tetap bisa dibuka. */
   isLocalArchiveWorkspace: boolean;

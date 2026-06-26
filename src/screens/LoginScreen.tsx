@@ -14,7 +14,7 @@ import {
 import Constants from "expo-constants";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { ErrorBanner } from "@/components/ErrorBanner";
-import { AbsendikMark } from "@/components/brand/AbsendikMark";
+import { CatatanGuruMark } from "@/components/brand/CatatanGuruMark";
 import { FormField } from "@/components/ui/FormField";
 import { GoogleLogo } from "@/components/ui/GoogleLogo";
 import { Icon, type IconName } from "@/components/ui/Icon";
@@ -65,6 +65,12 @@ const FEATURES: {
   { labelKey: "login.featureAttendance", icon: "attendance", tone: "accent" },
   { labelKey: "login.featureGrades", icon: "grades", tone: "primary" },
   { labelKey: "login.featureRecap", icon: "recap", tone: "success" },
+  { labelKey: "login.featureJournal", icon: "journal", tone: "primary" },
+  {
+    labelKey: "login.featureNotes",
+    icon: "studentNote",
+    tone: "accent",
+  },
 ];
 
 export function LoginScreen({ onLoggedIn }: Props) {
@@ -261,7 +267,7 @@ export function LoginScreen({ onLoggedIn }: Props) {
                 <View
                   style={[styles.logoBadge, compact && styles.logoBadgeCompact]}
                 >
-                  <AbsendikMark size={compact ? 40 : 48} />
+                  <CatatanGuruMark size={compact ? 40 : 48} />
                 </View>
                 <View style={styles.brandText}>
                   <Text
@@ -272,11 +278,6 @@ export function LoginScreen({ onLoggedIn }: Props) {
                   >
                     {t("app.name")}
                   </Text>
-                  {!compact ? (
-                    <Text style={textStyles.appTagline}>
-                      {t("app.tagline")}
-                    </Text>
-                  ) : null}
                 </View>
               </View>
 
@@ -490,99 +491,99 @@ export function LoginScreen({ onLoggedIn }: Props) {
 
               {!config.hideEmailLogin ? (
                 <>
-              <View style={styles.dividerRow}>
-                <View
-                  style={[
-                    styles.dividerLine,
-                    { backgroundColor: colors.border },
-                  ]}
-                />
-                <Text
-                  style={[
-                    font.caption,
-                    textStyles.dividerLabel,
-                    { color: colors.textMuted },
-                  ]}
-                >
-                  {t("common.or")}
-                </Text>
-                <View
-                  style={[
-                    styles.dividerLine,
-                    { backgroundColor: colors.border },
-                  ]}
-                />
-              </View>
-
-              {!emailExpanded ? (
-                <Pressable
-                  onPress={withHaptic(() => setEmailExpanded(true))}
-                  style={[
-                    styles.emailToggle,
-                    {
-                      borderColor: colors.primaryBorder,
-                      backgroundColor: colors.primaryMuted,
-                    },
-                  ]}
-                >
-                  <Icon name="mail" size={16} color={colors.primary} />
-                  <Text
-                    style={[
-                      textStyles.emailToggleText,
-                      { color: colors.primary },
-                    ]}
-                  >
-                    {t("login.emailToggle")}
-                  </Text>
-                </Pressable>
-              ) : (
-                <View
-                  style={[
-                    styles.emailForm,
-                    {
-                      backgroundColor: colors.primaryMuted,
-                      borderColor: colors.primaryBorder,
-                    },
-                  ]}
-                >
-                  <View style={styles.emailFormHeader}>
-                    <View style={styles.emailFormTitleRow}>
-                      <Icon name="mail" size={14} color={colors.primary} />
-                      <Text style={[font.label, { color: colors.primary }]}>
-                        {t("login.emailToggle")}
-                      </Text>
-                    </View>
-                    <TextLink
-                      label={t("login.emailHide")}
-                      onPress={() => setEmailExpanded(false)}
+                  <View style={styles.dividerRow}>
+                    <View
+                      style={[
+                        styles.dividerLine,
+                        { backgroundColor: colors.border },
+                      ]}
+                    />
+                    <Text
+                      style={[
+                        font.caption,
+                        textStyles.dividerLabel,
+                        { color: colors.textMuted },
+                      ]}
+                    >
+                      {t("common.or")}
+                    </Text>
+                    <View
+                      style={[
+                        styles.dividerLine,
+                        { backgroundColor: colors.border },
+                      ]}
                     />
                   </View>
-                  <FormField
-                    label={t("login.email")}
-                    value={email}
-                    onChangeText={setEmail}
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    keyboardType="email-address"
-                    placeholder="nama@sekolah.sch.id"
-                    editable={!loading}
-                  />
-                  <FormField
-                    label={t("login.password")}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry
-                    autoComplete="password"
-                    placeholder="••••••••"
-                    editable={!loading}
-                  />
-                  <PrimaryButton
-                    title={t("login.emailSubmit")}
-                    loading={loading}
-                    onPress={() => void handleEmailLogin()}
-                  />
-                </View>
-              )}
+
+                  {!emailExpanded ? (
+                    <Pressable
+                      onPress={withHaptic(() => setEmailExpanded(true))}
+                      style={[
+                        styles.emailToggle,
+                        {
+                          borderColor: colors.primaryBorder,
+                          backgroundColor: colors.primaryMuted,
+                        },
+                      ]}
+                    >
+                      <Icon name="mail" size={16} color={colors.primary} />
+                      <Text
+                        style={[
+                          textStyles.emailToggleText,
+                          { color: colors.primary },
+                        ]}
+                      >
+                        {t("login.emailToggle")}
+                      </Text>
+                    </Pressable>
+                  ) : (
+                    <View
+                      style={[
+                        styles.emailForm,
+                        {
+                          backgroundColor: colors.primaryMuted,
+                          borderColor: colors.primaryBorder,
+                        },
+                      ]}
+                    >
+                      <View style={styles.emailFormHeader}>
+                        <View style={styles.emailFormTitleRow}>
+                          <Icon name="mail" size={14} color={colors.primary} />
+                          <Text style={[font.label, { color: colors.primary }]}>
+                            {t("login.emailToggle")}
+                          </Text>
+                        </View>
+                        <TextLink
+                          label={t("login.emailHide")}
+                          onPress={() => setEmailExpanded(false)}
+                        />
+                      </View>
+                      <FormField
+                        label={t("login.email")}
+                        value={email}
+                        onChangeText={setEmail}
+                        autoCapitalize="none"
+                        autoComplete="email"
+                        keyboardType="email-address"
+                        placeholder="nama@sekolah.sch.id"
+                        editable={!loading}
+                      />
+                      <FormField
+                        label={t("login.password")}
+                        value={password}
+                        onChangeText={setPassword}
+                        secureTextEntry
+                        autoComplete="password"
+                        placeholder="••••••••"
+                        editable={!loading}
+                      />
+                      <PrimaryButton
+                        title={t("login.emailSubmit")}
+                        loading={loading}
+                        onPress={() => void handleEmailLogin()}
+                      />
+                    </View>
+                  )}
                 </>
               ) : null}
 

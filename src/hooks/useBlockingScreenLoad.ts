@@ -13,11 +13,8 @@ export function useSchoolFetchOverlay(loading: boolean) {
   return loading && isSchoolWorkspace;
 }
 
-/**
- * State loading fetch — default true agar tidak flash konten kosong
- * saat API timeout lalu fallback Supabase.
- */
-export function useFetchLoadingState(initial = true) {
+/** State loading fetch — sekolah set true saat fetch dimulai. */
+export function useFetchLoadingState(initial = false) {
   return useState(initial);
 }
 
@@ -27,4 +24,18 @@ export function shouldShowFetchLoading(
   silent?: boolean,
 ): boolean {
   return !silent && isSchoolWorkspace;
+}
+
+type ScreenFetchCleanupOpts = {
+  isSchoolWorkspace: boolean;
+  silent?: boolean;
+  setLoading: (loading: boolean) => void;
+  setRefreshing?: (refreshing: boolean) => void;
+};
+
+/** Pastikan spinner pull-to-refresh / loading selalu berhenti. */
+export function finishScreenFetch(opts: ScreenFetchCleanupOpts): void {
+  const showSpinner = shouldShowFetchLoading(opts.isSchoolWorkspace, opts.silent);
+  if (showSpinner) opts.setLoading(false);
+  opts.setRefreshing?.(false);
 }

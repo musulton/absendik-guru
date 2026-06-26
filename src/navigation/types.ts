@@ -7,7 +7,16 @@ export type ClassRouteParams = {
   labelColor?: string | null;
 };
 
-export type HomeModule = "attendance" | "grades";
+/** True bila guru masuk lewat "Mulai pertemuan" (bukan modul langsung). */
+export type SessionFlowRouteParams = {
+  sessionFlow?: boolean;
+};
+
+export type HomeModule =
+  | "attendance"
+  | "grades"
+  | "teachingJournal"
+  | "studentNotes";
 
 export type HomeClassHubParams = {
   classId: string;
@@ -16,12 +25,33 @@ export type HomeClassHubParams = {
   activeStudentCount: number;
 };
 
-/** Beranda — absensi & penilaian. */
+/** Beranda — modul guru. */
 export type HomeStackParamList = {
   HomeHub: undefined;
   ClassModuleHub: HomeClassHubParams;
-  SubjectList: ClassRouteParams & { module: HomeModule };
-  Attendance: ClassRouteParams & { subjectName?: string | null };
+  SubjectList: ClassRouteParams & { module: HomeModule } & SessionFlowRouteParams;
+  Attendance: ClassRouteParams & {
+    subjectName?: string | null;
+    sessionDate?: string;
+  } & SessionFlowRouteParams;
+  TeachingJournal: ClassRouteParams & {
+    subjectName?: string | null;
+    sessionDate?: string;
+  } & SessionFlowRouteParams;
+  ClassStudentsHome: ClassRouteParams & {
+    sessionDate?: string;
+    subjectName?: string | null;
+  } & SessionFlowRouteParams;
+  StudentNotes: {
+    classId: string;
+    className: string;
+    studentId: string;
+    fullName: string;
+    studentNumber: string;
+    sessionDate?: string;
+    subjectName?: string | null;
+    labelColor?: string | null;
+  } & SessionFlowRouteParams;
   StudentAttendanceDetail: {
     classId: string;
     className: string;
@@ -43,13 +73,33 @@ export type HomeStackParamList = {
     className: string;
     assignmentsJson: string;
   };
-  GradeEntry: ClassRouteParams & { subjectName?: string | null };
+  GradeEntry: ClassRouteParams & {
+    subjectName?: string | null;
+    sessionDate?: string;
+  } & SessionFlowRouteParams;
   ClassGradeRecap: {
     classId: string;
     className: string;
     assignmentsJson: string;
   };
-  CreateStudent: { classId: string; className: string };
+  ClassTeachingJournalRecap: {
+    classId: string;
+    className: string;
+    assignmentsJson: string;
+  };
+  StudentNotesDetail: {
+    classId: string;
+    className: string;
+    studentId: string;
+    fullName: string;
+    studentNumber: string;
+  };
+  CreateStudent: {
+    classId: string;
+    className: string;
+    labelColor?: string | null;
+    startSessionAfterCreate?: boolean;
+  };
   /** Stack pengelolaan — nested di Home. */
   Manage: NavigatorScreenParams<ManageStackParamList>;
   /** Stack pengaturan — nested di Home. */
@@ -87,7 +137,7 @@ export type ManageStackParamList = {
 
 /** Pengaturan aplikasi. */
 export type SettingsStackParamList = {
-  Settings: undefined;
+  SettingsHub: undefined;
   About: undefined;
   OnboardingReplay: undefined;
 };

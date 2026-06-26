@@ -6,8 +6,6 @@ const KEY_LAST_POST_SAVE = "ads_last_post_save_at";
 const KEY_LAST_UTILITY = "ads_last_utility_at";
 const KEY_DAILY_COUNT = "ads_interstitial_daily";
 const KEY_SESSION_START = "ads_session_start_at";
-const KEY_LAST_APP_OPEN = "ads_last_app_open_at";
-const KEY_APP_OPEN_DAILY = "ads_app_open_daily";
 
 /**
  * Profil nyaman + cukup monetisasi:
@@ -20,11 +18,6 @@ const UTILITY_MIN_INTERVAL_MS = 5 * 60 * 1000;
 const SESSION_GRACE_MS = 2 * 60 * 1000;
 const MAX_PER_DAY = 6;
 
-const APP_OPEN_MIN_INTERVAL_MS = 15 * 60 * 1000;
-const APP_OPEN_MAX_PER_DAY = 3;
-/** Wajib lama ditinggal sebelum app-open boleh muncul saat kembali. */
-export const APP_OPEN_BACKGROUND_THRESHOLD_MS = 30 * 1000;
-
 export const AD_CAPS = {
   interstitial: {
     globalMinIntervalMs: GLOBAL_MIN_INTERVAL_MS,
@@ -32,11 +25,6 @@ export const AD_CAPS = {
     utilityMinIntervalMs: UTILITY_MIN_INTERVAL_MS,
     sessionGraceMs: SESSION_GRACE_MS,
     maxPerDay: MAX_PER_DAY,
-  },
-  appOpen: {
-    minIntervalMs: APP_OPEN_MIN_INTERVAL_MS,
-    maxPerDay: APP_OPEN_MAX_PER_DAY,
-    backgroundThresholdMs: APP_OPEN_BACKGROUND_THRESHOLD_MS,
   },
 } as const;
 
@@ -128,23 +116,4 @@ export async function recordInterstitialShown(
     bucket === "post_save" ? KEY_LAST_POST_SAVE : KEY_LAST_UTILITY;
   await AsyncStorage.setItem(bucketKey, String(now));
   await bumpDailyCount(KEY_DAILY_COUNT);
-}
-
-export async function canShowAppOpenNow(): Promise<boolean> {
-  const now = Date.now();
-  const sessionStart = await getSessionStartAt();
-  if (now - sessionStart < SESSION_GRACE_MS) return false;
-
-  const lastRaw = await AsyncStorage.getItem(KEY_LAST_APP_OPEN);
-  if (lastRaw && now - Number(lastRaw) < APP_OPEN_MIN_INTERVAL_MS) return false;
-
-  const count = await readDailyCount(KEY_APP_OPEN_DAILY);
-  if (count >= APP_OPEN_MAX_PER_DAY) return false;
-
-  return true;
-}
-
-export async function recordAppOpenShown(): Promise<void> {
-  await AsyncStorage.setItem(KEY_LAST_APP_OPEN, String(Date.now()));
-  await bumpDailyCount(KEY_APP_OPEN_DAILY);
 }

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import {
   FlatList,
-  Modal,
   Platform,
   Pressable,
   StyleSheet,
@@ -11,6 +10,7 @@ import {
 } from "react-native";
 import type { DateTimePickerEvent } from "@react-native-community/datetimepicker";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { BottomSheetModal } from "@/components/ui/BottomSheetModal";
 import { CompactNavRow } from "@/components/ui/CompactNavRow";
 import { DatePickerInline } from "@/components/ui/DatePickerInline";
 import { FilterPicker, type FilterOption } from "@/components/ui/FilterPicker";
@@ -52,7 +52,7 @@ export function RecapPeriodFilter({
   onMonthChange,
   maxDate,
 }: Props) {
-  const { colors, font, scale, t, isDark } = useTheme();
+  const { colors, font, scale, t } = useTheme();
   const insets = useSafeAreaInsets();
   const { height: windowHeight } = useWindowDimensions();
   const [showWeekPicker, setShowWeekPicker] = useState(false);
@@ -156,20 +156,10 @@ export function RecapPeriodFilter({
         {subjectFilter ? <View style={styles.subjectRow}>{subjectFilter}</View> : null}
       </View>
 
-      <Modal
+      <BottomSheetModal
         visible={monthModalOpen}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setMonthModalOpen(false)}
+        onClose={() => setMonthModalOpen(false)}
       >
-        <View style={styles.overlay}>
-          <Pressable
-            style={[
-              styles.backdrop,
-              { backgroundColor: isDark ? "rgba(0,0,0,0.62)" : "rgba(15,23,42,0.38)" },
-            ]}
-            onPress={withHaptic(() => setMonthModalOpen(false))}
-          />
           <View
             style={[
               styles.sheet,
@@ -238,8 +228,7 @@ export function RecapPeriodFilter({
               }}
             />
           </View>
-        </View>
-      </Modal>
+      </BottomSheetModal>
     </>
   );
 }
@@ -261,13 +250,6 @@ const styles = StyleSheet.create({
   },
   subjectRow: {
     minWidth: 0,
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  backdrop: {
-    ...StyleSheet.absoluteFillObject,
   },
   sheet: {
     borderTopLeftRadius: radius.xl,

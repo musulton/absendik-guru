@@ -8,7 +8,10 @@ import {
   type ReactNode,
 } from "react";
 import type { AdInterstitialPlacement } from "@/lib/ads/placements";
-import { markSessionStart, recordInterstitialShown } from "@/lib/ads/frequency";
+import {
+  markSessionStart,
+  recordInterstitialShown,
+} from "@/lib/ads/frequency";
 import { shouldShowAds, shouldShowInterstitial } from "@/lib/ads/policy";
 import {
   isPrivacyOptionsAvailable,
@@ -23,7 +26,6 @@ import {
   type AdsRuntime,
   resolveAdsRuntime,
 } from "@/lib/ads";
-import { useAppOpenAds } from "@/hooks/useAppOpenAds";
 import { AdInterstitialModal } from "@/components/ads/AdInterstitialModal";
 
 type AdContextValue = {
@@ -81,8 +83,6 @@ export function AdProvider({ children, onUpgradePress }: Props) {
     void markSessionStart();
     void refreshAdsState();
   }, [refreshAdsState]);
-
-  useAppOpenAds(nativeReady && adsEnabled);
 
   const showPrivacyOptions = useCallback(async () => {
     const ok = await showAdsPrivacyOptions();

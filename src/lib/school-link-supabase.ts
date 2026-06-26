@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase";
+import { schoolSupabase } from "@/lib/supabase-school";
 import { config } from "@/lib/config";
 import { getGuruMonthRange } from "@/lib/month-range";
 import {
@@ -199,11 +199,11 @@ type SchoolProfile = {
 async function loadSchoolProfile(): Promise<
   (SchoolProfile & { attendanceMode: "class" | "subject" }) | null
 > {
-  const { data: session } = await supabase.auth.getSession();
+  const { data: session } = await schoolSupabase.auth.getSession();
   const userId = session.session?.user?.id;
   if (!userId) return null;
 
-  const { data: profile, error: profileErr } = await supabase
+  const { data: profile, error: profileErr } = await schoolSupabase
     .from("profiles")
     .select("id, school_id, role")
     .eq("id", userId)
@@ -212,7 +212,7 @@ async function loadSchoolProfile(): Promise<
   if (profileErr || !profile?.school_id) return null;
   if (profile.role !== "teacher" && profile.role !== "admin") return null;
 
-  const { data: school, error: schoolErr } = await supabase
+  const { data: school, error: schoolErr } = await schoolSupabase
     .from("schools")
     .select("attendance_mode")
     .eq("id", profile.school_id)
@@ -232,7 +232,7 @@ async function getAssignedClassIds(
   profile: SchoolProfile & { attendanceMode: "class" | "subject" },
 ): Promise<string[]> {
   if (profile.role === "admin") {
-    const { data, error } = await supabase
+    const { data, error } = await schoolSupabase
       .from("classes")
       .select("id")
       .eq("school_id", profile.schoolId)
@@ -242,7 +242,7 @@ async function getAssignedClassIds(
     return (data ?? []).map((row) => row.id);
   }
 
-  const homeroomQuery = supabase
+  const homeroomQuery = schoolSupabase
     .from("class_assignments")
     .select("class_id")
     .eq("teacher_id", profile.id)
@@ -292,7 +292,7 @@ async function summarizeSchoolLinkStatsFromSupabase(
     return { classCount: 0, subjectCount: 0, activeStudentCount: 0 };
   }
 
-  let query = supabase
+  let query = schoolSupabase
     .from("class_assignments")
     .select("subject_id")
     .in("class_id", classIds)
@@ -318,14 +318,14 @@ async function summarizeSchoolLinkStatsFromSupabase(
 }
 
 /**
- * Deteksi tautan Absendik Sekolah langsung dari Supabase (tanpa API Next.js).
+ * Deteksi tautan sekolah legacy dari Supabase (tidak dipakai di rilis saat ini).
  */
 export async function fetchSchoolLinkFromSupabase(): Promise<GuruSchoolLinkResponse | null> {
-  const { data: session } = await supabase.auth.getSession();
+  const { data: session } = await schoolSupabase.auth.getSession();
   const userId = session.session?.user?.id;
   if (!userId) return null;
 
-  const { data: profile, error: profileErr } = await supabase
+  const { data: profile, error: profileErr } = await schoolSupabase
     .from("profiles")
     .select("id, school_id, full_name, role")
     .eq("id", userId)
@@ -334,7 +334,7 @@ export async function fetchSchoolLinkFromSupabase(): Promise<GuruSchoolLinkRespo
   if (profileErr || !profile?.school_id) return null;
   if (profile.role !== "teacher" && profile.role !== "admin") return null;
 
-  const { data: school, error: schoolErr } = await supabase
+  const { data: school, error: schoolErr } = await schoolSupabase
     .from("schools")
     .select("name, attendance_mode, timezone")
     .eq("id", profile.school_id)
@@ -389,7 +389,7 @@ export async function fetchSchoolClassesFromSupabase(): Promise<
     const classIds = await getAssignedClassIds(profile);
     if (classIds.length === 0) return [];
 
-    const { data: classes, error: classErr } = await supabase
+    const { data: classes, error: classErr } = await schoolSupabase
       .from("classes")
       .select("id, name, is_active, created_at")
       .eq("school_id", profile.schoolId)
@@ -399,7 +399,7 @@ export async function fetchSchoolClassesFromSupabase(): Promise<
 
     if (classErr) throw new Error(classErr.message);
 
-    const { data: students, error: studentErr } = await supabase
+    const { data: students, error: studentErr } = await schoolSupabase
       .from("students")
       .select("class_id")
       .in("class_id", classIds)
@@ -430,7 +430,7 @@ async function teacherCanAccessClass(
   classId: string,
 ): Promise<boolean> {
   if (profile.role === "admin") {
-    const { data } = await supabase
+    const { data } = await schoolSupabase
       .from("classes")
       .select("id")
       .eq("id", classId)
@@ -453,7 +453,7 @@ async function resolveSubjectId(
   const trimmed = subjectName.trim();
   if (!trimmed || trimmed === "__homeroom__") return null;
 
-  let query = supabase
+  let query = schoolSupabase
     .from("class_assignments")
     .select("subject_id, subjects(name)")
     .eq("class_id", classId)
@@ -482,7 +482,7 @@ async function teacherIsHomeroomOfClassMobile(
   classId: string,
 ): Promise<boolean> {
   if (profile.role === "admin") return true;
-  const { data } = await supabase
+  const { data } = await schoolSupabase
     .from("class_assignments")
     .select("id")
     .eq("teacher_id", profile.id)
@@ -501,7 +501,7 @@ async function assertAttendanceViewAccessMobile(
   if (profile.role === "admin") return true;
 
   if (subjectId) {
-    const { data } = await supabase
+    const { data } = await schoolSupabase
       .from("class_assignments")
       .select("id")
       .eq("teacher_id", profile.id)
@@ -531,7 +531,7 @@ async function assertAttendanceManageAccessMobile(
     if (!subjectId) {
       return teacherIsHomeroomOfClassMobile(profile, classId);
     }
-    const { data } = await supabase
+    const { data } = await schoolSupabase
       .from("class_assignments")
       .select("id")
       .eq("teacher_id", profile.id)
@@ -595,7 +595,7 @@ async function getOrCreateAttendanceSessionMobile(
   }
   if (profile.attendanceMode === "class" && subjectId) return null;
 
-  let sessionQuery = supabase
+  let sessionQuery = schoolSupabase
     .from("attendance_sessions")
     .select("id, class_id, session_date, subject_id, submitted_at")
     .eq("class_id", classId)
@@ -617,7 +617,7 @@ async function getOrCreateAttendanceSessionMobile(
     return null;
   }
 
-  const { data: created, error } = await supabase
+  const { data: created, error } = await schoolSupabase
     .from("attendance_sessions")
     .insert({
       class_id: classId,
@@ -636,7 +636,7 @@ async function resolveSubjectName(
   subjectId: string | null,
 ): Promise<string | null> {
   if (!subjectId) return null;
-  const { data } = await supabase
+  const { data } = await schoolSupabase
     .from("subjects")
     .select("name")
     .eq("id", subjectId)
@@ -666,7 +666,7 @@ async function assertGradeEntryAccessMobile(
 
   if (profile.attendanceMode === "subject") {
     if (!subjectId) return false;
-    const { data } = await supabase
+    const { data } = await schoolSupabase
       .from("class_assignments")
       .select("id")
       .eq("teacher_id", profile.id)
@@ -676,7 +676,7 @@ async function assertGradeEntryAccessMobile(
     return Boolean(data);
   }
 
-  const { data } = await supabase
+  const { data } = await schoolSupabase
     .from("class_assignments")
     .select("id")
     .eq("teacher_id", profile.id)
@@ -695,7 +695,7 @@ export async function fetchSchoolStudentsFromSupabase(
     if (!profile || !(await teacherCanAccessClass(profile, classId)))
       return null;
 
-    const { data, error } = await supabase
+    const { data, error } = await schoolSupabase
       .from("students")
       .select("id, class_id, full_name, student_number, is_active, created_at")
       .eq("class_id", classId)
@@ -727,7 +727,7 @@ export async function fetchSchoolAssignmentsFromSupabase(
     if (!profile || !(await teacherCanAccessClass(profile, classId)))
       return null;
 
-    let query = supabase
+    let query = schoolSupabase
       .from("class_assignments")
       .select("id, class_id, subject_id, created_at, subjects(name)")
       .eq("class_id", classId);
@@ -804,7 +804,7 @@ export async function fetchSchoolAttendanceFromSupabase(
     if (!(await assertAttendanceViewAccessMobile(profile, classId, subjectId)))
       return null;
 
-    let sessionQuery = supabase
+    let sessionQuery = schoolSupabase
       .from("attendance_sessions")
       .select("id, class_id, session_date, subject_id, submitted_at")
       .eq("class_id", classId)
@@ -835,7 +835,7 @@ export async function fetchSchoolAttendanceFromSupabase(
     >();
 
     if (session?.id) {
-      const { data: records, error: recordsErr } = await supabase
+      const { data: records, error: recordsErr } = await schoolSupabase
         .from("attendance_records")
         .select("student_id, status, note")
         .eq("session_id", session.id);
@@ -931,7 +931,7 @@ export async function saveSchoolAttendanceFromSupabase(
     if (!session) return null;
 
     if (session.submitted_at) {
-      const { error: unlockErr } = await supabase
+      const { error: unlockErr } = await schoolSupabase
         .from("attendance_sessions")
         .update({ submitted_at: null, submitted_by: null })
         .eq("id", session.id);
@@ -939,7 +939,7 @@ export async function saveSchoolAttendanceFromSupabase(
     }
 
     const studentIds = records.map((row) => row.studentId);
-    const { data: validStudents, error: valErr } = await supabase
+    const { data: validStudents, error: valErr } = await schoolSupabase
       .from("students")
       .select("id")
       .eq("class_id", classId)
@@ -958,13 +958,13 @@ export async function saveSchoolAttendanceFromSupabase(
       note: record.note?.trim() || null,
     }));
 
-    const { error: upsertErr } = await supabase
+    const { error: upsertErr } = await schoolSupabase
       .from("attendance_records")
       .upsert(rows, { onConflict: "session_id,student_id" });
 
     if (upsertErr) throw new Error(upsertErr.message);
 
-    const { error: submitErr } = await supabase
+    const { error: submitErr } = await schoolSupabase
       .from("attendance_sessions")
       .update({
         submitted_by: profile.id,
@@ -1011,7 +1011,7 @@ export async function submitSchoolAttendanceFromSupabase(
     );
     if (!session) return null;
 
-    const { count, error: countErr } = await supabase
+    const { count, error: countErr } = await schoolSupabase
       .from("attendance_records")
       .select("*", { count: "exact", head: true })
       .eq("session_id", session.id);
@@ -1019,7 +1019,7 @@ export async function submitSchoolAttendanceFromSupabase(
     if (countErr) throw new Error(countErr.message);
     if (!count) return null;
 
-    const { error: submitErr } = await supabase
+    const { error: submitErr } = await schoolSupabase
       .from("attendance_sessions")
       .update({
         submitted_by: profile.id,
@@ -1071,7 +1071,7 @@ async function buildAttendancePeriodRecapFromSupabase(
     const className = await getClassName(profile, classId);
     const subjectLabel = await resolveSubjectName(subjectId);
 
-    const { data: students, error: stErr } = await supabase
+    const { data: students, error: stErr } = await schoolSupabase
       .from("students")
       .select("id, full_name, student_number")
       .eq("class_id", classId)
@@ -1081,7 +1081,7 @@ async function buildAttendancePeriodRecapFromSupabase(
 
     if (stErr) throw new Error(stErr.message);
 
-    let sessionQuery = supabase
+    let sessionQuery = schoolSupabase
       .from("attendance_sessions")
       .select("id, session_date, submitted_at")
       .eq("class_id", classId)
@@ -1106,7 +1106,7 @@ async function buildAttendancePeriodRecapFromSupabase(
     }[] = [];
 
     if (sessionIds.length > 0) {
-      const { data: recs, error: recErr } = await supabase
+      const { data: recs, error: recErr } = await schoolSupabase
         .from("attendance_records")
         .select("session_id, student_id, status")
         .in("session_id", sessionIds);
@@ -1262,7 +1262,7 @@ export async function fetchSchoolGradeDayFromSupabase(
     if (!(await assertGradeEntryAccessMobile(profile, classId, subjectId)))
       return null;
 
-    let taskQuery = supabase
+    let taskQuery = schoolSupabase
       .from("grade_tasks")
       .select(
         "id, class_id, subject_id, task_date, title, sort_order, created_at",
@@ -1312,7 +1312,7 @@ export async function fetchSchoolGradeDayFromSupabase(
       score: string | null;
     }[] = [];
     if (tasks.length > 0) {
-      const { data: scores, error: scoreErr } = await supabase
+      const { data: scores, error: scoreErr } = await schoolSupabase
         .from("grade_scores")
         .select("task_id, student_id, score")
         .in(
@@ -1365,7 +1365,7 @@ export async function fetchSchoolStudentAttendanceDetailFromSupabase(
     if (!profile || !(await teacherCanAccessClass(profile, classId)))
       return null;
 
-    const { data: student, error: studentErr } = await supabase
+    const { data: student, error: studentErr } = await schoolSupabase
       .from("students")
       .select("id, full_name, student_number")
       .eq("id", studentId)
@@ -1382,7 +1382,7 @@ export async function fetchSchoolStudentAttendanceDetailFromSupabase(
       subjectName,
     );
 
-    let sessionQuery = supabase
+    let sessionQuery = schoolSupabase
       .from("attendance_sessions")
       .select("id, session_date, subject_id, subjects(name)")
       .eq("class_id", classId)
@@ -1411,7 +1411,7 @@ export async function fetchSchoolStudentAttendanceDetailFromSupabase(
       };
     }
 
-    const { data: records, error: recordsErr } = await supabase
+    const { data: records, error: recordsErr } = await schoolSupabase
       .from("attendance_records")
       .select("session_id, status, note")
       .eq("student_id", studentId)
@@ -1472,7 +1472,7 @@ export async function fetchSchoolStudentGradeDetailFromSupabase(
     if (!profile || !(await teacherCanAccessClass(profile, classId)))
       return null;
 
-    const { data: student, error: studentErr } = await supabase
+    const { data: student, error: studentErr } = await schoolSupabase
       .from("students")
       .select("id, full_name, student_number")
       .eq("id", studentId)
@@ -1489,7 +1489,7 @@ export async function fetchSchoolStudentGradeDetailFromSupabase(
       subjectName,
     );
 
-    let taskQuery = supabase
+    let taskQuery = schoolSupabase
       .from("grade_tasks")
       .select("id, task_date, title, subject_id")
       .eq("class_id", classId)
@@ -1518,7 +1518,7 @@ export async function fetchSchoolStudentGradeDetailFromSupabase(
       };
     }
 
-    const { data: scores, error: scoreErr } = await supabase
+    const { data: scores, error: scoreErr } = await schoolSupabase
       .from("grade_scores")
       .select("task_id, score")
       .eq("student_id", studentId)
@@ -1573,7 +1573,7 @@ export async function createSchoolGradeTaskFromSupabase(
     if (!(await assertGradeEntryAccessMobile(profile, classId, subjectId)))
       return null;
 
-    let maxQuery = supabase
+    let maxQuery = schoolSupabase
       .from("grade_tasks")
       .select("sort_order")
       .eq("class_id", classId)
@@ -1592,7 +1592,7 @@ export async function createSchoolGradeTaskFromSupabase(
     const sortOrder = (maxRow?.sort_order ?? -1) + 1;
     const taskTitle = title?.trim() || `Tugas ${sortOrder + 1}`;
 
-    const { data, error } = await supabase
+    const { data, error } = await schoolSupabase
       .from("grade_tasks")
       .insert({
         school_id: profile.schoolId,
@@ -1637,7 +1637,7 @@ export async function saveSchoolGradeTaskFromSupabase(
     const profile = await loadSchoolProfile();
     if (!profile) return null;
 
-    const { data: task, error: taskErr } = await supabase
+    const { data: task, error: taskErr } = await schoolSupabase
       .from("grade_tasks")
       .select(
         "id, class_id, subject_id, task_date, title, sort_order, created_at",
@@ -1657,7 +1657,7 @@ export async function saveSchoolGradeTaskFromSupabase(
     const trimmedTitle = input.title.trim();
     if (!trimmedTitle) return null;
 
-    const { error: updateErr } = await supabase
+    const { error: updateErr } = await schoolSupabase
       .from("grade_tasks")
       .update({ title: trimmedTitle })
       .eq("id", taskId);
@@ -1673,7 +1673,7 @@ export async function saveSchoolGradeTaskFromSupabase(
       .filter((row) => row.score !== null);
 
     if (scoreRows.length > 0) {
-      const { error: scoreErr } = await supabase
+      const { error: scoreErr } = await schoolSupabase
         .from("grade_scores")
         .upsert(scoreRows, { onConflict: "task_id,student_id" });
       if (scoreErr) throw new Error(scoreErr.message);
@@ -1684,7 +1684,7 @@ export async function saveSchoolGradeTaskFromSupabase(
       .map((row) => row.studentId);
 
     if (emptyScoreStudentIds.length > 0) {
-      const { error: clearErr } = await supabase
+      const { error: clearErr } = await schoolSupabase
         .from("grade_scores")
         .delete()
         .eq("task_id", taskId)
@@ -1716,7 +1716,7 @@ export async function deleteSchoolGradeTaskFromSupabase(
     const profile = await loadSchoolProfile();
     if (!profile) return null;
 
-    const { data: task, error: taskErr } = await supabase
+    const { data: task, error: taskErr } = await schoolSupabase
       .from("grade_tasks")
       .select("id, subject_id")
       .eq("id", taskId)
@@ -1731,7 +1731,7 @@ export async function deleteSchoolGradeTaskFromSupabase(
       return null;
     }
 
-    const { error } = await supabase
+    const { error } = await schoolSupabase
       .from("grade_tasks")
       .delete()
       .eq("id", taskId);
@@ -1746,7 +1746,7 @@ async function getClassName(
   profile: SchoolProfile,
   classId: string,
 ): Promise<string> {
-  const { data } = await supabase
+  const { data } = await schoolSupabase
     .from("classes")
     .select("name")
     .eq("id", classId)
@@ -1780,7 +1780,7 @@ async function buildGradePeriodRecapFromSupabase(
     const className = await getClassName(profile, classId);
     const subjectLabel = await resolveSubjectName(subjectId);
 
-    let taskQuery = supabase
+    let taskQuery = schoolSupabase
       .from("grade_tasks")
       .select("id, title, task_date")
       .eq("class_id", classId)
@@ -1824,7 +1824,7 @@ async function buildGradePeriodRecapFromSupabase(
       score: string | null;
     }[] = [];
     if (tasks.length > 0) {
-      const { data: scores, error: scoreErr } = await supabase
+      const { data: scores, error: scoreErr } = await schoolSupabase
         .from("grade_scores")
         .select("task_id, student_id, score")
         .in(

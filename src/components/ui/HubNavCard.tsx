@@ -12,6 +12,9 @@ type Props = {
   subtitle?: string;
   accentColor: string;
   tintColor?: string;
+  compact?: boolean;
+  /** Tampilkan subtitle meski mode compact (mis. kartu rekap). */
+  compactSubtitle?: boolean;
   onPress: () => void;
 };
 
@@ -21,6 +24,8 @@ export function HubNavCard({
   subtitle,
   accentColor,
   tintColor,
+  compact = false,
+  compactSubtitle = false,
   onPress,
 }: Props) {
   const { colors, font, scale } = useTheme();
@@ -36,36 +41,50 @@ export function HubNavCard({
         accentColor={accentColor}
         tintColor={tintColor}
         style={styles.outer}
-        contentStyle={styles.body}
+        contentStyle={[styles.body, compact && styles.bodyCompact]}
       >
         <IconBadge
           icon={icon}
           backgroundColor={`${accentColor}18`}
           color={accentColor}
+          size={compact ? "sm" : "md"}
         />
         <View style={styles.textWrap}>
           <Text
             style={[
               font.body,
               styles.title,
-              { color: colors.text, fontSize: scale(16) },
+              {
+                color: colors.text,
+                fontSize: scale(compact ? 14 : 16),
+              },
             ]}
           >
             {title}
           </Text>
-          {subtitle ? (
+          {subtitle && (!compact || compactSubtitle) ? (
             <Text
               style={[
                 font.caption,
-                { color: colors.textMuted, fontSize: scale(12), lineHeight: scale(17) },
+                {
+                  color: colors.textMuted,
+                  fontSize: scale(compact ? 11 : 12),
+                  lineHeight: scale(compact ? 15 : 17),
+                },
               ]}
             >
               {subtitle}
             </Text>
           ) : null}
         </View>
-        <View style={[styles.chevronPill, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Icon name="chevronRight" size={18} color={colors.textMuted} />
+        <View
+          style={[
+            styles.chevronPill,
+            compact && styles.chevronPillCompact,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Icon name="chevronRight" size={compact ? 16 : 18} color={colors.textMuted} />
         </View>
       </AccentCard>
     </Pressable>
@@ -81,6 +100,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: space.md,
     paddingVertical: 14,
   },
+  bodyCompact: {
+    gap: space.sm,
+    paddingHorizontal: space.sm + 2,
+    paddingVertical: 10,
+  },
   textWrap: { flex: 1, minWidth: 0, gap: 3 },
   title: { fontWeight: "700" },
   chevronPill: {
@@ -91,6 +115,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+  },
+  chevronPillCompact: {
+    width: 28,
+    height: 28,
   },
   pressed: { opacity: 0.92, transform: [{ scale: 0.998 }] },
 });

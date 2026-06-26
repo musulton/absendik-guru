@@ -15,6 +15,8 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 import { ErrorBanner } from "@/components/ErrorBanner";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { SectionLabel } from "@/components/ui/SectionLabel";
+import { CollapsibleSection } from "@/components/ui/CollapsibleSection";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { SegmentedChoice } from "@/components/ui/SegmentedChoice";
 import { wipeAllLocalDeviceData } from "@/lib/device-data";
 import {
@@ -55,8 +57,7 @@ import {
   purchaseAndroidPro,
   restoreAndroidProPurchases,
 } from "@/lib/iap/android-pro";
-import { isAndroidIapSupported } from "@/lib/iap/native-module";
-import { GURU_IAP_DEV_UNLOCK } from "@/lib/iap/config";
+import { GURU_IAP_DEV_UNLOCK, isAndroidBillingReady } from "@/lib/iap/config";
 import type { GuruAccount } from "@/lib/types";
 import type { Locale } from "@/lib/i18n/translations";
 import { elevation, radius, space } from "@/lib/theme";
@@ -93,8 +94,16 @@ function useSettingsTextStyles() {
     () =>
       StyleSheet.create({
         avatarText: { color: "#fff", fontSize: scale(14), fontWeight: "800" },
-        profileName: { fontSize: scale(15), fontWeight: "700", lineHeight: scale(19) },
-        profileEmail: { fontSize: scale(12), lineHeight: scale(16), marginTop: 1 },
+        profileName: {
+          fontSize: scale(15),
+          fontWeight: "700",
+          lineHeight: scale(19),
+        },
+        profileEmail: {
+          fontSize: scale(12),
+          lineHeight: scale(16),
+          marginTop: 1,
+        },
         fieldLabel: {
           fontSize: scale(10),
           fontWeight: "700",
@@ -117,7 +126,11 @@ function useSettingsTextStyles() {
         cloudTileText: { fontSize: scale(12), fontWeight: "700" },
         cloudHint: { flex: 1, fontSize: scale(10), lineHeight: scale(14) },
         switchTitle: { fontWeight: "600", fontSize: scale(13), flex: 1 },
-        footerTileText: { fontSize: scale(11), fontWeight: "700", lineHeight: scale(14) },
+        footerTileText: {
+          fontSize: scale(11),
+          fontWeight: "700",
+          lineHeight: scale(14),
+        },
       }),
     [scale],
   );
@@ -188,10 +201,7 @@ function SettingsNavRow({
     <View style={styles.navRow}>
       {icon ? (
         <View
-          style={[
-            styles.navIcon,
-            { backgroundColor: colors.primaryMuted },
-          ]}
+          style={[styles.navIcon, { backgroundColor: colors.primaryMuted }]}
         >
           <Icon name={icon} size={16} color={colors.primary} />
         </View>
@@ -238,7 +248,9 @@ function SettingsField({
   const textStyles = useSettingsTextStyles();
   return (
     <View style={styles.field}>
-      <Text style={[textStyles.fieldLabel, { color: colors.textMuted }]}>{label}</Text>
+      <Text style={[textStyles.fieldLabel, { color: colors.textMuted }]}>
+        {label}
+      </Text>
       {children}
     </View>
   );
@@ -260,10 +272,14 @@ function InlineSwitch({
   const textStyles = useSettingsTextStyles();
   return (
     <View style={styles.switchRow}>
-      <View style={[styles.switchIcon, { backgroundColor: colors.primaryMuted }]}>
+      <View
+        style={[styles.switchIcon, { backgroundColor: colors.primaryMuted }]}
+      >
         <Icon name={icon} size={14} color={colors.primary} />
       </View>
-      <Text style={[textStyles.switchTitle, { color: colors.text }]}>{title}</Text>
+      <Text style={[textStyles.switchTitle, { color: colors.text }]}>
+        {title}
+      </Text>
       <Switch
         value={value}
         onValueChange={onValueChange}
@@ -292,9 +308,7 @@ function PlanBullet({
   return (
     <View style={styles.planBullet}>
       <View style={[styles.planDot, { backgroundColor: dotColor }]}>
-        {tone === "pro" ? (
-          <Icon name="check" size={8} color="#fff" />
-        ) : null}
+        {tone === "pro" ? <Icon name="check" size={8} color="#fff" /> : null}
       </View>
       <Text style={[textStyles.planLine, { color: colors.textMuted }]}>
         <Text style={{ fontWeight: "800", color: labelColor }}>{label}</Text>
@@ -350,7 +364,10 @@ function FooterAction({
         )}
       </View>
       <Text
-        style={[textStyles.footerTileText, { color: tint, textAlign: "center" }]}
+        style={[
+          textStyles.footerTileText,
+          { color: tint, textAlign: "center" },
+        ]}
         numberOfLines={2}
       >
         {title}
@@ -395,7 +412,10 @@ function CloudAction({
           <Icon name={icon} size={16} color={colors.primary} />
         )}
       </View>
-      <Text style={[textStyles.cloudTileText, { color: colors.primary }]} numberOfLines={1}>
+      <Text
+        style={[textStyles.cloudTileText, { color: colors.primary }]}
+        numberOfLines={1}
+      >
         {title}
       </Text>
     </Pressable>
@@ -430,8 +450,10 @@ export function SettingsScreen({
 
   useTranslatedScreenTitle(t("settings.title"));
   const [subscribed, setSubscribed] = useState(false);
-  const [proDeviceConflict, setProDeviceConflict] =
-    useState<Extract<GuruProDeviceStatus, { ok: false }> | null>(null);
+  const [proDeviceConflict, setProDeviceConflict] = useState<Extract<
+    GuruProDeviceStatus,
+    { ok: false }
+  > | null>(null);
   const [transferringDevice, setTransferringDevice] = useState(false);
   const [loading, setLoading] = useState(false);
   const [restoringPurchase, setRestoringPurchase] = useState(false);
@@ -440,8 +462,12 @@ export function SettingsScreen({
   const [restoring, setRestoring] = useState(false);
   const [autoCloudSync, setAutoCloudSync] = useState(true);
   const [message, setMessage] = useState("");
+  const [confirmDialog, setConfirmDialog] = useState<"signOut" | "wipe" | null>(
+    null,
+  );
   const ads = useAdsOptional();
-  const { workspace, isSchoolWorkspace, isLocalArchiveWorkspace } = useWorkspace();
+  const { workspace, isSchoolWorkspace, isLocalArchiveWorkspace } =
+    useWorkspace();
   const modulesCtx = useWorkspaceModulesOptional();
   const [privacyOptionsAvailable, setPrivacyOptionsAvailable] = useState(false);
   const showModuleSettings =
@@ -457,7 +483,7 @@ export function SettingsScreen({
     setAutoCloudSync(await getAutoCloudSyncEnabled());
     await ads?.refreshAdsState();
     setPrivacyOptionsAvailable(await isPrivacyOptionsAvailable());
-    if (Platform.OS === "android" && isAndroidIapSupported()) {
+    if (Platform.OS === "android" && isAndroidBillingReady()) {
       const product = await fetchAndroidProProduct();
       setProPrice(product?.price || null);
     } else {
@@ -472,11 +498,19 @@ export function SettingsScreen({
   );
 
   const toggleModule = useCallback(
-    async (key: "attendance" | "grades", next: boolean) => {
+    async (
+      key: "attendance" | "grades" | "teachingJournal" | "studentNotes",
+      next: boolean,
+    ) => {
       if (!modulesCtx) return;
       const { modules, updateModules } = modulesCtx;
-      const other = key === "attendance" ? modules.grades : modules.attendance;
-      if (!next && !other) {
+      const enabledCount = [
+        modules.attendance,
+        modules.grades,
+        modules.teachingJournal,
+        modules.studentNotes,
+      ].filter(Boolean).length;
+      if (!next && enabledCount <= 1 && modules[key]) {
         Alert.alert(t("settings.modulesMinOne"));
         return;
       }
@@ -490,13 +524,17 @@ export function SettingsScreen({
     if (subscribed) return;
 
     if (GURU_IAP_DEV_UNLOCK) {
-      Alert.alert(t("settings.subscribeAlertTitle"), t("settings.subscribeAlertBody"), [
-        { text: t("common.cancel"), style: "cancel" },
-        {
-          text: t("settings.upgradePro"),
-          onPress: () => void confirmDevUnlock(),
-        },
-      ]);
+      Alert.alert(
+        t("settings.subscribeAlertTitle"),
+        t("settings.subscribeAlertBody"),
+        [
+          { text: t("common.cancel"), style: "cancel" },
+          {
+            text: t("settings.upgradePro"),
+            onPress: () => void confirmDevUnlock(),
+          },
+        ],
+      );
       return;
     }
 
@@ -505,7 +543,7 @@ export function SettingsScreen({
       return;
     }
 
-    if (Platform.OS !== "android" || !isAndroidIapSupported()) {
+    if (Platform.OS !== "android" || !isAndroidBillingReady()) {
       Alert.alert(t("settings.upgradePro"), t("settings.iapUnavailable"));
       return;
     }
@@ -536,7 +574,9 @@ export function SettingsScreen({
       void ads?.refreshAdsState();
       setMessage(t("settings.proActive"));
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : t("settings.proActivateFailed"));
+      setMessage(
+        err instanceof Error ? err.message : t("settings.proActivateFailed"),
+      );
     } finally {
       setLoading(false);
     }
@@ -579,7 +619,7 @@ export function SettingsScreen({
         return;
       }
 
-      if (Platform.OS === "android" && isAndroidIapSupported()) {
+      if (Platform.OS === "android" && isAndroidBillingReady()) {
         const result = await restoreAndroidProPurchases();
         if (result.ok) {
           await applyProSubscriptionActive(true);
@@ -600,13 +640,17 @@ export function SettingsScreen({
   }
 
   async function handleTransferDevice() {
-    Alert.alert(t("settings.transferDevice"), t("settings.transferDeviceConfirm"), [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("settings.transferDevice"),
-        onPress: () => void runTransferDevice(),
-      },
-    ]);
+    Alert.alert(
+      t("settings.transferDevice"),
+      t("settings.transferDeviceConfirm"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("settings.transferDevice"),
+          onPress: () => void runTransferDevice(),
+        },
+      ],
+    );
   }
 
   async function runTransferDevice() {
@@ -633,7 +677,10 @@ export function SettingsScreen({
     if (!(await hasCloudSubscription())) {
       Alert.alert(t("settings.upgradePro"), t("settings.cloudHint"), [
         { text: t("common.cancel"), style: "cancel" },
-        { text: t("settings.upgradePro"), onPress: () => void handleSubscribe() },
+        {
+          text: t("settings.upgradePro"),
+          onPress: () => void handleSubscribe(),
+        },
       ]);
       return;
     }
@@ -647,7 +694,10 @@ export function SettingsScreen({
     if (!(await hasCloudSubscription())) {
       Alert.alert(t("settings.upgradePro"), t("settings.cloudHint"), [
         { text: t("common.cancel"), style: "cancel" },
-        { text: t("settings.upgradePro"), onPress: () => void handleSubscribe() },
+        {
+          text: t("settings.upgradePro"),
+          onPress: () => void handleSubscribe(),
+        },
       ]);
       return;
     }
@@ -697,14 +747,7 @@ export function SettingsScreen({
   }
 
   function confirmWipeLocalData() {
-    Alert.alert(t("settings.wipe"), t("settings.wipeHint"), [
-      { text: t("common.cancel"), style: "cancel" },
-      {
-        text: t("settings.wipe"),
-        style: "destructive",
-        onPress: () => void runWipeLocalData(),
-      },
-    ]);
+    setConfirmDialog("wipe");
   }
 
   async function runWipeLocalData() {
@@ -721,10 +764,7 @@ export function SettingsScreen({
   }
 
   function confirmSignOut() {
-    Alert.alert(t("settings.signOutConfirm"), undefined, [
-      { text: t("common.cancel"), style: "cancel" },
-      { text: t("settings.signOut"), style: "destructive", onPress: onSignOut },
-    ]);
+    setConfirmDialog("signOut");
   }
 
   async function handleAdPrivacy() {
@@ -745,10 +785,15 @@ export function SettingsScreen({
       <SettingsCard colors={colors}>
         <View style={styles.profileRow}>
           <View style={[styles.avatar, { backgroundColor: colors.primary }]}>
-            <Text style={textStyles.avatarText}>{initialsFromName(account.fullName)}</Text>
+            <Text style={textStyles.avatarText}>
+              {initialsFromName(account.fullName)}
+            </Text>
           </View>
           <View style={styles.profileText}>
-            <Text style={[textStyles.profileName, { color: colors.text }]} numberOfLines={1}>
+            <Text
+              style={[textStyles.profileName, { color: colors.text }]}
+              numberOfLines={1}
+            >
               {account.fullName}
             </Text>
             <Text
@@ -776,8 +821,11 @@ export function SettingsScreen({
       </SettingsCard>
 
       {showModuleSettings ? (
-        <>
-          <SectionLabel title={t("settings.modulesSection")} dense />
+        <CollapsibleSection
+          title={t("settings.modulesSection")}
+          dense
+          defaultExpanded={false}
+        >
           <SettingsCard colors={colors}>
             <InlineSwitch
               title={t("settings.moduleAttendance")}
@@ -794,13 +842,34 @@ export function SettingsScreen({
               onValueChange={(next) => void toggleModule("grades", next)}
               colors={colors}
             />
+            <SettingsDivider color={colors.border} />
+            <InlineSwitch
+              title={t("settings.moduleTeachingJournal")}
+              icon="journal"
+              value={modulesCtx.modules.teachingJournal}
+              onValueChange={(next) =>
+                void toggleModule("teachingJournal", next)
+              }
+              colors={colors}
+            />
+            <SettingsDivider color={colors.border} />
+            <InlineSwitch
+              title={t("settings.moduleStudentNotes")}
+              icon="studentNote"
+              value={modulesCtx.modules.studentNotes}
+              onValueChange={(next) => void toggleModule("studentNotes", next)}
+              colors={colors}
+            />
             <Text
-              style={[font.caption, { color: colors.textMuted, lineHeight: 16 }]}
+              style={[
+                font.caption,
+                { color: colors.textMuted, lineHeight: 16 },
+              ]}
             >
               {t("settings.modulesHint")}
             </Text>
           </SettingsCard>
-        </>
+        </CollapsibleSection>
       ) : null}
 
       <SectionLabel title={t("settings.package")} dense />
@@ -810,7 +879,9 @@ export function SettingsScreen({
             style={[
               styles.planBadge,
               {
-                backgroundColor: subscribed ? colors.successBg : colors.primaryMuted,
+                backgroundColor: subscribed
+                  ? colors.successBg
+                  : colors.primaryMuted,
               },
             ]}
           >
@@ -825,7 +896,9 @@ export function SettingsScreen({
                 { color: subscribed ? colors.success : colors.primary },
               ]}
             >
-              {subscribed ? t("settings.proActive") : t("settings.freePlanBadge")}
+              {subscribed
+                ? t("settings.proActive")
+                : t("settings.freePlanBadge")}
             </Text>
           </View>
           <Text
@@ -857,18 +930,33 @@ export function SettingsScreen({
               colors={colors}
             />
             {proPrice ? (
-              <Text style={[font.caption, { color: colors.textMuted, marginBottom: space.sm }]}>
+              <Text
+                style={[
+                  font.caption,
+                  { color: colors.textMuted, marginBottom: space.sm },
+                ]}
+              >
                 {t("settings.proPrice", { price: proPrice })}
               </Text>
             ) : null}
-            <Text style={[font.caption, { color: colors.textMuted, marginBottom: space.sm }]}>
+            <Text
+              style={[
+                font.caption,
+                { color: colors.textMuted, marginBottom: space.sm },
+              ]}
+            >
               {GURU_IAP_DEV_UNLOCK
                 ? t("settings.proDevUnlockHint")
                 : Platform.OS === "ios"
                   ? t("settings.iapIosSoon")
                   : t("settings.proUpgradeHint")}
             </Text>
-            <Text style={[font.caption, { color: colors.textMuted, marginBottom: space.sm }]}>
+            <Text
+              style={[
+                font.caption,
+                { color: colors.textMuted, marginBottom: space.sm },
+              ]}
+            >
               {t("settings.restorePurchaseHint")}
             </Text>
             <PrimaryButton
@@ -905,10 +993,21 @@ export function SettingsScreen({
           >
             <Icon name="smartphone" size={13} color={colors.textMuted} />
             <View style={{ flex: 1 }}>
-              <Text style={[font.caption, { color: colors.text, fontWeight: "700" }]}>
+              <Text
+                style={[
+                  font.caption,
+                  { color: colors.text, fontWeight: "700" },
+                ]}
+              >
                 {t("settings.proDeviceConflict")}
               </Text>
-              <Text style={[font.caption, textStyles.cloudHint, { color: colors.textMuted }]}>
+              <Text
+                style={[
+                  font.caption,
+                  textStyles.cloudHint,
+                  { color: colors.textMuted },
+                ]}
+              >
                 {t("settings.proDeviceConflictBody", {
                   device:
                     proDeviceConflict.registeredDeviceLabel ??
@@ -951,7 +1050,13 @@ export function SettingsScreen({
             ]}
           >
             <Icon name="cloud" size={13} color={colors.textMuted} />
-            <Text style={[font.caption, textStyles.cloudHint, { color: colors.textMuted }]}>
+            <Text
+              style={[
+                font.caption,
+                textStyles.cloudHint,
+                { color: colors.textMuted },
+              ]}
+            >
               {t("settings.cloudHint")}
             </Text>
           </View>
@@ -965,7 +1070,12 @@ export function SettingsScreen({
               onValueChange={(next) => void handleAutoCloudSyncToggle(next)}
               colors={colors}
             />
-            <Text style={[font.caption, { color: colors.textMuted, lineHeight: 16 }]}>
+            <Text
+              style={[
+                font.caption,
+                { color: colors.textMuted, lineHeight: 16 },
+              ]}
+            >
               {t("settings.autoCloudSyncHint")}
             </Text>
           </>
@@ -1007,7 +1117,12 @@ export function SettingsScreen({
             value={fontSize}
             onChange={(key) => setFontSize(key as FontSizePreference)}
           />
-          <Text style={[font.caption, { color: colors.textMuted, marginTop: space.xs }]}>
+          <Text
+            style={[
+              font.caption,
+              { color: colors.textMuted, marginTop: space.xs },
+            ]}
+          >
             {t("settings.fontSizeHint")}
           </Text>
         </SettingsField>
@@ -1078,6 +1193,31 @@ export function SettingsScreen({
           variant="danger"
         />
       </View>
+
+      <ConfirmDialog
+        visible={confirmDialog === "wipe"}
+        title={t("settings.wipe")}
+        body={t("settings.wipeHint")}
+        confirmLabel={t("settings.wipe")}
+        destructive
+        loading={loading}
+        onClose={() => setConfirmDialog(null)}
+        onConfirm={() => {
+          setConfirmDialog(null);
+          void runWipeLocalData();
+        }}
+      />
+      <ConfirmDialog
+        visible={confirmDialog === "signOut"}
+        title={t("settings.signOutConfirm")}
+        confirmLabel={t("settings.signOut")}
+        destructive
+        onClose={() => setConfirmDialog(null)}
+        onConfirm={() => {
+          setConfirmDialog(null);
+          onSignOut();
+        }}
+      />
     </ScreenScroll>
   );
 }

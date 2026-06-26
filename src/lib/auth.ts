@@ -7,7 +7,11 @@ import { Linking, Platform } from "react-native";
 import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import { config } from "@/lib/config";
-import { guruOAuthDeepLink, OAUTH_CALLBACK_PATH } from "@/lib/app-id";
+import {
+  guruOAuthDeepLink,
+  OAUTH_CALLBACK_PATH,
+  OAUTH_WEB_CALLBACK_PATH,
+} from "@/lib/app-id";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -81,7 +85,7 @@ type MobileOAuthTargets = {
   /**
    * Deep link tempat token diteruskan dari halaman web.
    * Expo Go: exp://host:port/--/auth/callback
-   * Dev build / standalone: absendikguru://auth/callback
+   * Dev build / standalone: catatanguru://auth/callback
    */
   deepLinkReturnUri: string;
 };
@@ -90,7 +94,7 @@ function buildMobileOAuthTargets(): MobileOAuthTargets {
   const deepLinkReturnUri = isExpoGo()
     ? buildExpoGoRedirectUri()
     : guruOAuthDeepLink();
-  const browserRedirectPrefix = `${config.oauthWebOrigin}/auth/guru/mobile-callback`;
+  const browserRedirectPrefix = `${config.oauthWebOrigin}/${OAUTH_WEB_CALLBACK_PATH}`;
   const supabaseRedirectTo = `${browserRedirectPrefix}?expo=${encodeURIComponent(deepLinkReturnUri)}`;
   return { supabaseRedirectTo, browserRedirectPrefix, deepLinkReturnUri };
 }
@@ -131,7 +135,7 @@ export function getOAuthRedirectUri(): string {
 /** Entri tetap untuk Supabase → Redirect URLs (wildcard). */
 export function getOAuthSupabaseAllowListHints(): string[] {
   return [
-    `${config.oauthWebOrigin}/auth/guru/mobile-callback**`,
+    `${config.oauthWebOrigin}/${OAUTH_WEB_CALLBACK_PATH}**`,
     guruOAuthDeepLink(),
   ];
 }
@@ -352,7 +356,7 @@ function buildOAuthCallbackError(redirectTo: string): string {
     allowList +
     "\n\nRedirect sesi ini:\n" +
     redirectTo +
-    "\n\nSite URL = origin web Absendik (bukan localhost). Deploy halaman /auth/guru/mobile-callback."
+    `\n\nSite URL = origin web OAuth (HTTPS, bukan localhost). Deploy halaman /${OAUTH_WEB_CALLBACK_PATH}.`
   );
 }
 
@@ -468,7 +472,7 @@ type OAuthBrowserLaunch =
  * Buka browser OAuth.
  *
  * @param authUrl - URL OAuth dari Supabase
- * @param deepLinkReturnUri - Deep link tujuan akhir (exp:// atau absendikguru://)
+ * @param deepLinkReturnUri - Deep link tujuan akhir (exp:// atau catatanguru://)
  *
  * Android: openAuthSessionAsync memakai browserRedirectPrefix (HTTPS) sebagai
  * redirectUrl — Chrome Custom Tab hanya bisa mendeteksi redirect HTTPS sebagai

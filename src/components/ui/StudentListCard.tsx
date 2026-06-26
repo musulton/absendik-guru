@@ -12,12 +12,28 @@ type ActionProps = {
   studentNumber?: string | null;
   onAttendance: () => void;
   onGrades: () => void;
+  onStudentNotes?: () => void;
+  onStudentNotesHistory?: () => void;
   onManage?: () => void;
   attendanceLabel: string;
   gradesLabel: string;
+  studentNotesLabel?: string;
+  studentNotesHistoryLabel?: string;
   manageLabel?: string;
   showAttendance?: boolean;
   showGrades?: boolean;
+  showStudentNotes?: boolean;
+  showStudentNotesHistory?: boolean;
+};
+
+type NotesPickProps = {
+  variant: "notes";
+  fullName: string;
+  studentNumber?: string | null;
+  actionHint: string;
+  onPress: () => void;
+  onHistory?: () => void;
+  historyLabel?: string;
 };
 
 type NavigateProps = {
@@ -28,7 +44,7 @@ type NavigateProps = {
   onPress: () => void;
 };
 
-type Props = ActionProps | NavigateProps;
+type Props = ActionProps | NavigateProps | NotesPickProps;
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -92,17 +108,92 @@ function StudentListCardInner(props: Props) {
     );
   }
 
+  if (props.variant === "notes") {
+    const { fullName, studentNumber, actionHint, onPress, onHistory, historyLabel } =
+      props;
+    const palette = resolveLabelColor(null, fullName);
+
+    return (
+      <View
+        style={[
+          styles.cardNotes,
+          { backgroundColor: colors.surface, borderColor: colors.border },
+          elevation(colors.cardShadow, "sm"),
+        ]}
+      >
+        <Pressable
+          onPress={withHaptic(onPress)}
+          style={({ pressed }) => [
+            styles.identityNotes,
+            pressed && styles.pressed,
+          ]}
+          accessibilityRole="button"
+          accessibilityLabel={`${fullName}. ${actionHint}`}
+        >
+          <View style={[styles.avatar, { backgroundColor: palette.bg }]}>
+            <Text style={[textStyles.avatarText, { color: palette.text }]}>
+              {initials(fullName)}
+            </Text>
+          </View>
+          <View style={styles.nameWrap}>
+            <Text style={[font.body, textStyles.name, { color: colors.text }]} numberOfLines={2}>
+              {fullName}
+            </Text>
+            {studentNumber ? (
+              <Text
+                style={[font.caption, { color: colors.textMuted }]}
+                numberOfLines={1}
+              >
+                NIS {studentNumber}
+              </Text>
+            ) : null}
+            <Text
+              style={[
+                font.caption,
+                styles.notesActionHint,
+                { color: colors.primary, fontSize: scale(11) },
+              ]}
+              numberOfLines={1}
+            >
+              {actionHint}
+            </Text>
+          </View>
+        </Pressable>
+        {onHistory ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.historyBtn,
+              { backgroundColor: colors.bg, borderColor: colors.border },
+              pressed && styles.pressed,
+            ]}
+            onPress={withHaptic(onHistory)}
+            accessibilityRole="button"
+            accessibilityLabel={historyLabel}
+          >
+            <Icon name="recap" size={20} color={colors.text} />
+          </Pressable>
+        ) : null}
+      </View>
+    );
+  }
+
   const {
     fullName,
     studentNumber,
     onAttendance,
     onGrades,
+    onStudentNotes,
+    onStudentNotesHistory,
     onManage,
     attendanceLabel,
     gradesLabel,
+    studentNotesLabel,
+    studentNotesHistoryLabel,
     manageLabel,
     showAttendance = true,
     showGrades = true,
+    showStudentNotes = false,
+    showStudentNotesHistory = false,
   } = props;
   const palette = resolveLabelColor(null, fullName);
 
@@ -166,6 +257,37 @@ function StudentListCardInner(props: Props) {
             <Icon name="grades" size={15} color={colors.text} />
           </Pressable>
         ) : null}
+        {showStudentNotesHistory && onStudentNotesHistory ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.iconBtn,
+              { backgroundColor: colors.bg, borderColor: colors.border },
+              pressed && styles.pressed,
+            ]}
+            onPress={withHaptic(onStudentNotesHistory)}
+            accessibilityRole="button"
+            accessibilityLabel={studentNotesHistoryLabel}
+          >
+            <Icon name="recap" size={15} color={colors.text} />
+          </Pressable>
+        ) : null}
+        {showStudentNotes && onStudentNotes ? (
+          <Pressable
+            style={({ pressed }) => [
+              styles.iconBtn,
+              {
+                backgroundColor: colors.primaryMuted,
+                borderColor: colors.primaryBorder,
+              },
+              pressed && styles.pressed,
+            ]}
+            onPress={withHaptic(onStudentNotes)}
+            accessibilityRole="button"
+            accessibilityLabel={studentNotesLabel}
+          >
+            <Icon name="studentNote" size={15} color={colors.primary} />
+          </Pressable>
+        ) : null}
         {onManage ? (
           <Pressable
             onPress={withHaptic(onManage)}
@@ -220,6 +342,24 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
     marginBottom: 4,
   },
+  cardNotes: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    paddingHorizontal: space.sm,
+    paddingVertical: 8,
+    marginBottom: space.sm,
+  },
+  identityNotes: {
+    flex: 1,
+    minWidth: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: space.sm,
+  },
+  notesActionHint: { fontWeight: "600", marginTop: 2 },
   identity: {
     flex: 1,
     minWidth: 0,
@@ -249,6 +389,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
+  },
+  historyBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: radius.md,
+    borderWidth: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
   },
   pressed: { opacity: 0.88 },
 });
