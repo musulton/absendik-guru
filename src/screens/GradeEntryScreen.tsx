@@ -97,6 +97,28 @@ function taskScoreSummary(
   });
 }
 
+function taskHasEnteredScores(
+  taskId: string,
+  students: GuruGradeStudentRow[],
+  scoresByTask: Record<string, Record<string, string | null>>,
+): boolean {
+  const scores = scoresByTask[taskId];
+  if (!scores) return false;
+  return students.some((row) => {
+    const value = scores[row.studentId];
+    return value != null && String(value).trim() !== "";
+  });
+}
+
+function canSaveGradeTask(
+  taskId: string,
+  title: string,
+  students: GuruGradeStudentRow[],
+  scoresByTask: Record<string, Record<string, string | null>>,
+): boolean {
+  return Boolean(title.trim()) && taskHasEnteredScores(taskId, students, scoresByTask);
+}
+
 export function GradeEntryScreen({
   workspaceId,
   classId,
@@ -443,6 +465,10 @@ export function GradeEntryScreen({
         setError(t("grades.titleRequired"));
         return;
       }
+      if (!taskHasEnteredScores(taskId, students, scoresByTask)) {
+        setError(t("grades.scoreRequired"));
+        return;
+      }
       setError("");
       setMessage("");
       setSavingTaskId(taskId);
@@ -529,15 +555,19 @@ export function GradeEntryScreen({
   const renderItem = useCallback(
     ({ item }: { item: GuruGradeTask }) => {
       const readOnly = !editingTaskIds.has(item.id);
+      const taskTitle = titles[item.id] ?? item.title;
       return (
         <GradeTaskCard
           task={item}
           expanded={expandedTaskId === item.id}
           readOnly={readOnly}
-          title={titles[item.id] ?? item.title}
+          title={taskTitle}
           students={students}
           taskScores={scoresByTask[item.id]}
           saving={savingTaskId === item.id}
+          saveDisabled={
+            !canSaveGradeTask(item.id, taskTitle, students, scoresByTask)
+          }
           scoreSummary={taskScoreSummary(item.id, students, t, scoresByTask[item.id])}
           titlePlaceholder={t("grades.titlePlaceholder")}
           titleLabel={t("grades.titleLabel")}

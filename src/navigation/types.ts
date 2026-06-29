@@ -29,7 +29,9 @@ export type HomeClassHubParams = {
 export type HomeStackParamList = {
   HomeHub: undefined;
   ClassModuleHub: HomeClassHubParams;
-  SubjectList: ClassRouteParams & { module: HomeModule } & SessionFlowRouteParams;
+  SubjectList: ClassRouteParams & {
+    module: HomeModule;
+  } & SessionFlowRouteParams;
   Attendance: ClassRouteParams & {
     subjectName?: string | null;
     sessionDate?: string;
@@ -106,7 +108,7 @@ export type HomeStackParamList = {
   Settings: NavigatorScreenParams<SettingsStackParamList>;
 };
 
-/** Pengelolaan data kelas, mapel, siswa. */
+/** Pengelolaan data kelas, mata pelajaran, siswa. */
 export type ManageStackParamList = {
   ManageHub: undefined;
   ClassesManageList: undefined;
@@ -157,7 +159,7 @@ export type RootStackParamList = {
   CreateWorkspace: undefined;
   AccountSettings: undefined;
   About: undefined;
-  App: undefined;
+  App: NavigatorScreenParams<HomeStackParamList> | undefined;
 };
 
 export type GuruAssignmentList = GuruAssignment[];

@@ -24,6 +24,14 @@ export type GradeRecapStudentSummary = {
 
 export { GRADE_BAND_ORDER };
 
+/** Inisial predikat untuk grafik / ruang sempit. */
+export const GRADE_BAND_SHORT: Record<GradeBand, string> = {
+  sangat_baik: "SB",
+  baik: "B",
+  cukup: "C",
+  kurang: "K",
+};
+
 /** Warna sel/badge rekap nilai — selaras dengan rekap absensi. */
 export const RECAP_GRADE_COLORS: Record<GradeBand, { bg: string; text: string }> =
   {

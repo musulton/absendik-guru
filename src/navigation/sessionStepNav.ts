@@ -27,7 +27,7 @@ export function withSessionFlow<T extends Record<string, unknown>>(
   return sessionFlow ? { ...params, sessionFlow: true } : params;
 }
 
-/** Kembali ke hub kelas / daftar mapel / beranda — untuk tombol selesai alur pertemuan. */
+/** Kembali ke hub kelas / daftar mata pelajaran / beranda — untuk tombol selesai alur pertemuan. */
 function findSessionOriginIndex(
   routes: ReturnType<HomeNav["getState"]>["routes"],
   currentIndex: number,
@@ -69,7 +69,7 @@ export function goBackToSessionOrigin(navigation: HomeNav): boolean {
   return true;
 }
 
-/** Buka langkah dari daftar mapel — alur pertemuan mengganti SubjectList agar tidak tertinggal di stack. */
+/** Buka langkah dari daftar mata pelajaran — alur pertemuan mengganti SubjectList agar tidak tertinggal di stack. */
 export function openSubjectListStep<K extends keyof HomeStackParamList>(
   navigation: HomeNav,
   screen: K,

@@ -115,6 +115,7 @@ export type TranslationKey =
   | "grades.scoreColumnLabel"
   | "grades.scorePlaceholder"
   | "grades.titleRequired"
+  | "grades.scoreRequired"
   | "grades.saved"
   | "grades.taskAdded"
   | "grades.edit"
@@ -204,6 +205,13 @@ export type TranslationKey =
   | "subject.deleteBody"
   | "subject.deleteAction"
   | "recap.metaSummary"
+  | "recap.chartAttendance"
+  | "recap.chartGrades"
+  | "recap.chartAttendanceTrend"
+  | "recap.chartGradesTrend"
+  | "recap.chartAttendanceSemesterTrend"
+  | "recap.chartGradesSemesterTrend"
+  | "recap.chartEmpty"
   | "recap.periodWeekly"
   | "recap.periodMonthly"
   | "recap.periodSemester"
@@ -212,6 +220,12 @@ export type TranslationKey =
   | "recap.segmentWeekly"
   | "recap.segmentMonthly"
   | "recap.segmentSemester"
+  | "recap.tabChart"
+  | "recap.tabTable"
+  | "recap.chartHeroAttendance"
+  | "recap.chartHeroAttendanceHint"
+  | "recap.chartHeroGrade"
+  | "recap.chartHeroGradeHint"
   | "recap.needSubject"
   | "recap.subjectLabel"
   | "recap.chooseSubject"
@@ -499,6 +513,7 @@ export type TranslationKey =
   | "modules.studentNotes"
   | "teachingJournal.saved"
   | "teachingJournal.hint"
+  | "teachingJournal.fillRequired"
   | "teachingJournal.material"
   | "teachingJournal.method"
   | "teachingJournal.notes"
@@ -701,7 +716,8 @@ export type TranslationKey =
 
 const id: Record<TranslationKey, string> = {
   "app.name": "Catatan Guru",
-  "app.tagline": "Absensi & nilai per kelas atau mapel — dari genggaman guru",
+  "app.tagline":
+    "Absensi & nilai per kelas atau mata pelajaran — dari genggaman guru",
   "common.save": "Simpan",
   "common.cancel": "Batal",
   "common.done": "Selesai",
@@ -761,7 +777,7 @@ const id: Record<TranslationKey, string> = {
     "Pilih kelas terlebih dahulu, lalu pilih mata pelajaran untuk absensi atau nilai.",
   "classes.tapToAttendance": "Isi absensi",
   "classes.tapToSubjects": "Pilih mata pelajaran",
-  "classes.tapToSubjectsGrades": "Kelola mapel & nilai",
+  "classes.tapToSubjectsGrades": "Kelola mata pelajaran & nilai",
   "classes.empty": "Belum ada kelas. Ketuk + untuk menambahkan kelas pertama.",
   "classes.emptySchool":
     "Belum ada kelas. Ketuk + untuk menambahkan kelas pertama.",
@@ -774,14 +790,14 @@ const id: Record<TranslationKey, string> = {
   "classes.tapToManage": "Kelola kelas",
   "classes.emptyHome":
     "Belum ada kelas. Ketuk Pengelolaan di atas untuk menambahkan kelas pertama.",
-  "subjects.tapToManage": "Kelola mapel",
+  "subjects.tapToManage": "Kelola mata pelajaran",
   "subjects.hintTitle": "Pilih mata pelajaran",
   "subjects.hintBody":
-    "Ikon siswa (kanan atas) untuk kelola siswa, ikon buku untuk tambah mapel. Ketuk jumlah siswa di atas juga bisa.",
+    "Ikon siswa (kanan atas) untuk kelola siswa, ikon buku untuk tambah mata pelajaran. Ketuk jumlah siswa di atas juga bisa.",
   "subjects.hintBodyGrades":
-    "Ikon siswa untuk kelola siswa, ikon buku untuk tambah mapel. Ketuk mapel untuk input nilai.",
+    "Ikon siswa untuk kelola siswa, ikon buku untuk tambah mata pelajaran. Ketuk mata pelajaran untuk input nilai.",
   "subjects.hintBodyBoth":
-    "Ikon siswa untuk kelola siswa, ikon buku untuk tambah mapel. Ketuk ikon absensi atau nilai di setiap mapel.",
+    "Ikon siswa untuk kelola siswa, ikon buku untuk tambah mata pelajaran. Ketuk ikon absensi atau nilai di setiap mata pelajaran.",
   "subjects.tapToAttendance": "Isi absensi",
   "subjects.empty":
     "Belum ada mata pelajaran. Ketuk + di kanan atas untuk menambahkan.",
@@ -790,7 +806,7 @@ const id: Record<TranslationKey, string> = {
   "subjects.addStudentPrompt":
     "Tambahkan siswa terlebih dahulu untuk mulai pertemuan atau membuka modul ini.",
   "subjects.manageHint":
-    "Kelola mata pelajaran kelas ini. Ketuk mapel untuk mengubah atau menghapus.",
+    "Kelola mata pelajaran kelas ini. Ketuk mata pelajaran untuk mengubah atau menghapus.",
   "attendance.today": "Hari ini",
   "attendance.hint":
     "Pilih Hadir, Sakit, Izin, atau Alpha. Ketuk nama untuk riwayat, atau ikon catatan untuk keterangan.",
@@ -825,6 +841,7 @@ const id: Record<TranslationKey, string> = {
   "grades.scoreColumnLabel": "Nilai",
   "grades.scorePlaceholder": "0–100",
   "grades.titleRequired": "Judul tugas wajib diisi.",
+  "grades.scoreRequired": "Isi minimal satu nilai siswa sebelum menyimpan.",
   "grades.saved": "Nilai tugas tersimpan",
   "grades.taskAdded": "Tugas baru ditambahkan",
   "grades.edit": "Ubah nilai",
@@ -927,6 +944,13 @@ const id: Record<TranslationKey, string> = {
   "subject.deleteBody": "Mata pelajaran dan jadwal mengajarnya akan dihapus.",
   "subject.deleteAction": "Hapus mata pelajaran",
   "recap.metaSummary": "{students} siswa · {days} hari tercatat",
+  "recap.chartAttendance": "Grafik kehadiran",
+  "recap.chartGrades": "Grafik predikat nilai",
+  "recap.chartAttendanceTrend": "Tren kehadiran mingguan",
+  "recap.chartGradesTrend": "Tren rata-rata nilai mingguan",
+  "recap.chartAttendanceSemesterTrend": "Tren kehadiran bulanan (semester)",
+  "recap.chartGradesSemesterTrend": "Tren rata-rata nilai bulanan (semester)",
+  "recap.chartEmpty": "Belum ada data untuk grafik",
   "recap.periodWeekly": "Mingguan",
   "recap.periodMonthly": "Bulanan",
   "recap.periodSemester": "Semester",
@@ -935,6 +959,12 @@ const id: Record<TranslationKey, string> = {
   "recap.segmentWeekly": "Minggu",
   "recap.segmentMonthly": "Bulan",
   "recap.segmentSemester": "Semester",
+  "recap.tabChart": "Grafik",
+  "recap.tabTable": "Tabel",
+  "recap.chartHeroAttendance": "Tingkat kehadiran",
+  "recap.chartHeroAttendanceHint": "Dari {count} catatan kehadiran",
+  "recap.chartHeroGrade": "Rata-rata kelas",
+  "recap.chartHeroGradeHint": "Berdasarkan {count} siswa yang sudah dinilai",
   "recap.needSubject":
     "Tambahkan mata pelajaran terlebih dahulu untuk melihat rekap per mata pelajaran.",
   "recap.subjectLabel": "Mata pelajaran",
@@ -960,13 +990,14 @@ const id: Record<TranslationKey, string> = {
     "Siswa akan dinonaktifkan dan tidak dihitung dalam batas siswa aktif.",
   "student.deleteAction": "Hapus siswa",
   "about.title": "Tentang Catatan Guru",
-  "about.subtitle": "Absensi & nilai per kelas atau mapel — dari HP guru.",
+  "about.subtitle":
+    "Absensi & nilai per kelas atau mata pelajaran — dari HP guru.",
   "about.whatIs": "Apa ini?",
   "about.whatIsBody":
     "Catat kehadiran, nilai, jurnal, catatan siswa, dan rekap per kelas atau mata pelajaran — langsung dari HP Anda.",
   "about.howToUse": "Langkah awal",
   "about.step1": "Pilih atau buat sekolah di awal",
-  "about.step2": "Tab Pengelolaan: kelas, mapel, dan siswa",
+  "about.step2": "Tab Pengelolaan: kelas, mata pelajaran, dan siswa",
   "about.step3": "Tab Beranda: absensi & nilai harian per kelas",
   "about.step4": "Rekap mingguan/bulanan dan unduh Excel",
   "about.featuresTitle": "Fitur lain",
@@ -1101,13 +1132,14 @@ const id: Record<TranslationKey, string> = {
   "settings.adPrivacySub": "Atur izin iklan dan preferensi privasi Anda.",
   "pkg.free.school": "1 sekolah",
   "pkg.free.students": "120 siswa",
-  "pkg.free.classes": "5 kelas · mapel tanpa batas",
+  "pkg.free.classes": "5 kelas · mata pelajaran tanpa batas",
   "pkg.free.recap": "Rekap mingguan dan bulanan",
   "pkg.free.excel": "Unduh Excel",
   "pkg.free.local": "Data di HP",
   "pkg.free.ads": "Ada iklan",
   "pkg.pro.school": "Sekolah tanpa batas",
-  "pkg.pro.classes": "Kelas tanpa batas per sekolah · mapel tanpa batas",
+  "pkg.pro.classes":
+    "Kelas tanpa batas per sekolah · mata pelajaran tanpa batas",
   "pkg.pro.students": "Siswa tanpa batas",
   "pkg.pro.semester": "Rekap semester",
   "pkg.pro.cloud": "Cadangan online",
@@ -1121,7 +1153,7 @@ const id: Record<TranslationKey, string> = {
   "nav.tabManage": "Pengelolaan",
   "nav.tabSettings": "Pengaturan",
   "nav.tabManageClasses": "Kelas",
-  "nav.tabManageSubjects": "Mapel",
+  "nav.tabManageSubjects": "Mata Pelajaran",
   "nav.tabManageStudents": "Siswa",
   "nav.greeting": "Halo, {name}. Siap mengajar hari ini?",
   "nav.quickActions": "Akses cepat",
@@ -1175,7 +1207,7 @@ const id: Record<TranslationKey, string> = {
   "manage.hubClasses": "Kelas",
   "manage.hubClassesSub": "Tambah, ubah, atau hapus kelas",
   "manage.hubSubjects": "Mata pelajaran",
-  "manage.hubSubjectsSub": "Kelola mapel per kelas",
+  "manage.hubSubjectsSub": "Kelola mata pelajaran per kelas",
   "manage.hubStudents": "Siswa",
   "manage.hubStudentsSub": "Kelola daftar siswa per kelas",
   "manage.hubGradePredikat": "Predikat nilai",
@@ -1275,9 +1307,9 @@ const id: Record<TranslationKey, string> = {
     "Ketuk mata pelajaran untuk mengisi absensi.",
   "home.moduleSubjectGradesHint": "Ketuk mata pelajaran untuk input nilai.",
   "home.moduleSubjectJournalHint": "Ketuk mata pelajaran untuk mengisi jurnal.",
-  "home.tapSubjectForAttendance": "Isi absensi mapel ini",
-  "home.tapSubjectForGrades": "Isi nilai mapel ini",
-  "home.tapSubjectForJournal": "Isi jurnal mapel ini",
+  "home.tapSubjectForAttendance": "Isi absensi mata pelajaran ini",
+  "home.tapSubjectForGrades": "Isi nilai mata pelajaran ini",
+  "home.tapSubjectForJournal": "Isi jurnal mata pelajaran ini",
   "modules.attendance": "Absensi",
   "modules.grades": "Penilaian",
   "modules.teachingJournal": "Jurnal mengajar",
@@ -1285,6 +1317,8 @@ const id: Record<TranslationKey, string> = {
   "teachingJournal.saved": "Jurnal mengajar tersimpan.",
   "teachingJournal.hint":
     "Catat kegiatan pembelajaran per pertemuan. Terkait tanggal dan kelas yang sama dengan absensi dan penilaian.",
+  "teachingJournal.fillRequired":
+    "Isi minimal satu kolom (materi, metode, atau catatan) sebelum menyimpan.",
   "teachingJournal.material": "Materi pembelajaran",
   "teachingJournal.method": "Metode pembelajaran",
   "teachingJournal.notes": "Catatan",
@@ -1406,9 +1440,9 @@ const id: Record<TranslationKey, string> = {
     "Jurnal dan catatan siswa bisa diisi bila diperlukan",
   "onboarding.grades.title": "Nilai tugas",
   "onboarding.grades.body":
-    "Catat nilai ulangan, PR, atau tugas lain per kelas atau mapel.",
+    "Catat nilai ulangan, PR, atau tugas lain per kelas atau mata pelajaran.",
   "onboarding.grades.bullet1":
-    "Beranda → Nilai → pilih kelas (dan mapel jika per mapel)",
+    "Beranda → Nilai → pilih kelas (dan mata pelajaran jika per mata pelajaran)",
   "onboarding.grades.bullet2":
     "Tambah tugas, isi nilai tiap siswa di kolom kanan, lalu Simpan",
   "onboarding.grades.bullet3":
@@ -1452,7 +1486,7 @@ const id: Record<TranslationKey, string> = {
   "quota.studentLimit": "hingga {count} siswa",
   "quota.unlimitedClassesPerSchool": "kelas tanpa batas",
   "quota.classLimitPerSchool": "hingga {count} kelas",
-  "quota.unlimitedSubjects": "mapel tanpa batas",
+  "quota.unlimitedSubjects": "mata pelajaran tanpa batas",
   "quota.classesSubjects": "kelas & mata pelajaran tanpa batas",
   "settings.proActivateFailed": "Gagal mengaktifkan Pro.",
   "menu.settings": "Pengaturan",
@@ -1669,6 +1703,7 @@ const en: Record<TranslationKey, string> = {
   "grades.scoreColumnLabel": "Score",
   "grades.scorePlaceholder": "0–100",
   "grades.titleRequired": "Task title is required.",
+  "grades.scoreRequired": "Enter at least one student score before saving.",
   "grades.saved": "Task grades saved",
   "grades.taskAdded": "New task added",
   "grades.edit": "Edit grades",
@@ -1769,6 +1804,13 @@ const en: Record<TranslationKey, string> = {
     "The subject and its teaching schedule will be deleted.",
   "subject.deleteAction": "Delete subject",
   "recap.metaSummary": "{students} students · {days} days recorded",
+  "recap.chartAttendance": "Attendance chart",
+  "recap.chartGrades": "Grade band chart",
+  "recap.chartAttendanceTrend": "Weekly attendance trend",
+  "recap.chartGradesTrend": "Weekly average score trend",
+  "recap.chartAttendanceSemesterTrend": "Monthly attendance trend (semester)",
+  "recap.chartGradesSemesterTrend": "Monthly average score trend (semester)",
+  "recap.chartEmpty": "No data for chart yet",
   "recap.periodWeekly": "Weekly",
   "recap.periodMonthly": "Monthly",
   "recap.periodSemester": "Semester",
@@ -1777,6 +1819,12 @@ const en: Record<TranslationKey, string> = {
   "recap.segmentWeekly": "Week",
   "recap.segmentMonthly": "Month",
   "recap.segmentSemester": "Semester",
+  "recap.tabChart": "Charts",
+  "recap.tabTable": "Table",
+  "recap.chartHeroAttendance": "Attendance rate",
+  "recap.chartHeroAttendanceHint": "From {count} attendance records",
+  "recap.chartHeroGrade": "Class average",
+  "recap.chartHeroGradeHint": "Based on {count} graded students",
   "recap.needSubject": "Add a subject first to view subject-based reports.",
   "recap.subjectLabel": "Subject",
   "recap.chooseSubject": "Choose subject",
@@ -2119,6 +2167,8 @@ const en: Record<TranslationKey, string> = {
   "teachingJournal.saved": "Teaching journal saved.",
   "teachingJournal.hint":
     "Record learning activities per session. Linked to the same date and class as attendance and grades.",
+  "teachingJournal.fillRequired":
+    "Fill at least one field (material, method, or notes) before saving.",
   "teachingJournal.material": "Learning material",
   "teachingJournal.method": "Teaching method",
   "teachingJournal.notes": "Notes",

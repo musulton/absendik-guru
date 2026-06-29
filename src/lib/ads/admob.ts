@@ -1,6 +1,7 @@
 import { Platform } from "react-native";
 import { config } from "@/lib/config";
 import {
+  canRequestAds,
   getCachedAdRequestOptions,
   prepareAdsConsent,
   refreshRequestOptions,
@@ -38,10 +39,19 @@ export async function prepareAds(): Promise<boolean> {
   }
 
   try {
-    const consentOk = await prepareAdsConsent();
-    if (!consentOk) {
+    await prepareAdsConsent();
+
+    let gdprApplies = false;
+    try {
+      gdprApplies = await m.AdsConsent.getGdprApplies();
+    } catch {
+      gdprApplies = false;
+    }
+
+    const canRequest = await canRequestAds();
+    if (!canRequest && gdprApplies) {
       if (__DEV__) {
-        console.warn("[ads] UMP consent belum mengizinkan request iklan.");
+        console.warn("[ads] UMP consent belum mengizinkan request iklan (EEA).");
       }
       adsSdkReady = false;
       return false;

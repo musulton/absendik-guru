@@ -118,6 +118,7 @@ export function TeachingJournalScreen({
   const [notes, setNotes] = useState("");
 
   const isToday = sessionDate === today;
+  const canSave = Boolean(material.trim() || method.trim() || notes.trim());
   const dateLabel = useMemo(
     () => formatDateDisplay(sessionDate, locale as Locale),
     [sessionDate, locale],
@@ -217,6 +218,10 @@ export function TeachingJournalScreen({
   ]);
 
   async function handleSave() {
+    if (!canSave) {
+      setError(t("teachingJournal.fillRequired"));
+      return;
+    }
     setSaving(true);
     setError("");
     setMessage("");
@@ -272,6 +277,7 @@ export function TeachingJournalScreen({
           <PrimaryButton
             title={t("common.save")}
             loading={saving}
+            disabled={!canSave || saving}
             onPress={() => void handleSave()}
           />
         </StickyActionBar>

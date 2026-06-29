@@ -718,7 +718,7 @@ export async function fetchSchoolStudentsFromSupabase(
   }
 }
 
-/** Penugasan kelas/mapel guru — langsung dari Supabase. */
+/** Penugasan kelas/mata pelajaran guru — langsung dari Supabase. */
 export async function fetchSchoolAssignmentsFromSupabase(
   classId: string,
 ): Promise<GuruAssignment[] | null> {

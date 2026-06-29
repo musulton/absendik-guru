@@ -39,6 +39,7 @@ type Props = {
   onSave: () => void;
   onStartEdit: () => void;
   onDelete: () => void;
+  saveDisabled?: boolean;
   onStudentDetail?: (student: GuruGradeStudentRow) => void;
   /** Dipanggil saat input judul/nilai difokus — untuk scroll ke field. */
   onInputFocus?: (studentIndex?: number) => void;
@@ -69,6 +70,7 @@ function GradeTaskCardInner({
   onStudentDetail,
   onInputFocus,
   taskScores,
+  saveDisabled,
 }: Props) {
   const { colors, font, scale } = useTheme();
   const textStyles = useMemo(
@@ -292,6 +294,7 @@ function GradeTaskCardInner({
                   title={saveLabel}
                   size="compact"
                   loading={saving}
+                  disabled={saveDisabled || saving}
                   onPress={onSave}
                 />
               )}

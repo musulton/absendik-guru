@@ -293,7 +293,7 @@ export type GuruAssignment = {
   id: string;
   classId: string;
   subjectName: string | null;
-  /** UUID mapel sekolah — legacy school-link. */
+  /** UUID mata pelajaran sekolah — legacy school-link. */
   subjectId?: string | null;
   label: string;
   labelColor: string | null;

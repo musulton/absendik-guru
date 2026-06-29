@@ -49,7 +49,10 @@ async function guruFetch<T>(
   if (!token) {
     return {
       ok: false,
-      error: { code: "unauthorized", message: translate(locale, "error.notSignedIn") },
+      error: {
+        code: "unauthorized",
+        message: translate(locale, "error.notSignedIn"),
+      },
     };
   }
 
@@ -71,7 +74,10 @@ async function guruFetch<T>(
   } catch {
     return {
       ok: false,
-      error: { code: "network", message: translate(locale, "error.connectionFailed") },
+      error: {
+        code: "network",
+        message: translate(locale, "error.connectionFailed"),
+      },
     };
   }
 
@@ -173,7 +179,7 @@ function workspacePath(workspaceId: string, suffix: string) {
   return `/api/guru/v1/workspaces/${workspaceId}${suffix}`;
 }
 
-/** Query subjectName: undefined = default null; string = mapel; homeroom = wali. */
+/** Query subjectName: undefined = default null; string = mata pelajaran; homeroom = wali. */
 function subjectQueryParam(
   subjectName: string | null | undefined,
 ): string | undefined {
@@ -257,10 +263,7 @@ export async function apiDeleteStudent(
   );
 }
 
-export async function apiListAssignments(
-  workspaceId: string,
-  classId: string,
-) {
+export async function apiListAssignments(workspaceId: string, classId: string) {
   return guruFetch<{ assignments: GuruAssignment[] }>(
     workspacePath(workspaceId, `/classes/${classId}/assignments`),
   );
@@ -319,8 +322,7 @@ export async function apiSaveAttendance(
     subjectName?: string | null;
   } = { sessionDate, records };
   if (subjectName !== undefined) {
-    body.subjectName =
-      subjectName === null ? "__homeroom__" : subjectName;
+    body.subjectName = subjectName === null ? "__homeroom__" : subjectName;
   }
   return guruFetch<{ attendance: GuruAttendanceData }>(
     workspacePath(workspaceId, `/classes/${classId}/attendance`),
@@ -338,8 +340,7 @@ export async function apiSubmitAttendance(
     sessionDate,
   };
   if (subjectName !== undefined) {
-    body.subjectName =
-      subjectName === null ? "__homeroom__" : subjectName;
+    body.subjectName = subjectName === null ? "__homeroom__" : subjectName;
   }
   return guruFetch<{ attendance: GuruAttendanceData }>(
     workspacePath(workspaceId, `/classes/${classId}/attendance/submit`),

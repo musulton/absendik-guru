@@ -15,6 +15,9 @@ import { PrimaryButton } from "@/components/PrimaryButton";
 import { GradeRecapListFilter } from "@/components/recap/GradeRecapListFilter";
 import { GradeRecapStudentRow } from "@/components/recap/GradeRecapStudentRow";
 import { GradeRecapSummaryBar } from "@/components/recap/GradeRecapSummaryBar";
+import { GradeRecapChartTab } from "@/components/recap/GradeRecapChartTab";
+import { GradeMonthlyTrendChart } from "@/components/recap/GradeMonthlyTrendChart";
+import { GradeSemesterTrendChart } from "@/components/recap/GradeSemesterTrendChart";
 import { GradeRecapTable } from "@/components/recap/GradeRecapTable";
 import { RecapPeriodFilter } from "@/components/recap/RecapPeriodFilter";
 import { FilterPicker } from "@/components/ui/FilterPicker";
@@ -76,6 +79,7 @@ import type { AppStackParamList } from "@/navigation/types";
 import type { GuruAssignment, GuruGradePeriodRecap, GuruGradeStudentRecap } from "@/lib/types";
 
 type PeriodKind = "weekly" | "monthly" | "semester";
+type RecapContentTab = "chart" | "table";
 
 type Props = {
   workspaceId: string;
@@ -131,6 +135,7 @@ export function ClassGradeRecapScreen({
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
   const [recap, setRecap] = useState<GuruGradePeriodRecap | null>(null);
+  const [contentTab, setContentTab] = useState<RecapContentTab>("chart");
   const [gradeView, setGradeView] = useState<"list" | "table">("list");
   const [listFilter, setListFilter] = useState<GradeListFilter>({
     query: "",
@@ -252,6 +257,7 @@ export function ClassGradeRecapScreen({
   }, [subscribed, periodKind]);
 
   useEffect(() => {
+    setContentTab("chart");
     setGradeView("list");
     setListFilter({ query: "", predikat: "all" });
   }, [periodKind, weekDate, month, semester, subjectKey]);
@@ -430,16 +436,44 @@ export function ClassGradeRecapScreen({
     />
   );
 
-  const listHeader = recap ? (
+  const metaLabel = recap
+    ? t("grades.recapMetaSummary", {
+        students: recap.students.length,
+        tasks: recap.tasks.length,
+      })
+    : "";
+
+  const chartPanel = recap ? (
+    <GradeRecapChartTab
+      metaLabel={metaLabel}
+      recap={recap}
+      predikatSettings={predikatSettings}
+      trend={
+        <>
+          {periodKind === "monthly" ? (
+            <GradeMonthlyTrendChart
+              workspaceId={workspaceId}
+              classId={classId}
+              month={month}
+              subjectName={subjectParam()}
+            />
+          ) : null}
+          {periodKind === "semester" ? (
+            <GradeSemesterTrendChart
+              workspaceId={workspaceId}
+              classId={classId}
+              semester={semester}
+              subjectName={subjectParam()}
+            />
+          ) : null}
+        </>
+      }
+    />
+  ) : null;
+
+  const tableListHeader = recap ? (
     <>
-      <GradeRecapSummaryBar
-        recap={recap}
-        predikatSettings={predikatSettings}
-        metaLabel={t("grades.recapMetaSummary", {
-          students: recap.students.length,
-          tasks: recap.tasks.length,
-        })}
-      />
+      <GradeRecapSummaryBar metaLabel={metaLabel} />
       <GradeRecapListFilter
         collapsible
         inline
@@ -452,17 +486,18 @@ export function ClassGradeRecapScreen({
     </>
   ) : null;
 
-  const gradeViewToggle = showGradeViewToggle ? (
-    <SegmentedChoice
-      minimal
-      options={[
-        { key: "list", label: t("grades.recapViewList") },
-        { key: "table", label: t("grades.recapViewTable") },
-      ]}
-      value={gradeView}
-      onChange={(key) => setGradeView(key as "list" | "table")}
-    />
-  ) : null;
+  const gradeViewToggle =
+    contentTab === "table" && showGradeViewToggle ? (
+      <SegmentedChoice
+        minimal
+        options={[
+          { key: "list", label: t("grades.recapViewList") },
+          { key: "table", label: t("grades.recapViewTable") },
+        ]}
+        value={gradeView}
+        onChange={(key) => setGradeView(key as "list" | "table")}
+      />
+    ) : null;
 
   return (
     <StickyScreen
@@ -519,6 +554,17 @@ export function ClassGradeRecapScreen({
               ) : null
             }
           />
+          {recap ? (
+            <SegmentedChoice
+              minimal
+              options={[
+                { key: "chart", label: t("recap.tabChart") },
+                { key: "table", label: t("recap.tabTable") },
+              ]}
+              value={contentTab}
+              onChange={(key) => setContentTab(key as RecapContentTab)}
+            />
+          ) : null}
           {gradeViewToggle}
           <ErrorBanner message={error} />
         </View>
@@ -527,14 +573,25 @@ export function ClassGradeRecapScreen({
           <ScreenLoadingView />
         ) : (
           <View style={styles.contentArea}>
-            {gradeView === "table" && filteredRecap && filteredRecap.tasks.length >= 2 ? (
+            {contentTab === "chart" ? (
               <ScrollView
                 style={listStyles.list}
                 contentContainerStyle={styles.listContent}
                 showsVerticalScrollIndicator
                 refreshControl={refreshControl}
               >
-                {listHeader}
+                {chartPanel ?? (
+                  <EmptyState icon="gradeRecap" message={t("grades.recapEmpty")} />
+                )}
+              </ScrollView>
+            ) : gradeView === "table" && filteredRecap && filteredRecap.tasks.length >= 2 ? (
+              <ScrollView
+                style={listStyles.list}
+                contentContainerStyle={styles.listContent}
+                showsVerticalScrollIndicator
+                refreshControl={refreshControl}
+              >
+                {tableListHeader}
                 {filteredStudents.length === 0 ? (
                   <EmptyState icon="gradeRecap" message={t("grades.listEmpty")} />
                 ) : (
@@ -557,7 +614,7 @@ export function ClassGradeRecapScreen({
                 initialNumToRender={14}
                 maxToRenderPerBatch={20}
                 windowSize={8}
-                ListHeaderComponent={listHeader}
+                ListHeaderComponent={tableListHeader}
                 renderItem={renderStudent}
                 ListEmptyComponent={
                   <EmptyState

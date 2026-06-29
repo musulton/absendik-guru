@@ -260,6 +260,10 @@ export function StudentNotesScreen({
     onEditClass,
   ]);
 
+  const canSave =
+    selectedPresets.size > 0 ||
+    (otherSelected && otherText.trim().length > 0);
+
   return (
     <StickyScreen
       footer={
@@ -267,6 +271,7 @@ export function StudentNotesScreen({
           <PrimaryButton
             title={t("studentNotes.save")}
             loading={saving}
+            disabled={!canSave || saving}
             onPress={() => void handleSave()}
           />
         </StickyActionBar>

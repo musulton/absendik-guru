@@ -12,9 +12,13 @@ import { ErrorBanner } from "@/components/ErrorBanner";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { PrimaryButton } from "@/components/PrimaryButton";
 import { AttendanceRecapTable } from "@/components/recap/AttendanceRecapTable";
+import { AttendanceRecapChartTab } from "@/components/recap/AttendanceRecapChartTab";
+import { AttendanceMonthlyTrendChart } from "@/components/recap/AttendanceMonthlyTrendChart";
+import { AttendanceSemesterTrendChart } from "@/components/recap/AttendanceSemesterTrendChart";
 import { RecapPeriodFilter } from "@/components/recap/RecapPeriodFilter";
 import { RecapSummaryBar } from "@/components/recap/RecapSummaryBar";
 import { FilterPicker } from "@/components/ui/FilterPicker";
+import { SegmentedChoice } from "@/components/ui/SegmentedChoice";
 import { StickyScreen } from "@/components/ui/StickyScreen";
 import { useRefreshOnFocus } from "@/hooks/useRefreshOnFocus";
 import {
@@ -64,6 +68,7 @@ import type {
 } from "@/lib/types";
 
 type PeriodKind = "weekly" | "monthly" | "semester";
+type RecapContentTab = "chart" | "table";
 
 type Props = {
   workspaceId: string;
@@ -116,6 +121,7 @@ export function ClassRecapScreen({
   const [exporting, setExporting] = useState(false);
   const [error, setError] = useState("");
   const [recap, setRecap] = useState<GuruPeriodRecap | null>(null);
+  const [contentTab, setContentTab] = useState<RecapContentTab>("chart");
   const ads = useAdsOptional();
 
   useEffect(() => {
@@ -223,6 +229,10 @@ export function ClassRecapScreen({
     }
   }, [subscribed, periodKind]);
 
+  useEffect(() => {
+    setContentTab("chart");
+  }, [periodKind, weekDate, month, semester.year, semester.semester, subjectKey]);
+
   async function handleExport() {
     if (!recap) return;
     setError("");
@@ -281,15 +291,46 @@ export function ClassRecapScreen({
     setSemester((s) => (direction < 0 ? prevSemester(s) : nextSemester(s)));
   };
 
-  const listHeader = recap ? (
-    <RecapSummaryBar
-      recap={recap}
-      metaLabel={t("recap.metaSummary", {
+  const metaLabel = recap
+    ? t("recap.metaSummary", {
         students: recap.students.length,
         days: recap.daysRecorded,
-      })}
+      })
+    : "";
+
+  const chartPanel = recap ? (
+    <AttendanceRecapChartTab
+      metaLabel={metaLabel}
+      totals={recap.totals}
+      trend={
+        <>
+          {periodKind === "monthly" ? (
+            <AttendanceMonthlyTrendChart
+              workspaceId={workspaceId}
+              classId={classId}
+              month={month}
+              subjectName={subjectParam()}
+            />
+          ) : null}
+          {periodKind === "semester" ? (
+            <AttendanceSemesterTrendChart
+              workspaceId={workspaceId}
+              classId={classId}
+              semester={semester}
+              subjectName={subjectParam()}
+            />
+          ) : null}
+        </>
+      }
     />
   ) : null;
+
+  const emptyMessage =
+    periodKind === "weekly"
+      ? t("recap.emptyWeekly")
+      : periodKind === "monthly"
+        ? t("recap.emptyMonthly")
+        : t("recap.emptySemester");
 
   const openStudentDetail = useCallback(
     (student: GuruPeriodStudentRecap) => {
@@ -297,6 +338,23 @@ export function ClassRecapScreen({
     },
     [onStudentDetail, subjectKey, attendanceMode],
   );
+
+  const tablePanel =
+    recap && recap.students.length > 0 ? (
+      <View>
+        <RecapSummaryBar metaLabel={metaLabel} />
+        <AttendanceRecapTable
+          recap={recap}
+          onStudentPress={onStudentDetail ? openStudentDetail : undefined}
+        />
+      </View>
+    ) : (
+      <EmptyState
+        icon="recap"
+        title={t("recap.emptyTitle")}
+        message={emptyMessage}
+      />
+    );
 
   return (
     <StickyScreen
@@ -348,6 +406,17 @@ export function ClassRecapScreen({
               ) : null
             }
           />
+          {recap ? (
+            <SegmentedChoice
+              minimal
+              options={[
+                { key: "chart", label: t("recap.tabChart") },
+                { key: "table", label: t("recap.tabTable") },
+              ]}
+              value={contentTab}
+              onChange={(key) => setContentTab(key as RecapContentTab)}
+            />
+          ) : null}
           <ErrorBanner message={error} />
         </View>
 
@@ -373,26 +442,16 @@ export function ClassRecapScreen({
                 />
               }
             >
-              {listHeader}
-              {recap && recap.students.length > 0 ? (
-                <AttendanceRecapTable
-                  recap={recap}
-                  onStudentPress={
-                    onStudentDetail ? openStudentDetail : undefined
-                  }
-                />
-              ) : (
+              {!recap ? (
                 <EmptyState
                   icon="recap"
                   title={t("recap.emptyTitle")}
-                  message={
-                    periodKind === "weekly"
-                      ? t("recap.emptyWeekly")
-                      : periodKind === "monthly"
-                        ? t("recap.emptyMonthly")
-                        : t("recap.emptySemester")
-                  }
+                  message={emptyMessage}
                 />
+              ) : contentTab === "chart" ? (
+                chartPanel
+              ) : (
+                tablePanel
               )}
             </ScrollView>
             <FetchLoadingOverlay visible={showFetchOverlay} />

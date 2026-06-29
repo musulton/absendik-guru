@@ -589,11 +589,14 @@ export function AttendanceScreen({
         />
         {rows.length > 0 ? (
           <View style={styles.summaryRow}>
-            <AttendanceStatusSummary
-              rows={rows}
-              locale={locale as Locale}
-              compact
-            />
+            <View style={styles.summaryChips}>
+              <AttendanceStatusSummary
+                rows={rows}
+                locale={locale as Locale}
+                compact
+                nowrap
+              />
+            </View>
             {!readOnly ? (
               <ActionChip
                 compact
@@ -748,7 +751,10 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: space.xs,
-    flexWrap: "wrap",
+  },
+  summaryChips: {
+    flex: 1,
+    minWidth: 0,
   },
   listContent: {
     paddingHorizontal: space.md,

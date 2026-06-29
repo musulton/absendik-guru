@@ -46,6 +46,11 @@ import { WorkspaceStudentSortProvider } from "@/context/WorkspaceStudentSortCont
 import { ActionMenuProvider } from "@/context/ActionMenuContext";
 import { AccountSettingsRoute } from "@/navigation/AccountSettingsRoute";
 import type { RootStackParamList } from "@/navigation/types";
+import { bindTeachingNotificationNavigation } from "@/lib/teaching-notification-response";
+import {
+  navigateToTeachingAttendance,
+  type TeachingNotificationPayload,
+} from "@/navigation/teachingNotificationNav";
 
 import { LoginScreen } from "@/screens/LoginScreen";
 import { WorkspacePickerScreen } from "@/screens/WorkspacePickerScreen";
@@ -86,6 +91,9 @@ export function RootNavigator() {
   const [onboardingDone, setOnboardingDone] = useState(false);
   const hydrateGeneration = useRef(0);
   const signingOutRef = useRef(false);
+  const pendingTeachingNotification = useRef<TeachingNotificationPayload | null>(
+    null,
+  );
 
   useAutoCloudSync(phase === "app" && !!session);
 
@@ -251,6 +259,59 @@ export function RootNavigator() {
   const handleRefreshApp = useCallback(() => {
     if (session) void hydrateSession(session);
   }, [hydrateSession, session]);
+
+  const openTeachingNotification = useCallback(
+    (payload: TeachingNotificationPayload) => {
+      if (!session || phase !== "app") {
+        pendingTeachingNotification.current = payload;
+        return;
+      }
+
+      if (payload.workspaceId !== workspace?.id) {
+        pendingTeachingNotification.current = payload;
+        void storage
+          .set(STORAGE_KEYS.ACTIVE_WORKSPACE_ID, payload.workspaceId)
+          .then(() => {
+            if (session) void hydrateSession(session);
+          });
+        return;
+      }
+
+      pendingTeachingNotification.current = null;
+      navigateToTeachingAttendance(navigationRef, payload);
+    },
+    [phase, session, workspace?.id, hydrateSession],
+  );
+
+  useEffect(() => {
+    if (phase !== "app" || !session) return;
+
+    let cleanup: (() => void) | undefined;
+    void bindTeachingNotificationNavigation(openTeachingNotification).then(
+      (unsubscribe) => {
+        cleanup = unsubscribe;
+      },
+    );
+
+    return () => cleanup?.();
+  }, [phase, session, openTeachingNotification]);
+
+  useEffect(() => {
+    if (phase !== "app" || !workspace || !navigationRef.isReady()) return;
+
+    const pending = pendingTeachingNotification.current;
+    if (!pending || pending.workspaceId !== workspace.id) return;
+
+    pendingTeachingNotification.current = null;
+    navigateToTeachingAttendance(navigationRef, pending);
+  }, [phase, workspace]);
+
+  useEffect(() => {
+    if (phase !== "app" || !session) return;
+    const pending = pendingTeachingNotification.current;
+    if (!pending) return;
+    openTeachingNotification(pending);
+  }, [phase, session, openTeachingNotification]);
 
   const handleSignOutStable = useCallback(() => {
     void handleSignOut();

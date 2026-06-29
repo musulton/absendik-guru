@@ -226,9 +226,10 @@ export async function localListTeachingSlotsForNotifications() {
     day_of_week: number;
     start_time: string;
     class_name: string;
+    label_color: string | null;
   }>(
     `SELECT ts.id, ts.workspace_id, ts.class_id, ts.subject_name, ts.day_of_week, ts.start_time,
-            c.name AS class_name
+            c.name AS class_name, c.label_color
      FROM teaching_slots ts
      JOIN classes c ON c.id = ts.class_id AND c.is_active = 1
      ORDER BY ts.day_of_week ASC, ts.start_time ASC`,
@@ -245,6 +246,7 @@ export async function localListTeachingSlotsForNotifications() {
         dayOfWeek: r.day_of_week,
         startTime: r.start_time,
         className: r.class_name,
+        labelColor: r.label_color,
       })),
     },
   };

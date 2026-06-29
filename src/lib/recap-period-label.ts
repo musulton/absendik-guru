@@ -8,7 +8,7 @@ import { getGuruWeekRange } from "@/lib/week-range";
 
 export type RecapPeriodKind = "weekly" | "monthly" | "semester";
 
-/** Label periode untuk UI (tanpa nama mapel). */
+/** Label periode untuk UI (tanpa nama mata pelajaran). */
 export function recapNavPeriodLabel(
   kind: RecapPeriodKind,
   state: {
@@ -29,7 +29,7 @@ export function recapNavPeriodLabel(
   }
 }
 
-/** Hapus sufiks mapel dari label lama (mis. "… · Matematika"). */
+/** Hapus sufiks mata pelajaran dari label lama (mis. "… · Matematika"). */
 export function stripSubjectFromPeriodLabel(label: string): string {
   const sep = " · ";
   const idx = label.lastIndexOf(sep);

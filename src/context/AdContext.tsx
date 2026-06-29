@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { AppState } from "react-native";
 import type { AdInterstitialPlacement } from "@/lib/ads/placements";
 import {
   markSessionStart,
@@ -82,6 +83,15 @@ export function AdProvider({ children, onUpgradePress }: Props) {
   useEffect(() => {
     void markSessionStart();
     void refreshAdsState();
+    const retry = setTimeout(() => void refreshAdsState(), 2500);
+    return () => clearTimeout(retry);
+  }, [refreshAdsState]);
+
+  useEffect(() => {
+    const sub = AppState.addEventListener("change", (state) => {
+      if (state === "active") void refreshAdsState();
+    });
+    return () => sub.remove();
   }, [refreshAdsState]);
 
   const showPrivacyOptions = useCallback(async () => {

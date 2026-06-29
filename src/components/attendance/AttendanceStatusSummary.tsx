@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from "react-native";
 import {
   ATTENDANCE_STATUS_ORDER,
   getAttendanceStatusLabel,
+  getAttendanceStatusShort,
 } from "@/lib/attendance-labels";
 import { useTheme } from "@/context/AppPreferencesContext";
 import { RECAP_STATUS_COLORS } from "@/lib/recap-display";
@@ -14,17 +15,22 @@ type Props = {
   rows: GuruAttendanceStudent[];
   locale: Locale;
   compact?: boolean;
+  /** Satu baris horizontal (mis. di samping tombol aksi). */
+  nowrap?: boolean;
 };
 
-function AttendanceStatusSummaryInner({ rows, locale, compact }: Props) {
+function AttendanceStatusSummaryInner({ rows, locale, compact, nowrap }: Props) {
   const { scale } = useTheme();
+  const statusLabels = compact
+    ? getAttendanceStatusShort(locale)
+    : getAttendanceStatusLabel(locale);
+
   const textStyles = useMemo(
     () => ({
       chipText: { fontSize: scale(compact ? 10 : 12), fontWeight: "700" as const },
     }),
     [scale, compact],
   );
-  const statusLabels = getAttendanceStatusLabel(locale);
 
   const counts = useMemo(() => {
     const tally = { hadir: 0, sakit: 0, izin: 0, alpha: 0 };
@@ -37,7 +43,13 @@ function AttendanceStatusSummaryInner({ rows, locale, compact }: Props) {
   if (!rows.length) return null;
 
   return (
-    <View style={[styles.wrap, compact && styles.wrapCompact]}>
+    <View
+      style={[
+        styles.wrap,
+        compact && styles.wrapCompact,
+        nowrap && styles.wrapNowrap,
+      ]}
+    >
       {ATTENDANCE_STATUS_ORDER.map((status) => {
         const palette = RECAP_STATUS_COLORS[status];
         return (
@@ -50,7 +62,7 @@ function AttendanceStatusSummaryInner({ rows, locale, compact }: Props) {
             ]}
           >
             <Text style={[textStyles.chipText, { color: palette.text }]}>
-              {statusLabels[status]} {counts[status]}
+              {`${statusLabels[status]} ${counts[status]}`}
             </Text>
           </View>
         );
@@ -71,6 +83,9 @@ const styles = StyleSheet.create({
   wrapCompact: {
     marginBottom: 0,
   },
+  wrapNowrap: {
+    flexWrap: "nowrap",
+  },
   chip: {
     borderRadius: radius.pill,
     borderWidth: 1,
@@ -78,7 +93,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
   },
   chipCompact: {
-    paddingHorizontal: 6,
+    paddingHorizontal: 5,
     paddingVertical: 2,
   },
 });

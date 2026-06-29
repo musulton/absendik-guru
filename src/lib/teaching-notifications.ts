@@ -5,6 +5,7 @@ import {
   loadNotificationsModule,
   supportsLocalNotifications,
 } from "@/lib/notifications-runtime";
+import { TEACHING_NOTIFICATION_TYPE } from "@/navigation/teachingNotificationNav";
 import {
   isoToExpoWeekday,
   subtractMinutesFromTime,
@@ -86,8 +87,11 @@ export async function rescheduleTeachingNotifications(
         title: "Waktunya absensi",
         body: buildNotificationBody(slot.className, slot.subjectName),
         data: {
+          type: TEACHING_NOTIFICATION_TYPE,
           workspaceId: slot.workspaceId,
           classId: slot.classId,
+          className: slot.className,
+          labelColor: slot.labelColor,
           subjectName: slot.subjectName,
         },
       },

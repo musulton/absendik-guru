@@ -4,7 +4,7 @@ export type LabelColorOption = {
   text: string;
 };
 
-/** Palet warna label kelas & mapel (background + teks). */
+/** Palet warna label kelas & mata pelajaran (background + teks). */
 export const LABEL_COLOR_OPTIONS: LabelColorOption[] = [
   { id: "teal", bg: "#ccfbf1", text: "#0f766e" },
   { id: "sky", bg: "#e0f2fe", text: "#0369a1" },
@@ -36,7 +36,7 @@ export function labelColorById(id: string): LabelColorOption {
   );
 }
 
-/** Warna default stabil dari nama (kelas/mapel lama tanpa warna tersimpan). */
+/** Warna default stabil dari nama (kelas/mata pelajaran lama tanpa warna tersimpan). */
 export function pickDefaultLabelColorId(seed: string): string {
   let h = 0;
   for (let i = 0; i < seed.length; i++) {

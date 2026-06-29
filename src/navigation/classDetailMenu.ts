@@ -143,7 +143,7 @@ export function showStudentNotesModuleMenu(
   showMenu({ title: opts.title, items });
 }
 
-/** Menu ⋮ daftar mapel (mode home) — rekap modul aktif + kelola kelas. */
+/** Menu ⋮ daftar mata pelajaran (mode home) — rekap modul aktif + kelola kelas. */
 export function showSubjectListModuleMenu(
   showMenu: ShowMenu,
   t: (key: TranslationKey) => string,
