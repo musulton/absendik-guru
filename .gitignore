@@ -46,3 +46,5 @@ android/
 *.pem
 *.p12
 *.keystore
+
+catatan-guru-play-billing.json

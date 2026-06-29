@@ -50,7 +50,7 @@
         "react-native-google-mobile-ads",
         {
           "androidAppId": "ca-app-pub-2498265386280857~8098433120",
-          "iosAppId": "ca-app-pub-3940256099942544~1458002511",
+          "iosAppId": "ca-app-pub-2498265386280857~8235832790",
           "delayAppMeasurementInit": true,
           "userTrackingUsageDescription": "Iklan yang lebih relevan membantu Catatan Guru tetap gratis. Anda bisa menolak tanpa kehilangan fitur."
         }
@@ -60,8 +60,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "a6eae90c-c0eb-43a8-8693-acc336b90d7b"
       }
-    }
+    },
+    "owner": "bytera"
   }
 }
